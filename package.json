@@ -2,6 +2,7 @@
   "type": "module",
   "private": true,
   "devDependencies": {
+    "bulma": "^1.0.4",
     "vite": "^6.3.5",
     "vite-plugin-elm-watch": "^1.4.3"
   }
