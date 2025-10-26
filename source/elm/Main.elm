@@ -87,19 +87,10 @@ viewColorRow fgColor bgColor =
             |> List.map (viewColorRowCell fgColor bgColor)
          )
             ++ [ Html.div
-                    [ css
-                        [ Tw.rounded_full
-                        , Tw.bg_color bgColor
-                        , Tw.text_color fgColor
-                        , Tw.border_2
-                        , Tw.border_color fgColor
-                        , Tw.w_16
-                        , Tw.h_16
-                        , Tw.flex
-                        , Tw.justify_center
-                        , Tw.items_center
-                        , Tw.text_3xl
-                        ]
+                    [ css [ Tw.w_16, Tw.h_16, Tw.flex, Tw.justify_center, Tw.items_center ]
+                    , css [ Tw.text_3xl, Tw.text_color fgColor ]
+                    , css [ Tw.bg_color bgColor ]
+                    , css [ Tw.border_2, Tw.border_color fgColor, Tw.rounded_full ]
                     ]
                     [ Html.text "🔓" ]
                ]
@@ -109,18 +100,9 @@ viewColorRow fgColor bgColor =
 viewColorRowCell : Twc.Color -> Twc.Color -> Int -> Html Msg
 viewColorRowCell fgColor bgColor number =
     Html.div
-        [ css
-            [ Tw.w_16
-            , Tw.h_16
-            , Tw.flex
-            , Tw.justify_center
-            , Tw.items_center
-            , Tw.font_bold
-            , Tw.text_color fgColor
-            , Tw.bg_color bgColor
-            , Tw.border_2
-            , Tw.border_color fgColor
-            , Tw.rounded_lg
-            ]
+        [ css [ Tw.w_16, Tw.h_16, Tw.flex, Tw.justify_center, Tw.items_center ]
+        , css [ Tw.font_bold, Tw.text_color fgColor ]
+        , css [ Tw.bg_color bgColor ]
+        , css [ Tw.border_2, Tw.border_color fgColor, Tw.rounded_lg ]
         ]
         [ Html.text (String.fromInt number) ]
