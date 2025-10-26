@@ -83,8 +83,26 @@ viewColorRows =
 viewColorRow : Twc.Color -> Twc.Color -> Html Msg
 viewColorRow fgColor bgColor =
     Html.div [ css [ Tw.flex, Tw.flex_row, Tw.gap_1 ] ]
-        (List.range 2 12
+        ((List.range 2 12
             |> List.map (viewColorRowCell fgColor bgColor)
+         )
+            ++ [ Html.div
+                    [ css
+                        [ Tw.rounded_full
+                        , Tw.bg_color bgColor
+                        , Tw.text_color fgColor
+                        , Tw.border_2
+                        , Tw.border_color fgColor
+                        , Tw.w_16
+                        , Tw.h_16
+                        , Tw.flex
+                        , Tw.justify_center
+                        , Tw.items_center
+                        , Tw.text_3xl
+                        ]
+                    ]
+                    [ Html.text "🔓" ]
+               ]
         )
 
 
