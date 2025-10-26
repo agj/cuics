@@ -8,9 +8,6 @@ importers:
 
   .:
     devDependencies:
-      tachyons:
-        specifier: ^4.12.0
-        version: 4.12.0
       vite:
         specifier: ^6.3.5
         version: 6.4.1(terser@5.39.0)
@@ -430,9 +427,6 @@ packages:
     resolution: {integrity: sha512-UjgapumWlbMhkBgzT7Ykc5YXUT46F0iKu8SGXq0bcwP5dz/h0Plj6enJqjz1Zbq2l5WaqYnrVbwWOWMyF3F47g==}
     engines: {node: '>=0.10.0'}
 
-  tachyons@4.12.0:
-    resolution: {integrity: sha512-2nA2IrYFy3raCM9fxJ2KODRGHVSZNTW3BR0YnlGsLUf1DA3pk3YfWZ/DdfbnZK6zLZS+jUenlUGJsKcA5fUiZg==}
-
   terser@5.39.0:
     resolution: {integrity: sha512-LBAhFyLho16harJoWMg/nZsQYgTrg5jXOn2nCYjRUcZZEdE3qa2zb8QEDRUGVZBW4rlazf2fxkg8tztybTaqWw==}
     engines: {node: '>=10'}
@@ -808,8 +802,6 @@ snapshots:
       source-map: 0.6.1
 
   source-map@0.6.1: {}
-
-  tachyons@4.12.0: {}
 
   terser@5.39.0:
     dependencies:

@@ -1,9 +1,12 @@
 module Main exposing (main)
 
 import Browser
-import Html exposing (Html)
-import Html.Attributes exposing (class)
+import Css.Global
+import Html.Styled as Html exposing (Html)
+import Html.Styled.Attributes exposing (css)
 import List exposing (range)
+import Tailwind.Theme as Twc
+import Tailwind.Utilities as Tw
 
 
 main : Program () Model Msg
@@ -58,26 +61,48 @@ view : Model -> Browser.Document Msg
 view model =
     { title = "Cuics"
     , body =
-        [ Html.div [ class "helvetica" ]
-            [ viewColorRow ]
+        [ Html.div []
+            [ viewColorRows
+            , Css.Global.global Tw.globalStyles
+            ]
+            |> Html.toUnstyled
         ]
     }
 
 
-viewColorRow : Html Msg
-viewColorRow =
-    Html.div [ class "flex" ]
+viewColorRows : Html Msg
+viewColorRows =
+    Html.div [ css [ Tw.flex, Tw.flex_col, Tw.gap_1 ] ]
+        [ viewColorRow Twc.red_800 Twc.red_200
+        , viewColorRow Twc.yellow_800 Twc.yellow_200
+        , viewColorRow Twc.green_800 Twc.green_200
+        , viewColorRow Twc.blue_800 Twc.blue_200
+        ]
+
+
+viewColorRow : Twc.Color -> Twc.Color -> Html Msg
+viewColorRow fgColor bgColor =
+    Html.div [ css [ Tw.flex, Tw.flex_row, Tw.gap_1 ] ]
         (List.range 2 12
-            |> List.map viewColorRowCell
+            |> List.map (viewColorRowCell fgColor bgColor)
         )
 
 
-viewColorRowCell : Int -> Html Msg
-viewColorRowCell number =
+viewColorRowCell : Twc.Color -> Twc.Color -> Int -> Html Msg
+viewColorRowCell fgColor bgColor number =
     Html.div
-        [ class "w3 h3 flex justify-center items-center"
-        , class "b dark-red"
-        , class "bg-washed-red"
-        , class "ba bw1 b--dark-red br3"
+        [ css
+            [ Tw.w_16
+            , Tw.h_16
+            , Tw.flex
+            , Tw.justify_center
+            , Tw.items_center
+            , Tw.font_bold
+            , Tw.text_color fgColor
+            , Tw.bg_color bgColor
+            , Tw.border_2
+            , Tw.border_color fgColor
+            , Tw.rounded_lg
+            ]
         ]
         [ Html.text (String.fromInt number) ]
