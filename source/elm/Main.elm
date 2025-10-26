@@ -1,8 +1,9 @@
 module Main exposing (main)
 
 import Browser
-import Html
+import Html exposing (Html)
 import Html.Attributes exposing (class)
+import List exposing (range)
 
 
 main : Program () Model Msg
@@ -57,5 +58,26 @@ view : Model -> Browser.Document Msg
 view model =
     { title = "Cuics"
     , body =
-        [ Html.button [ class "button" ] [ Html.text "Hola" ] ]
+        [ Html.div [ class "helvetica" ]
+            [ viewColorRow ]
+        ]
     }
+
+
+viewColorRow : Html Msg
+viewColorRow =
+    Html.div [ class "flex" ]
+        (List.range 2 12
+            |> List.map viewColorRowCell
+        )
+
+
+viewColorRowCell : Int -> Html Msg
+viewColorRowCell number =
+    Html.div
+        [ class "w3 h3 flex justify-center items-center"
+        , class "b dark-red"
+        , class "bg-washed-red"
+        , class "ba bw1 b--dark-red br3"
+        ]
+        [ Html.text (String.fromInt number) ]
