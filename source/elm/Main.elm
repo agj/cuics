@@ -8,6 +8,7 @@ import Html.Styled.Attributes as Attributes exposing (class, css)
 import Html.Styled.Events as Events
 import List exposing (range)
 import Num exposing (Num(..))
+import Row exposing (Row)
 import Tailwind.Theme as Twc
 import Tailwind.Utilities as Tw
 import Util.Html.Styled.Attributes exposing (attributeIf)
@@ -49,7 +50,7 @@ type CellStatus
 
 
 type alias RowXs =
-    AnyDict Int Num ()
+    Row Bool
 
 
 
@@ -58,10 +59,10 @@ type alias RowXs =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( { redRow = Dict.Any.empty numToInt
-      , yellowRow = Dict.Any.empty numToInt
-      , greenRow = Dict.Any.empty numToInt
-      , blueRow = Dict.Any.empty numToInt
+    ( { redRow = Row.init False
+      , yellowRow = Row.init False
+      , greenRow = Row.init False
+      , blueRow = Row.init False
       }
     , Cmd.none
     )
@@ -83,16 +84,16 @@ update msg model =
                 newModel =
                     case color of
                         Red ->
-                            { model | redRow = xNum model.redRow num }
+                            { model | redRow = Row.set num True model.redRow }
 
                         Yellow ->
-                            { model | yellowRow = xNum model.yellowRow num }
+                            { model | yellowRow = Row.set num True model.yellowRow }
 
                         Green ->
-                            { model | greenRow = xNum model.greenRow num }
+                            { model | greenRow = Row.set num True model.greenRow }
 
                         Blue ->
-                            { model | blueRow = xNum model.blueRow num }
+                            { model | blueRow = Row.set num True model.blueRow }
             in
             ( newModel, Cmd.none )
 
@@ -257,7 +258,7 @@ viewScoreboardColorPoints color rowXs =
 
 getStatus : RowXs -> Num -> CellStatus
 getStatus rowXs num =
-    if cellIsXed rowXs num then
+    if Row.get num rowXs then
         Xed
 
     else if cellIsAvailable rowXs num then
@@ -269,7 +270,7 @@ getStatus rowXs num =
 
 cellIsAvailable : RowXs -> Num -> Bool
 cellIsAvailable rowXs num =
-    case ( cellIsXed rowXs num, nextNum num ) of
+    case ( Row.get num rowXs, nextNum num ) of
         ( True, _ ) ->
             False
 
@@ -278,21 +279,6 @@ cellIsAvailable rowXs num =
 
         ( False, Nothing ) ->
             True
-
-
-cellIsXed : RowXs -> Num -> Bool
-cellIsXed rowXs num =
-    case Dict.Any.get num rowXs of
-        Just () ->
-            True
-
-        Nothing ->
-            False
-
-
-xNum : RowXs -> Num -> RowXs
-xNum rowStatus num =
-    rowStatus |> Dict.Any.insert num ()
 
 
 getColors : Color -> CellStatus -> { fg : Twc.Color, bg : Twc.Color, b : Twc.Color }
