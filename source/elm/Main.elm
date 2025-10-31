@@ -117,13 +117,18 @@ view : Model -> Browser.Document Msg
 view model =
     { title = "Cuics"
     , body =
-        [ Html.div []
-            [ viewColorRows model
+        [ Html.div [ css [ Tw.flex, Tw.flex_col, Tw.justify_center, Tw.items_center, Tw.h_full, Tw.w_full ] ]
+            [ viewBoard model
             , Css.Global.global Tw.globalStyles
             ]
             |> Html.toUnstyled
         ]
     }
+
+
+viewBoard : Model -> Html Msg
+viewBoard model =
+    viewColorRows model
 
 
 viewColorRows : Model -> Html Msg
@@ -147,8 +152,15 @@ viewColorRow onClick rowXs color =
                     getStatus rowXs num
             in
             viewColorRowCell (onClick num) color num status
+
+        colors =
+            getColors color Available
     in
-    Html.div [ css [ Tw.flex, Tw.flex_row, Tw.gap_1 ] ]
+    Html.div
+        [ css [ Tw.flex, Tw.flex_row, Tw.gap_1 ]
+        , css [ Tw.bg_color colors.b ]
+        , css [ Tw.border_2, Tw.border_color colors.b ]
+        ]
         [ cell Num2
         , cell Num3
         , cell Num4
@@ -162,9 +174,9 @@ viewColorRow onClick rowXs color =
         , cell Num12
         , Html.div
             [ css [ Tw.w_16, Tw.h_16, Tw.flex, Tw.justify_center, Tw.items_center ]
-            , css [ Tw.text_3xl, Tw.text_color (getFgColor color Available) ]
-            , css [ Tw.bg_color (getBgColor color Available) ]
-            , css [ Tw.border_2, Tw.border_color (getFgColor color Available), Tw.rounded_full ]
+            , css [ Tw.text_3xl, Tw.text_color colors.fg ]
+            , css [ Tw.bg_color colors.bg ]
+            , css [ Tw.border_2, Tw.border_color colors.b, Tw.rounded_full ]
             , css [ Tw.select_none ]
             ]
             [ Html.text "🔓" ]
@@ -174,8 +186,8 @@ viewColorRow onClick rowXs color =
 viewColorRowCell : Msg -> Color -> Num -> CellStatus -> Html Msg
 viewColorRowCell onClick color num status =
     let
-        fg =
-            getFgColor color status
+        colors =
+            getColors color status
 
         conditionalStyles =
             case status of
@@ -193,9 +205,9 @@ viewColorRowCell onClick color num status =
     in
     Html.button
         ([ css [ Tw.w_16, Tw.h_16, Tw.flex, Tw.justify_center, Tw.items_center ]
-         , css [ Tw.text_2xl, Tw.text_color fg, Tw.font_bold ]
-         , css [ Tw.bg_color (getBgColor color status) ]
-         , css [ Tw.border_2, Tw.border_color fg, Tw.rounded_lg ]
+         , css [ Tw.text_2xl, Tw.text_color colors.fg, Tw.font_bold ]
+         , css [ Tw.bg_color colors.bg ]
+         , css [ Tw.border_2, Tw.border_color colors.b, Tw.rounded_lg ]
          , css [ Tw.select_none ]
          ]
             ++ conditionalStyles
@@ -247,84 +259,44 @@ xNum rowStatus num =
     rowStatus |> Dict.Any.insert num ()
 
 
-getFgColor : Color -> CellStatus -> Twc.Color
-getFgColor color status =
+getColors : Color -> CellStatus -> { fg : Twc.Color, bg : Twc.Color, b : Twc.Color }
+getColors color status =
     case ( status, color ) of
         ( Available, Red ) ->
-            Twc.red_800
+            { fg = Twc.red_500, bg = Twc.red_50, b = Twc.red_800 }
 
         ( Available, Yellow ) ->
-            Twc.yellow_800
+            { fg = Twc.yellow_500, bg = Twc.yellow_50, b = Twc.yellow_800 }
 
         ( Available, Green ) ->
-            Twc.green_800
+            { fg = Twc.green_500, bg = Twc.green_50, b = Twc.green_800 }
 
         ( Available, Blue ) ->
-            Twc.blue_800
+            { fg = Twc.blue_500, bg = Twc.blue_50, b = Twc.blue_800 }
 
         ( Xed, Red ) ->
-            Twc.red_800
+            { fg = Twc.red_500, bg = Twc.red_50, b = Twc.red_800 }
 
         ( Xed, Yellow ) ->
-            Twc.yellow_800
+            { fg = Twc.yellow_500, bg = Twc.yellow_50, b = Twc.yellow_800 }
 
         ( Xed, Green ) ->
-            Twc.green_800
+            { fg = Twc.green_500, bg = Twc.green_50, b = Twc.green_800 }
 
         ( Xed, Blue ) ->
-            Twc.blue_800
+            { fg = Twc.blue_500, bg = Twc.blue_50, b = Twc.blue_800 }
 
         ( Unavailable, Red ) ->
-            Twc.red_300
+            { fg = Twc.red_300, bg = Twc.red_50, b = Twc.red_300 }
 
         ( Unavailable, Yellow ) ->
-            Twc.yellow_300
+            { fg = Twc.yellow_300, bg = Twc.yellow_50, b = Twc.yellow_300 }
 
         ( Unavailable, Green ) ->
-            Twc.green_300
+            { fg = Twc.green_300, bg = Twc.green_50, b = Twc.green_300 }
 
         ( Unavailable, Blue ) ->
-            Twc.blue_300
-
-
-getBgColor : Color -> CellStatus -> Twc.Color
-getBgColor color status =
-    case ( status, color ) of
-        ( Available, Red ) ->
-            Twc.red_300
-
-        ( Available, Yellow ) ->
-            Twc.yellow_300
-
-        ( Available, Green ) ->
-            Twc.green_300
-
-        ( Available, Blue ) ->
-            Twc.blue_300
-
-        ( Xed, Red ) ->
-            Twc.red_300
-
-        ( Xed, Yellow ) ->
-            Twc.yellow_300
-
-        ( Xed, Green ) ->
-            Twc.green_300
-
-        ( Xed, Blue ) ->
-            Twc.blue_300
-
-        ( Unavailable, Red ) ->
-            Twc.red_100
-
-        ( Unavailable, Yellow ) ->
-            Twc.yellow_100
-
-        ( Unavailable, Green ) ->
-            Twc.green_100
-
-        ( Unavailable, Blue ) ->
-            Twc.blue_100
+            { fg = Twc.blue_300, bg = Twc.blue_50, b = Twc.blue_300 }
 
 
 numToInt : Num -> Int
