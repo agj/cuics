@@ -3,8 +3,6 @@ module Main exposing (main)
 import Browser
 import Css.Global
 import Dict.Any exposing (AnyDict)
-import Html.Attributes.Extra
-import Html.Extra
 import Html.Styled as Html exposing (Html)
 import Html.Styled.Attributes as Attributes exposing (class, css)
 import Html.Styled.Events as Events
