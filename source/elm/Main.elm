@@ -133,12 +133,15 @@ view model =
 
 viewBoard : Model -> Html Msg
 viewBoard model =
-    viewColorRows model
+    Html.div [ css [ Tw.flex, Tw.flex_col, Tw.gap_3 ] ]
+        [ viewColorRows model
+        , viewScoreboard model
+        ]
 
 
 viewColorRows : Model -> Html Msg
 viewColorRows model =
-    Html.div [ css [ Tw.flex, Tw.flex_col, Tw.gap_1, Tw.p_2 ] ]
+    Html.div [ css [ Tw.flex, Tw.flex_col, Tw.gap_1 ] ]
         [ viewColorRow (ClickedCell Red) model.redRow Red
         , viewColorRow (ClickedCell Yellow) model.yellowRow Yellow
         , viewColorRow (ClickedCell Green) model.greenRow Green
@@ -228,6 +231,37 @@ viewLockCell color xed =
         , attributeIf xed (class "xed")
         ]
         [ Html.text "🔓" ]
+
+
+
+-- VIEW SCOREBOARD
+
+
+viewScoreboard : Model -> Html Msg
+viewScoreboard model =
+    Html.div [ css [ Tw.flex, Tw.flex_row, Tw.gap_2 ] ]
+        [ viewScoreboardColorPoints Red model.redRow
+        , viewScoreboardColorPoints Yellow model.yellowRow
+        , viewScoreboardColorPoints Green model.greenRow
+        , viewScoreboardColorPoints Blue model.blueRow
+        ]
+
+
+viewScoreboardColorPoints : Color -> RowXs -> Html Msg
+viewScoreboardColorPoints color rowXs =
+    let
+        colors =
+            getColors color Available
+    in
+    Html.div
+        [ css [ Tw.flex, Tw.flex_col, Tw.gap_2, Tw.w_24, Tw.items_center, Tw.p_2 ]
+        , css [ Tw.border_4, Tw.border_color colors.fg, Tw.rounded_lg ]
+        ]
+        [ Html.div []
+            [ Html.text "2 ╳ =" ]
+        , Html.div [ css [ Tw.font_bold, Tw.text_xl, Tw.text_color colors.fg ] ]
+            [ Html.text "12 p" ]
+        ]
 
 
 
