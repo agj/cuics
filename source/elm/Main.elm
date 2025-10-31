@@ -129,6 +129,10 @@ view model =
     }
 
 
+
+-- VIEW BOARD
+
+
 viewBoard : Model -> Html Msg
 viewBoard model =
     viewColorRows model
@@ -179,23 +183,6 @@ viewColorRow onClick rowXs color =
         ]
 
 
-viewLockCell : Color -> Bool -> Html Msg
-viewLockCell color xed =
-    let
-        colors =
-            getColors color Available
-    in
-    Html.div
-        [ css [ Tw.w_16, Tw.h_16, Tw.flex, Tw.justify_center, Tw.items_center ]
-        , css [ Tw.text_3xl, Tw.text_color colors.fg ]
-        , css [ Tw.bg_color colors.bg ]
-        , css [ Tw.border_2, Tw.border_color colors.b, Tw.rounded_full ]
-        , css [ Tw.select_none ]
-        , attributeIf xed (class "xed")
-        ]
-        [ Html.text "🔓" ]
-
-
 viewColorRowCell : Msg -> Color -> Num -> CellStatus -> Html Msg
 viewColorRowCell onClick color num status =
     let
@@ -226,6 +213,23 @@ viewColorRowCell onClick color num status =
             ++ conditionalStyles
         )
         [ Html.text (num |> numToInt |> String.fromInt) ]
+
+
+viewLockCell : Color -> Bool -> Html Msg
+viewLockCell color xed =
+    let
+        colors =
+            getColors color Available
+    in
+    Html.div
+        [ css [ Tw.w_16, Tw.h_16, Tw.flex, Tw.justify_center, Tw.items_center ]
+        , css [ Tw.text_3xl, Tw.text_color colors.fg ]
+        , css [ Tw.bg_color colors.bg ]
+        , css [ Tw.border_2, Tw.border_color colors.b, Tw.rounded_full ]
+        , css [ Tw.select_none ]
+        , attributeIf xed (class "xed")
+        ]
+        [ Html.text "🔓" ]
 
 
 
