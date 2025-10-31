@@ -3,12 +3,15 @@ module Main exposing (main)
 import Browser
 import Css.Global
 import Dict.Any exposing (AnyDict)
+import Html.Attributes.Extra
+import Html.Extra
 import Html.Styled as Html exposing (Html)
 import Html.Styled.Attributes as Attributes exposing (class, css)
 import Html.Styled.Events as Events
 import List exposing (range)
 import Tailwind.Theme as Twc
 import Tailwind.Utilities as Tw
+import Util.Html.Styled.Attributes exposing (attributeIf)
 
 
 main : Program () Model Msg
@@ -172,15 +175,25 @@ viewColorRow onClick rowXs color =
         , cell Num10
         , cell Num11
         , cell Num12
-        , Html.div
-            [ css [ Tw.w_16, Tw.h_16, Tw.flex, Tw.justify_center, Tw.items_center ]
-            , css [ Tw.text_3xl, Tw.text_color colors.fg ]
-            , css [ Tw.bg_color colors.bg ]
-            , css [ Tw.border_2, Tw.border_color colors.b, Tw.rounded_full ]
-            , css [ Tw.select_none ]
-            ]
-            [ Html.text "🔓" ]
+        , viewLockCell color (getStatus rowXs Num12 == Xed)
         ]
+
+
+viewLockCell : Color -> Bool -> Html Msg
+viewLockCell color xed =
+    let
+        colors =
+            getColors color Available
+    in
+    Html.div
+        [ css [ Tw.w_16, Tw.h_16, Tw.flex, Tw.justify_center, Tw.items_center ]
+        , css [ Tw.text_3xl, Tw.text_color colors.fg ]
+        , css [ Tw.bg_color colors.bg ]
+        , css [ Tw.border_2, Tw.border_color colors.b, Tw.rounded_full ]
+        , css [ Tw.select_none ]
+        , attributeIf xed (class "xed")
+        ]
+        [ Html.text "🔓" ]
 
 
 viewColorRowCell : Msg -> Color -> Num -> CellStatus -> Html Msg
