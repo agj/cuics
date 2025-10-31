@@ -7,6 +7,7 @@ import Html.Styled as Html exposing (Html)
 import Html.Styled.Attributes as Attributes exposing (class, css)
 import Html.Styled.Events as Events
 import List exposing (range)
+import Num exposing (Num(..))
 import Tailwind.Theme as Twc
 import Tailwind.Utilities as Tw
 import Util.Html.Styled.Attributes exposing (attributeIf)
@@ -39,20 +40,6 @@ type Color
     | Yellow
     | Green
     | Blue
-
-
-type Num
-    = Num2
-    | Num3
-    | Num4
-    | Num5
-    | Num6
-    | Num7
-    | Num8
-    | Num9
-    | Num10
-    | Num11
-    | Num12
 
 
 type CellStatus
