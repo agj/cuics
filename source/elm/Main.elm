@@ -41,10 +41,6 @@ type CellStatus
     | Unavailable
 
 
-type alias RowXs =
-    Row
-
-
 
 -- INIT
 
@@ -119,15 +115,15 @@ viewColorRows model =
         ]
 
 
-viewColorRow : (Num -> Msg) -> Bool -> RowXs -> Color -> Html Msg
-viewColorRow onClick reverse rowXs color =
+viewColorRow : (Num -> Msg) -> Bool -> Row -> Color -> Html Msg
+viewColorRow onClick reverse row color =
     let
         cell : Num -> Html Msg
         cell num =
             let
                 status : CellStatus
                 status =
-                    getStatus reverse rowXs num
+                    getStatus reverse row num
             in
             viewColorRowCell (onClick num) color num status
 
@@ -149,7 +145,7 @@ viewColorRow onClick reverse rowXs color =
         , css [ Tw.bg_color colors.fg ]
         ]
         ([ cells
-         , [ viewLockCell color (getStatus reverse rowXs Num12 == Xed) ]
+         , [ viewLockCell color (getStatus reverse row Num12 == Xed) ]
          ]
             |> List.concat
         )
@@ -293,13 +289,13 @@ viewScoreboard model =
         ]
 
 
-viewScoreboardColorPoints : Color -> RowXs -> Html Msg
-viewScoreboardColorPoints color rowXs =
+viewScoreboardColorPoints : Color -> Row -> Html Msg
+viewScoreboardColorPoints color row =
     let
         colors =
             getColors color Available
     in
-    viewScoreboardPoints colors.fg (Row.xCount rowXs) (Row.points rowXs)
+    viewScoreboardPoints colors.fg (Row.xCount row) (Row.points row)
 
 
 viewScoreboardPoints : Twc.Color -> Int -> Int -> Html Msg
@@ -325,26 +321,26 @@ viewScoreboardSquare twColor content =
 -- UTILS
 
 
-getStatus : Bool -> RowXs -> Num -> CellStatus
-getStatus reverse rowXs num =
-    if Row.get num rowXs then
+getStatus : Bool -> Row -> Num -> CellStatus
+getStatus reverse row num =
+    if Row.get num row then
         Xed
 
-    else if cellIsAvailable reverse rowXs num then
+    else if cellIsAvailable reverse row num then
         Available
 
     else
         Unavailable
 
 
-cellIsAvailable : Bool -> RowXs -> Num -> Bool
-cellIsAvailable reverse rowXs num =
-    case ( Row.get num rowXs, Num.next reverse num ) of
+cellIsAvailable : Bool -> Row -> Num -> Bool
+cellIsAvailable reverse row num =
+    case ( Row.get num row, Num.next reverse num ) of
         ( True, _ ) ->
             False
 
         ( False, Just n ) ->
-            cellIsAvailable reverse rowXs n
+            cellIsAvailable reverse row n
 
         ( False, Nothing ) ->
             True
