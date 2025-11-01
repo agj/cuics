@@ -82,7 +82,7 @@ view model =
     { title = "Cuics"
     , body =
         [ Html.div [ css [ Tw.flex, Tw.flex_col, Tw.justify_center, Tw.items_center, Tw.h_full, Tw.w_full ] ]
-            [ viewBoard model
+            [ viewBoard model.board
             , Css.Global.global Tw.globalStyles
             ]
             |> Html.toUnstyled
@@ -94,27 +94,27 @@ view model =
 -- VIEW BOARD
 
 
-viewBoard : Model -> Html Msg
-viewBoard model =
+viewBoard : Board -> Html Msg
+viewBoard board =
     Html.div [ css [ Tw.flex, Tw.flex_col, Tw.gap_3 ] ]
-        [ viewColorRows model
-        , viewFaults ClickedFault (Board.getFaults model.board)
-        , viewScoreboard model
+        [ viewColorRows board
+        , viewFaults ClickedFault (Board.getFaults board)
+        , viewScoreboard board
         ]
 
 
-viewColorRows : Model -> Html Msg
-viewColorRows model =
+viewColorRows : Board -> Html Msg
+viewColorRows board =
     Html.div [ css [ Tw.flex, Tw.flex_col, Tw.gap_1 ] ]
-        [ viewColorRow (ClickedCell Red) (Board.getRow Red model.board) Red
-        , viewColorRow (ClickedCell Yellow) (Board.getRow Yellow model.board) Yellow
-        , viewColorRow (ClickedCell Green) (Board.getRow Green model.board) Green
-        , viewColorRow (ClickedCell Blue) (Board.getRow Blue model.board) Blue
+        [ viewColorRow (Board.getRow Red board) Red
+        , viewColorRow (Board.getRow Yellow board) Yellow
+        , viewColorRow (Board.getRow Green board) Green
+        , viewColorRow (Board.getRow Blue board) Blue
         ]
 
 
-viewColorRow : (Num -> Msg) -> Row -> Color -> Html Msg
-viewColorRow onClick row color =
+viewColorRow : Row -> Color -> Html Msg
+viewColorRow row color =
     let
         cell : Num -> Html Msg
         cell num =
@@ -123,7 +123,7 @@ viewColorRow onClick row color =
                 status =
                     getStatus (Color.isReverse color) row num
             in
-            viewColorRowCell (onClick num) color num status
+            viewColorRowCell (ClickedCell color num) color num status
 
         cells : List (Html Msg)
         cells =
@@ -245,8 +245,8 @@ viewFaultButton onClick xed =
 -- VIEW SCOREBOARD
 
 
-viewScoreboard : Model -> Html Msg
-viewScoreboard model =
+viewScoreboard : Board -> Html Msg
+viewScoreboard board =
     let
         between : String -> Html Msg
         between string =
@@ -254,19 +254,19 @@ viewScoreboard model =
                 [ Html.text string ]
     in
     Html.div [ css [ Tw.flex, Tw.flex_row, Tw.gap_2, Tw.items_center ] ]
-        [ viewScoreboardColorPoints Red (Board.getRow Red model.board)
+        [ viewScoreboardColorPoints Red (Board.getRow Red board)
         , between "+"
-        , viewScoreboardColorPoints Yellow (Board.getRow Yellow model.board)
+        , viewScoreboardColorPoints Yellow (Board.getRow Yellow board)
         , between "+"
-        , viewScoreboardColorPoints Green (Board.getRow Green model.board)
+        , viewScoreboardColorPoints Green (Board.getRow Green board)
         , between "+"
-        , viewScoreboardColorPoints Blue (Board.getRow Blue model.board)
+        , viewScoreboardColorPoints Blue (Board.getRow Blue board)
         , between "−"
-        , viewScoreboardPoints faultColors.fg (Board.getFaults model.board) (Board.faultPoints model.board)
+        , viewScoreboardPoints faultColors.fg (Board.getFaults board) (Board.faultPoints board)
         , between "="
         , viewScoreboardSquare Twc.black
             [ Html.div [ css [ Tw.font_bold, Tw.text_2xl, Tw.text_color Twc.black ] ]
-                [ Html.text (String.fromInt (Board.points model.board) ++ " p") ]
+                [ Html.text (String.fromInt (Board.points board) ++ " p") ]
             ]
         ]
 
