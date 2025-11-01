@@ -111,8 +111,8 @@ set num value (Row row) =
             Row { row | num12 = value }
 
 
-xCount : Row -> Int
-xCount row =
+xCount : Bool -> Row -> Int
+xCount reverse row =
     let
         baseCount =
             allForward
@@ -120,8 +120,15 @@ xCount row =
                 |> List.filter identity
                 |> List.length
 
+        lastNumXed =
+            if reverse then
+                get Num2 row
+
+            else
+                get Num12 row
+
         lockBonus =
-            if get Num12 row then
+            if lastNumXed then
                 1
 
             else
@@ -130,10 +137,10 @@ xCount row =
     baseCount + lockBonus
 
 
-points : Row -> Int
-points row =
+points : Bool -> Row -> Int
+points reverse row =
     pointsTable
-        |> Array.get (xCount row - 1)
+        |> Array.get (xCount reverse row - 1)
         |> Maybe.withDefault 0
 
 

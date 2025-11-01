@@ -277,7 +277,10 @@ viewScoreboardColorPoints color row =
         colors =
             getColors color Available
     in
-    viewScoreboardPoints colors.fg (Row.xCount row) (Row.points row)
+    viewScoreboardPoints
+        colors.fg
+        (Row.xCount (Color.isReverse color) row)
+        (Row.points (Color.isReverse color) row)
 
 
 viewScoreboardPoints : Twc.Color -> Int -> Int -> Html Msg
