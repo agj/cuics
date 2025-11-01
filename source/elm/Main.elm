@@ -287,6 +287,7 @@ viewScoreboard model =
         , viewScoreboardColorPoints Yellow model.yellowRow
         , viewScoreboardColorPoints Green model.greenRow
         , viewScoreboardColorPoints Blue model.blueRow
+        , viewScoreboardPoints Twc.gray_500 model.faults (model.faults * 5)
         ]
 
 
