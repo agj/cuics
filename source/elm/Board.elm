@@ -1,4 +1,13 @@
-module Board exposing (Board, addFault, getFaults, getRow, init, updateRow)
+module Board exposing
+    ( Board
+    , addFault
+    , faultPoints
+    , getFaults
+    , getRow
+    , init
+    , points
+    , updateRow
+    )
 
 import Color exposing (Color(..))
 import Row exposing (Row)
@@ -51,6 +60,24 @@ getRow color (Board board) =
 getFaults : Board -> Int
 getFaults (Board board) =
     board.faults
+
+
+points : Board -> Int
+points board =
+    ([ getRow Red board
+     , getRow Yellow board
+     , getRow Green board
+     , getRow Blue board
+     ]
+        |> List.map Row.points
+        |> List.foldl (+) 0
+    )
+        - faultPoints board
+
+
+faultPoints : Board -> Int
+faultPoints board =
+    getFaults board * 5
 
 
 updateRow : Color -> (Row -> Row) -> Board -> Board

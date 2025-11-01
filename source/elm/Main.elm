@@ -1,15 +1,13 @@
 module Main exposing (main)
 
-import Array
 import Board exposing (Board)
 import Browser
 import Color exposing (Color(..))
 import Css.Global
-import Dict.Any exposing (AnyDict)
 import Html.Styled as Html exposing (Html)
 import Html.Styled.Attributes as Attributes exposing (class, css)
 import Html.Styled.Events as Events
-import List exposing (range)
+import List
 import Num exposing (Num(..))
 import Row exposing (Row)
 import Tailwind.Theme as Twc
@@ -254,22 +252,6 @@ viewScoreboard model =
         between string =
             Html.div [ css [ Tw.font_bold ] ]
                 [ Html.text string ]
-
-        faultPoints : Int
-        faultPoints =
-            Board.getFaults model.board * 5
-
-        totalPoints : Int
-        totalPoints =
-            ([ Board.getRow Red model.board
-             , Board.getRow Yellow model.board
-             , Board.getRow Green model.board
-             , Board.getRow Blue model.board
-             ]
-                |> List.map Row.points
-                |> List.foldl (+) 0
-            )
-                - faultPoints
     in
     Html.div [ css [ Tw.flex, Tw.flex_row, Tw.gap_2, Tw.items_center ] ]
         [ viewScoreboardColorPoints Red (Board.getRow Red model.board)
@@ -280,11 +262,11 @@ viewScoreboard model =
         , between "+"
         , viewScoreboardColorPoints Blue (Board.getRow Blue model.board)
         , between "−"
-        , viewScoreboardPoints faultColors.fg (Board.getFaults model.board) faultPoints
+        , viewScoreboardPoints faultColors.fg (Board.getFaults model.board) (Board.faultPoints model.board)
         , between "="
         , viewScoreboardSquare Twc.black
             [ Html.div [ css [ Tw.font_bold, Tw.text_2xl, Tw.text_color Twc.black ] ]
-                [ Html.text (String.fromInt totalPoints ++ " p") ]
+                [ Html.text (String.fromInt (Board.points model.board) ++ " p") ]
             ]
         ]
 
