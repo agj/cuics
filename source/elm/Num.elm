@@ -2,6 +2,7 @@ module Num exposing
     ( Num(..)
     , allBackward
     , allForward
+    , getLast
     , isLast
     , next
     , toInt
@@ -56,8 +57,16 @@ allBackward =
 
 isLast : Bool -> Num -> Bool
 isLast reverse num =
-    (reverse && num == Num2)
-        || (not reverse && num == Num12)
+    getLast reverse == num
+
+
+getLast : Bool -> Num
+getLast reverse =
+    if reverse then
+        Num2
+
+    else
+        Num12
 
 
 next : Bool -> Num -> Maybe Num

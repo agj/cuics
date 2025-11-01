@@ -76,11 +76,7 @@ get num (Row row) =
 
 getLock : Bool -> Row -> Bool
 getLock reverse row =
-    if reverse then
-        get Num2 row
-
-    else
-        get Num12 row
+    get (Num.getLast reverse) row
 
 
 set : Num -> Bool -> Row -> Row
@@ -129,15 +125,8 @@ xCount reverse row =
                 |> List.filter identity
                 |> List.length
 
-        lastNumXed =
-            if reverse then
-                get Num2 row
-
-            else
-                get Num12 row
-
         lockBonus =
-            if lastNumXed then
+            if getLock reverse row then
                 1
 
             else
