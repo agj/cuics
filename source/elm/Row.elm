@@ -1,6 +1,6 @@
-module Row exposing (Row, get, init, set)
+module Row exposing (Row, count, get, init, set)
 
-import Num exposing (Num(..))
+import Num exposing (Num(..), allForward)
 
 
 type Row a
@@ -108,3 +108,11 @@ set num value (Row row) =
 
         Num12 ->
             Row { row | num12 = value }
+
+
+count : (a -> Bool) -> Row a -> Int
+count checker row =
+    allForward
+        |> List.map (\num -> get num row)
+        |> List.filter checker
+        |> List.length

@@ -12,6 +12,7 @@ import Row exposing (Row)
 import Tailwind.Theme as Twc
 import Tailwind.Utilities as Tw
 import Util.Html.Styled.Attributes exposing (attributeIf)
+import Util.String
 
 
 main : Program () Model Msg
@@ -242,13 +243,23 @@ viewScoreboardColorPoints color rowXs =
     let
         colors =
             getColors color Available
+
+        xs : Int
+        xs =
+            Row.count identity rowXs
+                + (if Row.get Num12 rowXs then
+                    1
+
+                   else
+                    0
+                  )
     in
     Html.div
         [ css [ Tw.flex, Tw.flex_col, Tw.gap_2, Tw.w_24, Tw.items_center, Tw.p_2 ]
         , css [ Tw.border_4, Tw.border_color colors.fg, Tw.rounded_lg ]
         ]
         [ Html.div []
-            [ Html.text "2 ╳ =" ]
+            [ Html.text ("{xs} ╳ =" |> String.replace "{xs}" (String.fromInt xs)) ]
         , Html.div [ css [ Tw.font_bold, Tw.text_xl, Tw.text_color colors.fg ] ]
             [ Html.text "12 p" ]
         ]
