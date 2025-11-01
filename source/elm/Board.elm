@@ -6,10 +6,10 @@ import Row exposing (Row)
 
 type Board
     = Board
-        { redRow : Row Bool
-        , yellowRow : Row Bool
-        , greenRow : Row Bool
-        , blueRow : Row Bool
+        { redRow : Row
+        , yellowRow : Row
+        , greenRow : Row
+        , blueRow : Row
         , faults : Int
         }
 
@@ -24,15 +24,15 @@ type FaultsCount
 init : Board
 init =
     Board
-        { redRow = Row.init False
-        , yellowRow = Row.init False
-        , greenRow = Row.init False
-        , blueRow = Row.init False
+        { redRow = Row.init
+        , yellowRow = Row.init
+        , greenRow = Row.init
+        , blueRow = Row.init
         , faults = 0
         }
 
 
-getRow : Color -> Board -> Row Bool
+getRow : Color -> Board -> Row
 getRow color (Board board) =
     case color of
         Red ->
@@ -53,7 +53,7 @@ getFaults (Board board) =
     board.faults
 
 
-updateRow : Color -> (Row Bool -> Row Bool) -> Board -> Board
+updateRow : Color -> (Row -> Row) -> Board -> Board
 updateRow color rowUpdater (Board board) =
     case color of
         Red ->

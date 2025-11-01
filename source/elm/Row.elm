@@ -1,5 +1,6 @@
-module Row exposing (Row, count, get, init, set)
+module Row exposing (Row, get, init, points, set, xCount)
 
+import Array exposing (Array)
 import Num exposing (Num(..), allForward)
 
 
@@ -110,9 +111,33 @@ set num value (Row row) =
             Row { row | num12 = value }
 
 
-count : Row -> Int
-count row =
-    allForward
-        |> List.map (\num -> get num row)
-        |> List.filter identity
-        |> List.length
+xCount : Row -> Int
+xCount row =
+    let
+        baseCount =
+            allForward
+                |> List.map (\num -> get num row)
+                |> List.filter identity
+                |> List.length
+
+        lockBonus =
+            if get Num12 row then
+                1
+
+            else
+                0
+    in
+    baseCount + lockBonus
+
+
+points : Row -> Int
+points row =
+    pointsTable
+        |> Array.get (xCount row - 1)
+        |> Maybe.withDefault 0
+
+
+pointsTable : Array number
+pointsTable =
+    [ 1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 66, 78 ]
+        |> Array.fromList

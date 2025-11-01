@@ -270,7 +270,7 @@ viewScoreboard model =
              , Board.getRow Green model.board
              , Board.getRow Blue model.board
              ]
-                |> List.map (\rowXs -> getPoints (getXs rowXs))
+                |> List.map Row.points
                 |> List.foldl (+) 0
             )
                 - faultPoints
@@ -298,12 +298,8 @@ viewScoreboardColorPoints color rowXs =
     let
         colors =
             getColors color Available
-
-        xs : Int
-        xs =
-            getXs rowXs
     in
-    viewScoreboardPoints colors.fg xs (getPoints xs)
+    viewScoreboardPoints colors.fg (Row.xCount rowXs) (Row.points rowXs)
 
 
 viewScoreboardPoints : Twc.Color -> Int -> Int -> Html Msg
@@ -397,27 +393,3 @@ getColors color status =
 faultColors : { fg : Twc.Color, bg : Twc.Color }
 faultColors =
     { fg = Twc.gray_400, bg = Twc.gray_50 }
-
-
-getXs : RowXs -> Int
-getXs rowXs =
-    Row.count rowXs
-        + (if Row.get Num12 rowXs then
-            1
-
-           else
-            0
-          )
-
-
-getPoints : Int -> Int
-getPoints xs =
-    pointsTable
-        |> Array.get (xs - 1)
-        |> Maybe.withDefault 0
-
-
-pointsTable : Array.Array number
-pointsTable =
-    [ 1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 66, 78 ]
-        |> Array.fromList
