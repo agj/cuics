@@ -305,18 +305,19 @@ viewScoreboardColorPoints color rowXs =
                    else
                     0
                   )
-
-        points : Int
-        points =
-            getPoints xs
     in
+    viewScoreboardPoints colors.fg xs (getPoints xs)
+
+
+viewScoreboardPoints : Twc.Color -> Int -> Int -> Html Msg
+viewScoreboardPoints twColor xs points =
     Html.div
         [ css [ Tw.flex, Tw.flex_col, Tw.gap_2, Tw.w_24, Tw.items_center, Tw.p_2 ]
-        , css [ Tw.border_4, Tw.border_color colors.fg, Tw.rounded_lg ]
+        , css [ Tw.border_4, Tw.border_color twColor, Tw.rounded_lg ]
         ]
         [ Html.div []
             [ Html.text ("{xs} ╳ =" |> String.replace "{xs}" (String.fromInt xs)) ]
-        , Html.div [ css [ Tw.font_bold, Tw.text_xl, Tw.text_color colors.fg ] ]
+        , Html.div [ css [ Tw.font_bold, Tw.text_xl, Tw.text_color twColor ] ]
             [ Html.text ("{points} p" |> String.replace "{points}" (String.fromInt points)) ]
         ]
 
