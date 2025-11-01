@@ -3,40 +3,40 @@ module Row exposing (Row, count, get, init, set)
 import Num exposing (Num(..), allForward)
 
 
-type Row a
+type Row
     = Row
-        { num2 : a
-        , num3 : a
-        , num4 : a
-        , num5 : a
-        , num6 : a
-        , num7 : a
-        , num8 : a
-        , num9 : a
-        , num10 : a
-        , num11 : a
-        , num12 : a
+        { num2 : Bool
+        , num3 : Bool
+        , num4 : Bool
+        , num5 : Bool
+        , num6 : Bool
+        , num7 : Bool
+        , num8 : Bool
+        , num9 : Bool
+        , num10 : Bool
+        , num11 : Bool
+        , num12 : Bool
         }
 
 
-init : a -> Row a
-init value =
+init : Row
+init =
     Row
-        { num2 = value
-        , num3 = value
-        , num4 = value
-        , num5 = value
-        , num6 = value
-        , num7 = value
-        , num8 = value
-        , num9 = value
-        , num10 = value
-        , num11 = value
-        , num12 = value
+        { num2 = False
+        , num3 = False
+        , num4 = False
+        , num5 = False
+        , num6 = False
+        , num7 = False
+        , num8 = False
+        , num9 = False
+        , num10 = False
+        , num11 = False
+        , num12 = False
         }
 
 
-get : Num -> Row a -> a
+get : Num -> Row -> Bool
 get num (Row row) =
     case num of
         Num2 ->
@@ -73,7 +73,7 @@ get num (Row row) =
             row.num12
 
 
-set : Num -> a -> Row a -> Row a
+set : Num -> Bool -> Row -> Row
 set num value (Row row) =
     case num of
         Num2 ->
@@ -110,9 +110,9 @@ set num value (Row row) =
             Row { row | num12 = value }
 
 
-count : (a -> Bool) -> Row a -> Int
-count checker row =
+count : Row -> Int
+count row =
     allForward
         |> List.map (\num -> get num row)
-        |> List.filter checker
+        |> List.filter identity
         |> List.length

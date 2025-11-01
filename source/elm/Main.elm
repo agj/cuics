@@ -42,7 +42,7 @@ type CellStatus
 
 
 type alias RowXs =
-    Row Bool
+    Row
 
 
 
@@ -401,7 +401,7 @@ faultColors =
 
 getXs : RowXs -> Int
 getXs rowXs =
-    Row.count identity rowXs
+    Row.count rowXs
         + (if Row.get Num12 rowXs then
             1
 
