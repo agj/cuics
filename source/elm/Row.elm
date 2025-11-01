@@ -1,4 +1,4 @@
-module Row exposing (Row, get, init, points, set, xCount)
+module Row exposing (Row, get, getLock, init, points, set, xCount)
 
 import Array exposing (Array)
 import Num exposing (Num(..), allForward)
@@ -72,6 +72,15 @@ get num (Row row) =
 
         Num12 ->
             row.num12
+
+
+getLock : Bool -> Row -> Bool
+getLock reverse row =
+    if reverse then
+        get Num2 row
+
+    else
+        get Num12 row
 
 
 set : Num -> Bool -> Row -> Row

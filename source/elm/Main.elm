@@ -106,28 +106,28 @@ viewBoard model =
 viewColorRows : Model -> Html Msg
 viewColorRows model =
     Html.div [ css [ Tw.flex, Tw.flex_col, Tw.gap_1 ] ]
-        [ viewColorRow (ClickedCell Red) False (Board.getRow Red model.board) Red
-        , viewColorRow (ClickedCell Yellow) False (Board.getRow Yellow model.board) Yellow
-        , viewColorRow (ClickedCell Green) True (Board.getRow Green model.board) Green
-        , viewColorRow (ClickedCell Blue) True (Board.getRow Blue model.board) Blue
+        [ viewColorRow (ClickedCell Red) (Board.getRow Red model.board) Red
+        , viewColorRow (ClickedCell Yellow) (Board.getRow Yellow model.board) Yellow
+        , viewColorRow (ClickedCell Green) (Board.getRow Green model.board) Green
+        , viewColorRow (ClickedCell Blue) (Board.getRow Blue model.board) Blue
         ]
 
 
-viewColorRow : (Num -> Msg) -> Bool -> Row -> Color -> Html Msg
-viewColorRow onClick reverse row color =
+viewColorRow : (Num -> Msg) -> Row -> Color -> Html Msg
+viewColorRow onClick row color =
     let
         cell : Num -> Html Msg
         cell num =
             let
                 status : CellStatus
                 status =
-                    getStatus reverse row num
+                    getStatus (Color.isReverse color) row num
             in
             viewColorRowCell (onClick num) color num status
 
         cells : List (Html Msg)
         cells =
-            (if reverse then
+            (if Color.isReverse color then
                 Num.allBackward
 
              else
@@ -143,7 +143,7 @@ viewColorRow onClick reverse row color =
         , css [ Tw.bg_color colors.fg ]
         ]
         ([ cells
-         , [ viewLockCell color (getStatus reverse row Num12 == Xed) ]
+         , [ viewLockCell color (Row.getLock (Color.isReverse color) row) ]
          ]
             |> List.concat
         )
