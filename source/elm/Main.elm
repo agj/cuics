@@ -282,12 +282,39 @@ viewFaultButton onClick xed =
 
 viewScoreboard : Model -> Html Msg
 viewScoreboard model =
-    Html.div [ css [ Tw.flex, Tw.flex_row, Tw.gap_2 ] ]
+    let
+        between : String -> Html Msg
+        between string =
+            Html.div [ css [ Tw.font_bold ] ]
+                [ Html.text string ]
+
+        faultPoints : Int
+        faultPoints =
+            model.faults * 5
+
+        totalPoints : Int
+        totalPoints =
+            ([ model.redRow, model.yellowRow, model.greenRow, model.blueRow ]
+                |> List.map (\rowXs -> getPoints (getXs rowXs))
+                |> List.foldl (+) 0
+            )
+                - faultPoints
+    in
+    Html.div [ css [ Tw.flex, Tw.flex_row, Tw.gap_2, Tw.items_center ] ]
         [ viewScoreboardColorPoints Red model.redRow
+        , between "+"
         , viewScoreboardColorPoints Yellow model.yellowRow
+        , between "+"
         , viewScoreboardColorPoints Green model.greenRow
+        , between "+"
         , viewScoreboardColorPoints Blue model.blueRow
-        , viewScoreboardPoints Twc.gray_500 model.faults (model.faults * 5)
+        , between "−"
+        , viewScoreboardPoints Twc.gray_500 model.faults faultPoints
+        , between "="
+        , viewScoreboardSquare Twc.black
+            [ Html.div [ css [ Tw.font_bold, Tw.text_2xl, Tw.text_color Twc.black ] ]
+                [ Html.text (String.fromInt totalPoints ++ " p") ]
+            ]
         ]
 
 
@@ -299,28 +326,28 @@ viewScoreboardColorPoints color rowXs =
 
         xs : Int
         xs =
-            Row.count identity rowXs
-                + (if Row.get Num12 rowXs then
-                    1
-
-                   else
-                    0
-                  )
+            getXs rowXs
     in
     viewScoreboardPoints colors.fg xs (getPoints xs)
 
 
 viewScoreboardPoints : Twc.Color -> Int -> Int -> Html Msg
 viewScoreboardPoints twColor xs points =
-    Html.div
-        [ css [ Tw.flex, Tw.flex_col, Tw.gap_2, Tw.w_24, Tw.items_center, Tw.p_2 ]
-        , css [ Tw.border_4, Tw.border_color twColor, Tw.rounded_lg ]
-        ]
+    viewScoreboardSquare twColor
         [ Html.div []
             [ Html.text ("{xs} ╳ =" |> String.replace "{xs}" (String.fromInt xs)) ]
         , Html.div [ css [ Tw.font_bold, Tw.text_xl, Tw.text_color twColor ] ]
             [ Html.text ("{points} p" |> String.replace "{points}" (String.fromInt points)) ]
         ]
+
+
+viewScoreboardSquare : Twc.Color -> List (Html Msg) -> Html Msg
+viewScoreboardSquare twColor content =
+    Html.div
+        [ css [ Tw.flex, Tw.flex_col, Tw.gap_1, Tw.w_24, Tw.items_center, Tw.p_2 ]
+        , css [ Tw.border_4, Tw.border_color twColor, Tw.rounded_lg ]
+        ]
+        content
 
 
 
@@ -390,6 +417,17 @@ getColors color status =
 
         ( Unavailable, Blue ) ->
             { fg = Twc.blue_300, bg = Twc.blue_50, b = Twc.blue_300 }
+
+
+getXs : RowXs -> Int
+getXs rowXs =
+    Row.count identity rowXs
+        + (if Row.get Num12 rowXs then
+            1
+
+           else
+            0
+          )
 
 
 getPoints : Int -> Int
