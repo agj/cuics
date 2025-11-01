@@ -1,4 +1,11 @@
-module Num exposing (Num(..), allBackward, allForward, next, toInt)
+module Num exposing
+    ( Num(..)
+    , allBackward
+    , allForward
+    , isLast
+    , next
+    , toInt
+    )
 
 
 type Num
@@ -45,6 +52,12 @@ allBackward =
     , Num3
     , Num2
     ]
+
+
+isLast : Bool -> Num -> Bool
+isLast reverse num =
+    (reverse && num == Num2)
+        || (not reverse && num == Num12)
 
 
 next : Bool -> Num -> Maybe Num

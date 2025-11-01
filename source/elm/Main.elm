@@ -116,12 +116,16 @@ viewColorRows board =
 viewColorRow : Row -> Color -> Html Msg
 viewColorRow row color =
     let
+        reverse : Bool
+        reverse =
+            Color.isReverse color
+
         cell : Num -> Html Msg
         cell num =
             let
                 status : CellStatus
                 status =
-                    getStatus (Color.isReverse color) row num
+                    getStatus reverse row num
             in
             viewColorRowCell (ClickedCell color num) color num status
 
@@ -312,7 +316,15 @@ getStatus reverse row num =
         Xed
 
     else if cellIsAvailable reverse row num then
-        Available
+        if Num.isLast reverse num then
+            if Row.xCount reverse row >= 5 then
+                Available
+
+            else
+                Unavailable
+
+        else
+            Available
 
     else
         Unavailable
