@@ -1,5 +1,6 @@
 module Main exposing (main)
 
+import Array
 import Browser
 import Css.Global
 import Dict.Any exposing (AnyDict)
@@ -253,6 +254,10 @@ viewScoreboardColorPoints color rowXs =
                    else
                     0
                   )
+
+        points : Int
+        points =
+            getPoints xs
     in
     Html.div
         [ css [ Tw.flex, Tw.flex_col, Tw.gap_2, Tw.w_24, Tw.items_center, Tw.p_2 ]
@@ -261,7 +266,7 @@ viewScoreboardColorPoints color rowXs =
         [ Html.div []
             [ Html.text ("{xs} ╳ =" |> String.replace "{xs}" (String.fromInt xs)) ]
         , Html.div [ css [ Tw.font_bold, Tw.text_xl, Tw.text_color colors.fg ] ]
-            [ Html.text "12 p" ]
+            [ Html.text ("{points} p" |> String.replace "{points}" (String.fromInt points)) ]
         ]
 
 
@@ -332,3 +337,16 @@ getColors color status =
 
         ( Unavailable, Blue ) ->
             { fg = Twc.blue_300, bg = Twc.blue_50, b = Twc.blue_300 }
+
+
+getPoints : Int -> Int
+getPoints xs =
+    pointsTable
+        |> Array.get (xs - 1)
+        |> Maybe.withDefault 0
+
+
+pointsTable : Array.Array number
+pointsTable =
+    [ 1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 66, 78 ]
+        |> Array.fromList
