@@ -173,9 +173,8 @@ viewColorRow onClick reverse rowXs color =
             getColors color Available
     in
     Html.div
-        [ css [ Tw.flex, Tw.flex_row, Tw.gap_1 ]
-        , css [ Tw.bg_color colors.b ]
-        , css [ Tw.border_2, Tw.border_color colors.b ]
+        [ css [ Tw.flex, Tw.flex_row, Tw.gap_1, Tw.p_1 ]
+        , css [ Tw.bg_color colors.fg ]
         ]
         ([ cells
          , [ viewLockCell color (getStatus reverse rowXs Num12 == Xed) ]
@@ -268,7 +267,7 @@ viewFaultButton onClick xed =
     in
     Html.button
         ([ css [ Tw.w_8, Tw.h_8 ]
-         , css [ Tw.border_2, Tw.border_color Twc.gray_500, Tw.rounded_lg ]
+         , css [ Tw.border_2, Tw.border_color faultColors.fg, Tw.rounded_lg ]
          , attributeIf xed (class "xed")
          ]
             ++ conditionalStyles
@@ -309,7 +308,7 @@ viewScoreboard model =
         , between "+"
         , viewScoreboardColorPoints Blue model.blueRow
         , between "−"
-        , viewScoreboardPoints Twc.gray_500 model.faults faultPoints
+        , viewScoreboardPoints faultColors.fg model.faults faultPoints
         , between "="
         , viewScoreboardSquare Twc.black
             [ Html.div [ css [ Tw.font_bold, Tw.text_2xl, Tw.text_color Twc.black ] ]
@@ -383,40 +382,45 @@ getColors : Color -> CellStatus -> { fg : Twc.Color, bg : Twc.Color, b : Twc.Col
 getColors color status =
     case ( status, color ) of
         ( Available, Red ) ->
-            { fg = Twc.red_500, bg = Twc.red_50, b = Twc.red_800 }
+            { fg = Twc.red_500, bg = Twc.red_50, b = Twc.red_700 }
 
         ( Available, Yellow ) ->
-            { fg = Twc.yellow_500, bg = Twc.yellow_50, b = Twc.yellow_800 }
+            { fg = Twc.yellow_500, bg = Twc.yellow_50, b = Twc.yellow_700 }
 
         ( Available, Green ) ->
-            { fg = Twc.green_500, bg = Twc.green_50, b = Twc.green_800 }
+            { fg = Twc.green_500, bg = Twc.green_50, b = Twc.green_700 }
 
         ( Available, Blue ) ->
-            { fg = Twc.blue_500, bg = Twc.blue_50, b = Twc.blue_800 }
+            { fg = Twc.blue_500, bg = Twc.blue_50, b = Twc.blue_700 }
 
         ( Xed, Red ) ->
-            { fg = Twc.red_500, bg = Twc.red_50, b = Twc.red_800 }
+            { fg = Twc.red_500, bg = Twc.red_50, b = Twc.red_700 }
 
         ( Xed, Yellow ) ->
-            { fg = Twc.yellow_500, bg = Twc.yellow_50, b = Twc.yellow_800 }
+            { fg = Twc.yellow_500, bg = Twc.yellow_50, b = Twc.yellow_700 }
 
         ( Xed, Green ) ->
-            { fg = Twc.green_500, bg = Twc.green_50, b = Twc.green_800 }
+            { fg = Twc.green_500, bg = Twc.green_50, b = Twc.green_700 }
 
         ( Xed, Blue ) ->
-            { fg = Twc.blue_500, bg = Twc.blue_50, b = Twc.blue_800 }
+            { fg = Twc.blue_500, bg = Twc.blue_50, b = Twc.blue_700 }
 
         ( Unavailable, Red ) ->
-            { fg = Twc.red_300, bg = Twc.red_50, b = Twc.red_300 }
+            { fg = Twc.red_200, bg = Twc.red_50, b = Twc.red_700 }
 
         ( Unavailable, Yellow ) ->
-            { fg = Twc.yellow_300, bg = Twc.yellow_50, b = Twc.yellow_300 }
+            { fg = Twc.yellow_200, bg = Twc.yellow_50, b = Twc.yellow_700 }
 
         ( Unavailable, Green ) ->
-            { fg = Twc.green_300, bg = Twc.green_50, b = Twc.green_300 }
+            { fg = Twc.green_200, bg = Twc.green_50, b = Twc.green_700 }
 
         ( Unavailable, Blue ) ->
-            { fg = Twc.blue_300, bg = Twc.blue_50, b = Twc.blue_300 }
+            { fg = Twc.blue_200, bg = Twc.blue_50, b = Twc.blue_700 }
+
+
+faultColors : { fg : Twc.Color, bg : Twc.Color }
+faultColors =
+    { fg = Twc.gray_400, bg = Twc.gray_50 }
 
 
 getXs : RowXs -> Int
