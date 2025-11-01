@@ -130,24 +130,34 @@ viewBoard model =
 viewColorRows : Model -> Html Msg
 viewColorRows model =
     Html.div [ css [ Tw.flex, Tw.flex_col, Tw.gap_1 ] ]
-        [ viewColorRow (ClickedCell Red) model.redRow Red
-        , viewColorRow (ClickedCell Yellow) model.yellowRow Yellow
-        , viewColorRow (ClickedCell Green) model.greenRow Green
-        , viewColorRow (ClickedCell Blue) model.blueRow Blue
+        [ viewColorRow (ClickedCell Red) False model.redRow Red
+        , viewColorRow (ClickedCell Yellow) False model.yellowRow Yellow
+        , viewColorRow (ClickedCell Green) True model.greenRow Green
+        , viewColorRow (ClickedCell Blue) True model.blueRow Blue
         ]
 
 
-viewColorRow : (Num -> Msg) -> RowXs -> Color -> Html Msg
-viewColorRow onClick rowXs color =
+viewColorRow : (Num -> Msg) -> Bool -> RowXs -> Color -> Html Msg
+viewColorRow onClick reverse rowXs color =
     let
         cell : Num -> Html Msg
         cell num =
             let
                 status : CellStatus
                 status =
-                    getStatus rowXs num
+                    getStatus reverse rowXs num
             in
             viewColorRowCell (onClick num) color num status
+
+        cells : List (Html Msg)
+        cells =
+            (if reverse then
+                Num.allBackward
+
+             else
+                Num.allForward
+            )
+                |> List.map cell
 
         colors =
             getColors color Available
@@ -157,19 +167,11 @@ viewColorRow onClick rowXs color =
         , css [ Tw.bg_color colors.b ]
         , css [ Tw.border_2, Tw.border_color colors.b ]
         ]
-        [ cell Num2
-        , cell Num3
-        , cell Num4
-        , cell Num5
-        , cell Num6
-        , cell Num7
-        , cell Num8
-        , cell Num9
-        , cell Num10
-        , cell Num11
-        , cell Num12
-        , viewLockCell color (getStatus rowXs Num12 == Xed)
-        ]
+        ([ cells
+         , [ viewLockCell color (getStatus reverse rowXs Num12 == Xed) ]
+         ]
+            |> List.concat
+        )
 
 
 viewColorRowCell : Msg -> Color -> Num -> CellStatus -> Html Msg
@@ -256,26 +258,26 @@ viewScoreboardColorPoints color rowXs =
 -- UTILS
 
 
-getStatus : RowXs -> Num -> CellStatus
-getStatus rowXs num =
+getStatus : Bool -> RowXs -> Num -> CellStatus
+getStatus reverse rowXs num =
     if Row.get num rowXs then
         Xed
 
-    else if cellIsAvailable rowXs num then
+    else if cellIsAvailable reverse rowXs num then
         Available
 
     else
         Unavailable
 
 
-cellIsAvailable : RowXs -> Num -> Bool
-cellIsAvailable rowXs num =
-    case ( Row.get num rowXs, nextNum num ) of
+cellIsAvailable : Bool -> RowXs -> Num -> Bool
+cellIsAvailable reverse rowXs num =
+    case ( Row.get num rowXs, nextNum reverse num ) of
         ( True, _ ) ->
             False
 
         ( False, Just n ) ->
-            cellIsAvailable rowXs n
+            cellIsAvailable reverse rowXs n
 
         ( False, Nothing ) ->
             True
@@ -358,38 +360,71 @@ numToInt num =
             12
 
 
-nextNum : Num -> Maybe Num
-nextNum num =
-    case num of
-        Num2 ->
+nextNum : Bool -> Num -> Maybe Num
+nextNum reverse num =
+    case ( reverse, num ) of
+        ( False, Num2 ) ->
             Just Num3
 
-        Num3 ->
+        ( False, Num3 ) ->
             Just Num4
 
-        Num4 ->
+        ( False, Num4 ) ->
             Just Num5
 
-        Num5 ->
+        ( False, Num5 ) ->
             Just Num6
 
-        Num6 ->
+        ( False, Num6 ) ->
             Just Num7
 
-        Num7 ->
+        ( False, Num7 ) ->
             Just Num8
 
-        Num8 ->
+        ( False, Num8 ) ->
             Just Num9
 
-        Num9 ->
+        ( False, Num9 ) ->
             Just Num10
 
-        Num10 ->
+        ( False, Num10 ) ->
             Just Num11
 
-        Num11 ->
+        ( False, Num11 ) ->
             Just Num12
 
-        Num12 ->
+        ( False, Num12 ) ->
             Nothing
+
+        ( True, Num2 ) ->
+            Nothing
+
+        ( True, Num3 ) ->
+            Just Num2
+
+        ( True, Num4 ) ->
+            Just Num3
+
+        ( True, Num5 ) ->
+            Just Num4
+
+        ( True, Num6 ) ->
+            Just Num5
+
+        ( True, Num7 ) ->
+            Just Num6
+
+        ( True, Num8 ) ->
+            Just Num7
+
+        ( True, Num9 ) ->
+            Just Num8
+
+        ( True, Num10 ) ->
+            Just Num9
+
+        ( True, Num11 ) ->
+            Just Num10
+
+        ( True, Num12 ) ->
+            Just Num11
