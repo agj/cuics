@@ -13,7 +13,6 @@ import Row exposing (Row)
 import Tailwind.Theme as Twc
 import Tailwind.Utilities as Tw
 import Util.Html.Styled.Attributes exposing (attributeIf)
-import Util.String
 
 
 main : Program () Model Msg
