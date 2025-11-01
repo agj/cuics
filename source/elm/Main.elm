@@ -34,6 +34,7 @@ type alias Model =
     , yellowRow : RowXs
     , greenRow : RowXs
     , blueRow : RowXs
+    , faults : Int
     }
 
 
@@ -64,6 +65,7 @@ init _ =
       , yellowRow = Row.init False
       , greenRow = Row.init False
       , blueRow = Row.init False
+      , faults = 0
       }
     , Cmd.none
     )
@@ -75,6 +77,7 @@ init _ =
 
 type Msg
     = ClickedCell Color Num
+    | ClickedFault
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -97,6 +100,11 @@ update msg model =
                             { model | blueRow = Row.set num True model.blueRow }
             in
             ( newModel, Cmd.none )
+
+        ClickedFault ->
+            ( { model | faults = model.faults + 1 }
+            , Cmd.none
+            )
 
 
 
@@ -124,6 +132,7 @@ viewBoard : Model -> Html Msg
 viewBoard model =
     Html.div [ css [ Tw.flex, Tw.flex_col, Tw.gap_3 ] ]
         [ viewColorRows model
+        , viewFaults ClickedFault model.faults
         , viewScoreboard model
         ]
 
@@ -222,6 +231,49 @@ viewLockCell color xed =
         , attributeIf xed (class "xed")
         ]
         [ Html.text "🔓" ]
+
+
+
+-- VIEW FAULTS
+
+
+viewFaults : Msg -> Int -> Html Msg
+viewFaults onClick count =
+    let
+        faultButtons =
+            [ 1, 2, 3, 4 ]
+                |> List.map (\n -> viewFaultButton onClick (n <= count))
+    in
+    Html.div [ css [ Tw.flex, Tw.flex_row, Tw.gap_1, Tw.justify_end, Tw.items_center ] ]
+        ([ [ Html.div [ css [ Tw.mr_3 ] ]
+                [ Html.text "Faltas:" ]
+           ]
+         , faultButtons
+         ]
+            |> List.concat
+        )
+
+
+viewFaultButton : Msg -> Bool -> Html Msg
+viewFaultButton onClick xed =
+    let
+        conditionalStyles =
+            if xed then
+                [ css [ Tw.cursor_default ]
+                , class "xed"
+                ]
+
+            else
+                [ Events.onClick onClick ]
+    in
+    Html.button
+        ([ css [ Tw.w_8, Tw.h_8 ]
+         , css [ Tw.border_2, Tw.border_color Twc.gray_500, Tw.rounded_lg ]
+         , attributeIf xed (class "xed")
+         ]
+            ++ conditionalStyles
+        )
+        []
 
 
 
