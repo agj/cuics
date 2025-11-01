@@ -1,7 +1,9 @@
 module Main exposing (main)
 
 import Array
+import Board exposing (Board)
 import Browser
+import Color exposing (Color(..))
 import Css.Global
 import Dict.Any exposing (AnyDict)
 import Html.Styled as Html exposing (Html)
@@ -30,19 +32,7 @@ main =
 
 
 type alias Model =
-    { redRow : RowXs
-    , yellowRow : RowXs
-    , greenRow : RowXs
-    , blueRow : RowXs
-    , faults : Int
-    }
-
-
-type Color
-    = Red
-    | Yellow
-    | Green
-    | Blue
+    { board : Board }
 
 
 type CellStatus
@@ -61,12 +51,7 @@ type alias RowXs =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( { redRow = Row.init False
-      , yellowRow = Row.init False
-      , greenRow = Row.init False
-      , blueRow = Row.init False
-      , faults = 0
-      }
+    ( { board = Board.init }
     , Cmd.none
     )
 
@@ -84,25 +69,12 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         ClickedCell color num ->
-            let
-                newModel =
-                    case color of
-                        Red ->
-                            { model | redRow = Row.set num True model.redRow }
-
-                        Yellow ->
-                            { model | yellowRow = Row.set num True model.yellowRow }
-
-                        Green ->
-                            { model | greenRow = Row.set num True model.greenRow }
-
-                        Blue ->
-                            { model | blueRow = Row.set num True model.blueRow }
-            in
-            ( newModel, Cmd.none )
+            ( { model | board = Board.updateRow color (Row.set num True) model.board }
+            , Cmd.none
+            )
 
         ClickedFault ->
-            ( { model | faults = model.faults + 1 }
+            ( { model | board = Board.addFault model.board }
             , Cmd.none
             )
 
@@ -132,7 +104,7 @@ viewBoard : Model -> Html Msg
 viewBoard model =
     Html.div [ css [ Tw.flex, Tw.flex_col, Tw.gap_3 ] ]
         [ viewColorRows model
-        , viewFaults ClickedFault model.faults
+        , viewFaults ClickedFault (Board.getFaults model.board)
         , viewScoreboard model
         ]
 
@@ -140,10 +112,10 @@ viewBoard model =
 viewColorRows : Model -> Html Msg
 viewColorRows model =
     Html.div [ css [ Tw.flex, Tw.flex_col, Tw.gap_1 ] ]
-        [ viewColorRow (ClickedCell Red) False model.redRow Red
-        , viewColorRow (ClickedCell Yellow) False model.yellowRow Yellow
-        , viewColorRow (ClickedCell Green) True model.greenRow Green
-        , viewColorRow (ClickedCell Blue) True model.blueRow Blue
+        [ viewColorRow (ClickedCell Red) False (Board.getRow Red model.board) Red
+        , viewColorRow (ClickedCell Yellow) False (Board.getRow Yellow model.board) Yellow
+        , viewColorRow (ClickedCell Green) True (Board.getRow Green model.board) Green
+        , viewColorRow (ClickedCell Blue) True (Board.getRow Blue model.board) Blue
         ]
 
 
@@ -289,26 +261,30 @@ viewScoreboard model =
 
         faultPoints : Int
         faultPoints =
-            model.faults * 5
+            Board.getFaults model.board * 5
 
         totalPoints : Int
         totalPoints =
-            ([ model.redRow, model.yellowRow, model.greenRow, model.blueRow ]
+            ([ Board.getRow Red model.board
+             , Board.getRow Yellow model.board
+             , Board.getRow Green model.board
+             , Board.getRow Blue model.board
+             ]
                 |> List.map (\rowXs -> getPoints (getXs rowXs))
                 |> List.foldl (+) 0
             )
                 - faultPoints
     in
     Html.div [ css [ Tw.flex, Tw.flex_row, Tw.gap_2, Tw.items_center ] ]
-        [ viewScoreboardColorPoints Red model.redRow
+        [ viewScoreboardColorPoints Red (Board.getRow Red model.board)
         , between "+"
-        , viewScoreboardColorPoints Yellow model.yellowRow
+        , viewScoreboardColorPoints Yellow (Board.getRow Yellow model.board)
         , between "+"
-        , viewScoreboardColorPoints Green model.greenRow
+        , viewScoreboardColorPoints Green (Board.getRow Green model.board)
         , between "+"
-        , viewScoreboardColorPoints Blue model.blueRow
+        , viewScoreboardColorPoints Blue (Board.getRow Blue model.board)
         , between "−"
-        , viewScoreboardPoints faultColors.fg model.faults faultPoints
+        , viewScoreboardPoints faultColors.fg (Board.getFaults model.board) faultPoints
         , between "="
         , viewScoreboardSquare Twc.black
             [ Html.div [ css [ Tw.font_bold, Tw.text_2xl, Tw.text_color Twc.black ] ]
