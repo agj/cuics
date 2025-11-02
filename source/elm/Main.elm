@@ -10,7 +10,7 @@ import Html.Styled.Events as Events
 import List
 import Num exposing (Num(..))
 import Row exposing (Row)
-import Svg
+import Svg exposing (Svg)
 import Svg.Attributes as Svga
 import Tailwind.Theme as Twc
 import Tailwind.Utilities as Tw
@@ -120,33 +120,36 @@ viewDice =
 
 viewDie : Pips -> Html Msg
 viewDie pips =
-    Html.div [ css [ Tw.w_16, Tw.h_16, Tw.bg_color Twc.red_500 ] ]
+    Html.div
+        [ css [ Tw.w_16, Tw.h_16, Tw.bg_color Twc.red_500, Tw.rounded_2xl ]
+        , css [ Tw.border_2, Tw.border_color Twc.red_800 ]
+        ]
         [ Svg.svg [ Svga.viewBox "-10 -10 20 20" ]
             [ Svg.g [ Svga.fill "white" ]
                 ([ -- Top left
                    mergeIf (List.member pips [ Pips4, Pips5, Pips6 ])
-                    [ Svg.circle [ Svga.cx "-5", Svga.cy "-5", Svga.r "2" ] [] ]
+                    [ viewDiePip -1 -1 ]
 
                  -- Top right
                  , mergeIf (List.member pips [ Pips2, Pips3, Pips4, Pips5, Pips6 ])
-                    [ Svg.circle [ Svga.cx "5", Svga.cy "-5", Svga.r "2" ] [] ]
+                    [ viewDiePip 1 -1 ]
 
                  -- Bottom left
                  , mergeIf (List.member pips [ Pips2, Pips3, Pips4, Pips5, Pips6 ])
-                    [ Svg.circle [ Svga.cx "-5", Svga.cy "5", Svga.r "2" ] [] ]
+                    [ viewDiePip -1 1 ]
 
                  -- Bottom right
                  , mergeIf (List.member pips [ Pips4, Pips5, Pips6 ])
-                    [ Svg.circle [ Svga.cx "5", Svga.cy "5", Svga.r "2" ] [] ]
+                    [ viewDiePip 1 1 ]
 
                  -- Center
                  , mergeIf (List.member pips [ Pips1, Pips3, Pips5 ])
-                    [ Svg.circle [ Svga.cx "0", Svga.cy "0", Svga.r "2" ] [] ]
+                    [ viewDiePip 0 0 ]
 
                  -- Left and right
                  , mergeIf (List.member pips [ Pips6 ])
-                    [ Svg.circle [ Svga.cx "-5", Svga.cy "0", Svga.r "2" ] []
-                    , Svg.circle [ Svga.cx "5", Svga.cy "0", Svga.r "2" ] []
+                    [ viewDiePip -1 0
+                    , viewDiePip 1 0
                     ]
                  ]
                     |> List.concat
@@ -154,6 +157,16 @@ viewDie pips =
             ]
             |> Html.fromUnstyled
         ]
+
+
+viewDiePip : Int -> Int -> Svg Msg
+viewDiePip xOffset yOffset =
+    Svg.circle
+        [ Svga.cx (String.fromInt (xOffset * 4))
+        , Svga.cy (String.fromInt (yOffset * 4))
+        , Svga.r "1.2"
+        ]
+        []
 
 
 mergeIf : Bool -> List a -> List a
