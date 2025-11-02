@@ -10,6 +10,8 @@ import Html.Styled.Events as Events
 import List
 import Num exposing (Num(..))
 import Row exposing (Row)
+import Svg
+import Svg.Attributes as Svga
 import Tailwind.Theme as Twc
 import Tailwind.Utilities as Tw
 import Util.Html.Styled.Attributes exposing (attributeIf)
@@ -82,12 +84,85 @@ view model =
     { title = "Cuics"
     , body =
         [ Html.div [ css [ Tw.flex, Tw.flex_col, Tw.justify_center, Tw.items_center, Tw.h_full, Tw.w_full ] ]
-            [ viewBoard model.board
+            [ viewDice
+            , viewBoard model.board
             , Css.Global.global Tw.globalStyles
             ]
             |> Html.toUnstyled
         ]
     }
+
+
+
+-- VIEW DICE
+
+
+type Pips
+    = Pips1
+    | Pips2
+    | Pips3
+    | Pips4
+    | Pips5
+    | Pips6
+
+
+viewDice : Html Msg
+viewDice =
+    Html.div [ css [ Tw.flex, Tw.flex_row, Tw.gap_2 ] ]
+        [ viewDie Pips1
+        , viewDie Pips2
+        , viewDie Pips3
+        , viewDie Pips4
+        , viewDie Pips5
+        , viewDie Pips6
+        ]
+
+
+viewDie : Pips -> Html Msg
+viewDie pips =
+    Html.div [ css [ Tw.w_16, Tw.h_16, Tw.bg_color Twc.red_500 ] ]
+        [ Svg.svg [ Svga.viewBox "-10 -10 20 20" ]
+            [ Svg.g [ Svga.fill "white" ]
+                ([ -- Top left
+                   mergeIf (List.member pips [ Pips4, Pips5, Pips6 ])
+                    [ Svg.circle [ Svga.cx "-5", Svga.cy "-5", Svga.r "2" ] [] ]
+
+                 -- Top right
+                 , mergeIf (List.member pips [ Pips2, Pips3, Pips4, Pips5, Pips6 ])
+                    [ Svg.circle [ Svga.cx "5", Svga.cy "-5", Svga.r "2" ] [] ]
+
+                 -- Bottom left
+                 , mergeIf (List.member pips [ Pips2, Pips3, Pips4, Pips5, Pips6 ])
+                    [ Svg.circle [ Svga.cx "-5", Svga.cy "5", Svga.r "2" ] [] ]
+
+                 -- Bottom right
+                 , mergeIf (List.member pips [ Pips4, Pips5, Pips6 ])
+                    [ Svg.circle [ Svga.cx "5", Svga.cy "5", Svga.r "2" ] [] ]
+
+                 -- Center
+                 , mergeIf (List.member pips [ Pips1, Pips3, Pips5 ])
+                    [ Svg.circle [ Svga.cx "0", Svga.cy "0", Svga.r "2" ] [] ]
+
+                 -- Left and right
+                 , mergeIf (List.member pips [ Pips6 ])
+                    [ Svg.circle [ Svga.cx "-5", Svga.cy "0", Svga.r "2" ] []
+                    , Svg.circle [ Svga.cx "5", Svga.cy "0", Svga.r "2" ] []
+                    ]
+                 ]
+                    |> List.concat
+                )
+            ]
+            |> Html.fromUnstyled
+        ]
+
+
+mergeIf : Bool -> List a -> List a
+mergeIf condition items =
+    if condition then
+        items
+
+    else
+        []
 
 
 
