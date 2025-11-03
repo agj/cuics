@@ -182,15 +182,6 @@ viewDiePip twColor xOffset yOffset =
         []
 
 
-mergeIf : Bool -> List a -> List a
-mergeIf condition items =
-    if condition then
-        items
-
-    else
-        []
-
-
 
 -- VIEW BOARD
 
@@ -442,6 +433,15 @@ cellIsAvailable reverse row num =
 
         ( False, Nothing ) ->
             True
+
+
+mergeIf : Bool -> List a -> List a
+mergeIf condition items =
+    if condition then
+        items
+
+    else
+        []
 
 
 getColors : Color -> CellStatus -> { fg : Twc.Color, bg : Twc.Color, b : Twc.Color }
