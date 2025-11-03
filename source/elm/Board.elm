@@ -1,6 +1,7 @@
 module Board exposing
     ( Board
     , addFault
+    , addX
     , faultPoints
     , getFaults
     , getRow
@@ -10,6 +11,7 @@ module Board exposing
     )
 
 import Color exposing (Color(..))
+import Num exposing (Num)
 import Row exposing (Row)
 
 
@@ -90,6 +92,11 @@ updateRow color rowUpdater (Board board) =
 
         Blue ->
             Board { board | blueRow = rowUpdater board.blueRow }
+
+
+addX : Color -> Num -> Board -> Board
+addX color num board =
+    updateRow color (Row.set num True) board
 
 
 addFault : Board -> Board

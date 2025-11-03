@@ -115,8 +115,8 @@ update msg model =
                     ( { model
                         | board =
                             model.board
-                                |> Board.updateRow color (Row.set num True)
-                                |> Board.updateRow pick.color (Row.set pick.num True)
+                                |> Board.addX color num
+                                |> Board.addX pick.color pick.num
                         , turn = NotTurn
                       }
                     , Cmd.none
