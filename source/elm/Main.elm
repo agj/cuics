@@ -547,24 +547,39 @@ availableNumsByDiceThrow turn color =
             getWhitePicks diceThrow ++ getColoredPicks diceThrow color
 
         TurnPickedOnce diceThrow pick ->
+            let
+                whitePicks =
+                    getWhitePicks diceThrow
+
+                coloredPicks =
+                    getColoredPicks diceThrow color
+            in
             case getFirstPickType diceThrow pick of
                 FirstPickedWhite ->
-                    getColoredPicks diceThrow color
-
-                FirstPickedColored ->
                     if color /= pick.color then
-                        getWhitePicks diceThrow
+                        coloredPicks
 
                     else
-                        -- Since the rules say you have to first pick white, we need
-                        -- to make sure that the player can't now choose a white num
-                        -- that would make the colored pick illegal.
-                        getWhitePicks diceThrow
+                        -- Remove all cells to the left.
+                        coloredPicks
                             |> List.filter
                                 (cellIsAvailable (Color.isReverse color) (Row.init |> Row.set pick.num True))
 
+                FirstPickedColored ->
+                    if color /= pick.color then
+                        whitePicks
+
+                    else
+                        -- Remove all cells to the right. This is because
+                        -- the rules say you have to first pick white, so the
+                        -- previous move was made in the wrong order and we have
+                        -- to accomodate for that.
+                        whitePicks
+                            |> List.filter
+                                (cellIsAvailable (not (Color.isReverse color)) (Row.init |> Row.set pick.num True))
+
                 FirstPickedEither ->
-                    getWhitePicks diceThrow ++ getColoredPicks diceThrow color
+                    whitePicks ++ coloredPicks
 
 
 type FirstPickType
