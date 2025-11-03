@@ -683,6 +683,10 @@ mergeIf condition items =
         []
 
 
+
+-- COLORS
+
+
 getColors : Color -> CellStatus -> { fg : Twc.Color, bg : Twc.Color, b : Twc.Color }
 getColors color status =
     case ( status, color ) of
