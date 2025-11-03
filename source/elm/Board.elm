@@ -21,12 +21,13 @@ type Board
         , yellowRow : Row
         , greenRow : Row
         , blueRow : Row
-        , faults : Int
+        , faults : FaultsCount
         }
 
 
 type FaultsCount
-    = Faults1
+    = Faults0
+    | Faults1
     | Faults2
     | Faults3
     | Faults4
@@ -39,7 +40,7 @@ init =
         , yellowRow = Row.init
         , greenRow = Row.init
         , blueRow = Row.init
-        , faults = 0
+        , faults = Faults0
         }
 
 
@@ -61,7 +62,21 @@ getRow color (Board board) =
 
 getFaults : Board -> Int
 getFaults (Board board) =
-    board.faults
+    case board.faults of
+        Faults0 ->
+            0
+
+        Faults1 ->
+            1
+
+        Faults2 ->
+            2
+
+        Faults3 ->
+            3
+
+        Faults4 ->
+            4
 
 
 points : Board -> Int
@@ -101,4 +116,22 @@ addX color num board =
 
 addFault : Board -> Board
 addFault (Board board) =
-    Board { board | faults = board.faults + 1 }
+    let
+        nextFaults =
+            case board.faults of
+                Faults0 ->
+                    Faults1
+
+                Faults1 ->
+                    Faults2
+
+                Faults2 ->
+                    Faults3
+
+                Faults3 ->
+                    Faults4
+
+                Faults4 ->
+                    Faults4
+    in
+    Board { board | faults = nextFaults }
