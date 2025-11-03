@@ -106,64 +106,78 @@ type Pips
     | Pips6
 
 
+type DieColor
+    = DieWhite
+    | DieRed
+    | DieYellow
+    | DieGreen
+    | DieBlue
+
+
 viewDice : Html Msg
 viewDice =
     Html.div [ css [ Tw.flex, Tw.flex_row, Tw.gap_2 ] ]
-        [ viewDie Pips1
-        , viewDie Pips2
-        , viewDie Pips3
-        , viewDie Pips4
-        , viewDie Pips5
-        , viewDie Pips6
+        [ viewDie DieWhite Pips1
+        , viewDie DieWhite Pips2
+        , viewDie DieRed Pips3
+        , viewDie DieYellow Pips4
+        , viewDie DieGreen Pips5
+        , viewDie DieBlue Pips6
         ]
 
 
-viewDie : Pips -> Html Msg
-viewDie pips =
+viewDie : DieColor -> Pips -> Html Msg
+viewDie dieColor pips =
+    let
+        colors =
+            getDieColors dieColor
+
+        pip =
+            viewDiePip colors.pip
+    in
     Html.div
-        [ css [ Tw.w_16, Tw.h_16, Tw.bg_color Twc.red_500, Tw.rounded_2xl ]
-        , css [ Tw.border_2, Tw.border_color Twc.red_800 ]
+        [ css [ Tw.w_16, Tw.h_16, Tw.bg_color colors.face, Tw.rounded_2xl ]
+        , css [ Tw.border_2, Tw.border_color colors.border ]
         ]
         [ Svg.svg [ Svga.viewBox "-10 -10 20 20" ]
-            [ Svg.g [ Svga.fill "white" ]
-                ([ -- Top left
-                   mergeIf (List.member pips [ Pips4, Pips5, Pips6 ])
-                    [ viewDiePip -1 -1 ]
+            ([ -- Top left
+               mergeIf (List.member pips [ Pips4, Pips5, Pips6 ])
+                [ pip -1 -1 ]
 
-                 -- Top right
-                 , mergeIf (List.member pips [ Pips2, Pips3, Pips4, Pips5, Pips6 ])
-                    [ viewDiePip 1 -1 ]
+             -- Top right
+             , mergeIf (List.member pips [ Pips2, Pips3, Pips4, Pips5, Pips6 ])
+                [ pip 1 -1 ]
 
-                 -- Bottom left
-                 , mergeIf (List.member pips [ Pips2, Pips3, Pips4, Pips5, Pips6 ])
-                    [ viewDiePip -1 1 ]
+             -- Bottom left
+             , mergeIf (List.member pips [ Pips2, Pips3, Pips4, Pips5, Pips6 ])
+                [ pip -1 1 ]
 
-                 -- Bottom right
-                 , mergeIf (List.member pips [ Pips4, Pips5, Pips6 ])
-                    [ viewDiePip 1 1 ]
+             -- Bottom right
+             , mergeIf (List.member pips [ Pips4, Pips5, Pips6 ])
+                [ pip 1 1 ]
 
-                 -- Center
-                 , mergeIf (List.member pips [ Pips1, Pips3, Pips5 ])
-                    [ viewDiePip 0 0 ]
+             -- Center
+             , mergeIf (List.member pips [ Pips1, Pips3, Pips5 ])
+                [ pip 0 0 ]
 
-                 -- Left and right
-                 , mergeIf (List.member pips [ Pips6 ])
-                    [ viewDiePip -1 0
-                    , viewDiePip 1 0
-                    ]
-                 ]
-                    |> List.concat
-                )
-            ]
+             -- Left and right
+             , mergeIf (List.member pips [ Pips6 ])
+                [ pip -1 0
+                , pip 1 0
+                ]
+             ]
+                |> List.concat
+            )
         ]
 
 
-viewDiePip : Int -> Int -> Svg Msg
-viewDiePip xOffset yOffset =
+viewDiePip : Twc.Color -> Int -> Int -> Svg Msg
+viewDiePip twColor xOffset yOffset =
     Svg.circle
         [ Svga.cx (String.fromInt (xOffset * 4))
         , Svga.cy (String.fromInt (yOffset * 4))
         , Svga.r "1.2"
+        , css [ Tw.fill_color twColor ]
         ]
         []
 
@@ -473,3 +487,22 @@ getColors color status =
 faultColors : { fg : Twc.Color, bg : Twc.Color }
 faultColors =
     { fg = Twc.gray_400, bg = Twc.gray_50 }
+
+
+getDieColors : DieColor -> { face : Twc.Color, border : Twc.Color, pip : Twc.Color }
+getDieColors dieColor =
+    case dieColor of
+        DieWhite ->
+            { face = Twc.white, border = Twc.gray_300, pip = Twc.black }
+
+        DieRed ->
+            { face = Twc.red_500, border = Twc.red_700, pip = Twc.white }
+
+        DieYellow ->
+            { face = Twc.yellow_500, border = Twc.yellow_700, pip = Twc.white }
+
+        DieGreen ->
+            { face = Twc.green_500, border = Twc.green_700, pip = Twc.white }
+
+        DieBlue ->
+            { face = Twc.blue_500, border = Twc.blue_700, pip = Twc.white }
