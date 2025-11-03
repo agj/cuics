@@ -10,8 +10,8 @@ import Html.Styled.Events as Events
 import List
 import Num exposing (Num(..))
 import Row exposing (Row)
-import Svg exposing (Svg)
-import Svg.Attributes as Svga
+import Svg.Styled as Svg exposing (Svg)
+import Svg.Styled.Attributes as Svga
 import Tailwind.Theme as Twc
 import Tailwind.Utilities as Tw
 import Util.Html.Styled.Attributes exposing (attributeIf)
@@ -155,7 +155,6 @@ viewDie pips =
                     |> List.concat
                 )
             ]
-            |> Html.fromUnstyled
         ]
 
 
