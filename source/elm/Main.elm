@@ -300,7 +300,7 @@ viewColorRow row turn color =
             let
                 status : CellStatus
                 status =
-                    getStatus reverse row turn color num
+                    getCellStatus reverse row turn color num
             in
             viewColorRowCell (ClickedCell color num) color num status
 
@@ -489,8 +489,8 @@ viewScoreboardSquare twColor content =
 -- CELL STATUS
 
 
-getStatus : Bool -> Row -> Turn -> Color -> Num -> CellStatus
-getStatus reverse row turn color num =
+getCellStatus : Bool -> Row -> Turn -> Color -> Num -> CellStatus
+getCellStatus reverse row turn color num =
     let
         isPicked =
             case turn of
@@ -547,38 +547,50 @@ availableNumsByDiceThrow turn color =
             getWhitePicks diceThrow ++ getColoredPicks diceThrow color
 
         TurnPickedOnce diceThrow pick ->
-            let
-                firstPickedWhite =
-                    List.member pick.num whitePicks
-
-                firstPickedColor =
-                    getColoredPicks diceThrow pick.color
-                        |> List.member pick.num
-
-                whitePicks =
-                    getWhitePicks diceThrow
-
-                coloredPicks =
+            case getFirstPickType diceThrow pick of
+                FirstPickedWhite ->
                     getColoredPicks diceThrow color
-            in
-            if firstPickedWhite && not firstPickedColor then
-                coloredPicks
 
-            else if firstPickedColor && not firstPickedWhite then
-                if color /= pick.color then
-                    whitePicks
+                FirstPickedColored ->
+                    if color /= pick.color then
+                        getWhitePicks diceThrow
 
-                else
-                    -- Since the rules say you have to first pick white, we need
-                    -- to make sure that the player can't now choose a white num
-                    -- that would make the colored pick illegal.
-                    whitePicks
-                        |> List.filter
-                            (cellIsAvailable (Color.isReverse color) (Row.init |> Row.set pick.num True))
+                    else
+                        -- Since the rules say you have to first pick white, we need
+                        -- to make sure that the player can't now choose a white num
+                        -- that would make the colored pick illegal.
+                        getWhitePicks diceThrow
+                            |> List.filter
+                                (cellIsAvailable (Color.isReverse color) (Row.init |> Row.set pick.num True))
 
-            else
-                -- Could've been either.
-                whitePicks ++ coloredPicks
+                FirstPickedEither ->
+                    getWhitePicks diceThrow ++ getColoredPicks diceThrow color
+
+
+type FirstPickType
+    = FirstPickedWhite
+    | FirstPickedColored
+    | FirstPickedEither
+
+
+getFirstPickType : DiceThrow -> Pick -> FirstPickType
+getFirstPickType diceThrow pick =
+    let
+        pickedWhite =
+            List.member pick.num (getWhitePicks diceThrow)
+
+        pickedColored =
+            getColoredPicks diceThrow pick.color
+                |> List.member pick.num
+    in
+    if pickedWhite && not pickedColored then
+        FirstPickedWhite
+
+    else if pickedColored && not pickedWhite then
+        FirstPickedColored
+
+    else
+        FirstPickedEither
 
 
 getWhitePicks : DiceThrow -> List Num
