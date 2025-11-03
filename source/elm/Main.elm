@@ -86,10 +86,11 @@ init _ =
 
 
 type Msg
-    = ClickedCell Pick
+    = DiceThrown DiceThrow
+    | ClickedAvailableCell Pick
     | ClickedPickedCell
+    | ClickedDone
     | ClickedFault
-    | DiceThrown DiceThrow
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -100,17 +101,16 @@ update msg model =
             , Cmd.none
             )
 
-        ClickedCell pick ->
+        ClickedAvailableCell pick ->
             case model.turn of
-                NotTurn ->
-                    ( model, Cmd.none )
-
                 TurnPicking diceThrow ->
+                    -- Pick a cell.
                     ( { model | turn = TurnPickedOnce diceThrow pick }
                     , Cmd.none
                     )
 
                 TurnPickedOnce _ previousPick ->
+                    -- X the two picks and finish the turn.
                     ( { model
                         | board =
                             model.board
@@ -118,12 +118,16 @@ update msg model =
                                 |> Board.addX pick.color pick.num
                         , turn = NotTurn
                       }
-                    , Cmd.none
+                    , throwDice
                     )
+
+                NotTurn ->
+                    ( model, Cmd.none )
 
         ClickedPickedCell ->
             case model.turn of
                 TurnPickedOnce diceThrow _ ->
+                    -- Undo the first pick.
                     ( { model | turn = TurnPicking diceThrow }
                     , Cmd.none
                     )
@@ -134,13 +138,32 @@ update msg model =
                 TurnPicking _ ->
                     ( model, Cmd.none )
 
+        ClickedDone ->
+            case model.turn of
+                TurnPickedOnce _ pick ->
+                    -- End turn with a single X.
+                    ( { model
+                        | board =
+                            model.board
+                                |> Board.addX pick.color pick.num
+                        , turn = NotTurn
+                      }
+                    , throwDice
+                    )
+
+                TurnPicking _ ->
+                    ( model, Cmd.none )
+
+                NotTurn ->
+                    ( model, Cmd.none )
+
         ClickedFault ->
             if canAddFault model.turn then
                 ( { model
                     | board = Board.addFault model.board
                     , turn = NotTurn
                   }
-                , Cmd.none
+                , throwDice
                 )
 
             else
@@ -156,13 +179,66 @@ view model =
     { title = "Cuics"
     , body =
         [ Html.div [ css [ Tw.flex, Tw.flex_col, Tw.justify_center, Tw.items_center, Tw.gap_2, Tw.h_full, Tw.w_full ] ]
-            [ viewDiceIfThrown model.turn
+            [ viewTop model.turn
             , viewBoard model.board model.turn
             , Css.Global.global Tw.globalStyles
             ]
             |> Html.toUnstyled
         ]
     }
+
+
+
+-- VIEW TOP
+
+
+viewTop : Turn -> Html Msg
+viewTop turn =
+    let
+        ( showingDone, enabledDone ) =
+            case turn of
+                NotTurn ->
+                    ( False, False )
+
+                TurnPicking _ ->
+                    ( True, False )
+
+                TurnPickedOnce _ _ ->
+                    ( True, True )
+    in
+    Html.div [ css [ Tw.flex, Tw.flex_row, Tw.gap_4, Tw.items_center ] ]
+        [ viewDiceIfThrown turn
+        , viewDoneButton showingDone (not enabledDone)
+        ]
+
+
+
+-- VIEW DONE BUTTON
+
+
+viewDoneButton : Bool -> Bool -> Html Msg
+viewDoneButton showing disabled =
+    if showing then
+        let
+            conditionalStyles =
+                if disabled then
+                    [ css [ Tw.bg_color Twc.purple_300, Tw.cursor_not_allowed ] ]
+
+                else
+                    [ css [ Tw.bg_color Twc.purple_800 ]
+                    , Events.onClick ClickedDone
+                    ]
+        in
+        Html.button
+            ([ css [ Tw.w_32, Tw.h_10, Tw.rounded_lg ]
+             , css [ Tw.text_color Twc.white ]
+             ]
+                ++ conditionalStyles
+            )
+            [ Html.text "Listo" ]
+
+    else
+        Html.div [ css [ Tw.w_32 ] ] []
 
 
 
@@ -309,7 +385,7 @@ viewColorRow row turn color =
                 status =
                     getCellStatus growth row turn color num
             in
-            viewColorRowCell (ClickedCell { color = color, num = num }) color num status
+            viewColorRowCell (ClickedAvailableCell { color = color, num = num }) color num status
 
         cells : List (Html Msg)
         cells =
