@@ -34,6 +34,7 @@ main =
 type alias Model =
     { board : Board
     , diceThrow : DiceThrow
+    , turn : Turn
     }
 
 
@@ -53,6 +54,12 @@ type alias DiceThrow =
     }
 
 
+type Turn
+    = NotTurn
+    | TurnPickingWhite
+    | TurnPickingColored
+
+
 
 -- INIT
 
@@ -68,6 +75,7 @@ init _ =
             , dieGreen = Pips5
             , dieBlue = Pips6
             }
+      , turn = TurnPickingColored
       }
     , Cmd.none
     )
@@ -106,7 +114,7 @@ view model =
     , body =
         [ Html.div [ css [ Tw.flex, Tw.flex_col, Tw.justify_center, Tw.items_center, Tw.gap_2, Tw.h_full, Tw.w_full ] ]
             [ viewDice model.diceThrow
-            , viewBoard model.board
+            , viewBoard model.board model.turn model.diceThrow
             , Css.Global.global Tw.globalStyles
             ]
             |> Html.toUnstyled
@@ -207,27 +215,32 @@ viewDiePip twColor xOffset yOffset =
 -- VIEW BOARD
 
 
-viewBoard : Board -> Html Msg
-viewBoard board =
+viewBoard : Board -> Turn -> DiceThrow -> Html Msg
+viewBoard board turn diceThrow =
     Html.div [ css [ Tw.flex, Tw.flex_col, Tw.gap_3 ] ]
-        [ viewColorRows board
+        [ viewColorRows board turn diceThrow
         , viewFaults ClickedFault (Board.getFaults board)
         , viewScoreboard board
         ]
 
 
-viewColorRows : Board -> Html Msg
-viewColorRows board =
+viewColorRows : Board -> Turn -> DiceThrow -> Html Msg
+viewColorRows board turn diceThrow =
+    let
+        colorRow : Color -> Html Msg
+        colorRow color =
+            viewColorRow (Board.getRow color board) turn diceThrow color
+    in
     Html.div [ css [ Tw.flex, Tw.flex_col, Tw.gap_1 ] ]
-        [ viewColorRow (Board.getRow Red board) Red
-        , viewColorRow (Board.getRow Yellow board) Yellow
-        , viewColorRow (Board.getRow Green board) Green
-        , viewColorRow (Board.getRow Blue board) Blue
+        [ colorRow Red
+        , colorRow Yellow
+        , colorRow Green
+        , colorRow Blue
         ]
 
 
-viewColorRow : Row -> Color -> Html Msg
-viewColorRow row color =
+viewColorRow : Row -> Turn -> DiceThrow -> Color -> Html Msg
+viewColorRow row turn diceThrow color =
     let
         reverse : Bool
         reverse =
@@ -238,7 +251,7 @@ viewColorRow row color =
             let
                 status : CellStatus
                 status =
-                    getStatus reverse row num
+                    getStatus reverse row turn diceThrow color num
             in
             viewColorRowCell (ClickedCell color num) color num status
 
@@ -423,24 +436,143 @@ viewScoreboardSquare twColor content =
 -- UTILS
 
 
-getStatus : Bool -> Row -> Num -> CellStatus
-getStatus reverse row num =
-    if Row.get num row then
-        Xed
+getStatus : Bool -> Row -> Turn -> DiceThrow -> Color -> Num -> CellStatus
+getStatus reverse row turn diceThrow color num =
+    let
+        basicAvailability =
+            if Row.get num row then
+                Xed
 
-    else if cellIsAvailable reverse row num then
-        if Num.isLast reverse num then
-            if Row.xCount reverse row >= 5 then
+            else if cellIsAvailable reverse row num then
+                if Num.isLast reverse num then
+                    if Row.xCount reverse row >= 5 then
+                        Available
+
+                    else
+                        Unavailable
+
+                else
+                    Available
+
+            else
+                Unavailable
+
+        availableNums =
+            availableNumsByDiceThrow turn diceThrow color
+    in
+    case basicAvailability of
+        Available ->
+            if List.member num availableNums then
                 Available
 
             else
                 Unavailable
 
-        else
-            Available
+        _ ->
+            basicAvailability
 
-    else
-        Unavailable
+
+availableNumsByDiceThrow : Turn -> DiceThrow -> Color -> List Num
+availableNumsByDiceThrow turn diceThrow color =
+    case turn of
+        NotTurn ->
+            []
+
+        TurnPickingWhite ->
+            [ addPips diceThrow.dieWhite1 diceThrow.dieWhite2 ]
+
+        TurnPickingColored ->
+            case color of
+                Red ->
+                    [ addPips diceThrow.dieWhite1 diceThrow.dieRed
+                    , addPips diceThrow.dieWhite2 diceThrow.dieRed
+                    ]
+
+                Yellow ->
+                    [ addPips diceThrow.dieWhite1 diceThrow.dieYellow
+                    , addPips diceThrow.dieWhite2 diceThrow.dieYellow
+                    ]
+
+                Green ->
+                    [ addPips diceThrow.dieWhite1 diceThrow.dieGreen
+                    , addPips diceThrow.dieWhite2 diceThrow.dieGreen
+                    ]
+
+                Blue ->
+                    [ addPips diceThrow.dieWhite1 diceThrow.dieBlue
+                    , addPips diceThrow.dieWhite2 diceThrow.dieBlue
+                    ]
+
+
+addPips : Pips -> Pips -> Num
+addPips pips1 pips2 =
+    case ( pips1, pips2 ) of
+        ( Pips1, Pips1 ) ->
+            Num2
+
+        ( Pips1, Pips2 ) ->
+            Num3
+
+        ( Pips1, Pips3 ) ->
+            Num4
+
+        ( Pips1, Pips4 ) ->
+            Num5
+
+        ( Pips1, Pips5 ) ->
+            Num6
+
+        ( Pips1, Pips6 ) ->
+            Num7
+
+        ( Pips2, Pips2 ) ->
+            Num4
+
+        ( Pips2, Pips3 ) ->
+            Num5
+
+        ( Pips2, Pips4 ) ->
+            Num6
+
+        ( Pips2, Pips5 ) ->
+            Num7
+
+        ( Pips2, Pips6 ) ->
+            Num8
+
+        ( Pips3, Pips3 ) ->
+            Num6
+
+        ( Pips3, Pips4 ) ->
+            Num7
+
+        ( Pips3, Pips5 ) ->
+            Num8
+
+        ( Pips3, Pips6 ) ->
+            Num9
+
+        ( Pips4, Pips4 ) ->
+            Num8
+
+        ( Pips4, Pips5 ) ->
+            Num9
+
+        ( Pips4, Pips6 ) ->
+            Num10
+
+        ( Pips5, Pips5 ) ->
+            Num10
+
+        ( Pips5, Pips6 ) ->
+            Num11
+
+        ( Pips6, Pips6 ) ->
+            Num12
+
+        _ ->
+            -- Bigger number is the second, so we turn them around and try again.
+            addPips pips2 pips1
 
 
 cellIsAvailable : Bool -> Row -> Num -> Bool
