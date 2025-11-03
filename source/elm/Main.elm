@@ -33,7 +33,6 @@ main =
 
 type alias Model =
     { board : Board
-    , diceThrow : DiceThrow
     , turn : Turn
     }
 
@@ -45,6 +44,12 @@ type CellStatus
     | Unavailable
 
 
+type Turn
+    = NotTurn
+    | TurnPicking DiceThrow
+    | TurnPickedOnce DiceThrow Pick
+
+
 type alias DiceThrow =
     { dieWhite1 : Pips
     , dieWhite2 : Pips
@@ -53,12 +58,6 @@ type alias DiceThrow =
     , dieGreen : Pips
     , dieBlue : Pips
     }
-
-
-type Turn
-    = NotTurn
-    | TurnPicking
-    | TurnPickedOnce Pick
 
 
 type alias Pick =
@@ -74,15 +73,15 @@ type alias Pick =
 init : () -> ( Model, Cmd Msg )
 init _ =
     ( { board = Board.init
-      , diceThrow =
-            { dieWhite1 = Pips1
-            , dieWhite2 = Pips2
-            , dieRed = Pips3
-            , dieYellow = Pips4
-            , dieGreen = Pips5
-            , dieBlue = Pips6
-            }
-      , turn = TurnPicking
+      , turn =
+            TurnPicking
+                { dieWhite1 = Pips1
+                , dieWhite2 = Pips2
+                , dieRed = Pips3
+                , dieYellow = Pips4
+                , dieGreen = Pips5
+                , dieBlue = Pips6
+                }
       }
     , Cmd.none
     )
@@ -106,12 +105,12 @@ update msg model =
                 NotTurn ->
                     ( model, Cmd.none )
 
-                TurnPicking ->
-                    ( { model | turn = TurnPickedOnce { color = color, num = num } }
+                TurnPicking diceThrow ->
+                    ( { model | turn = TurnPickedOnce diceThrow { color = color, num = num } }
                     , Cmd.none
                     )
 
-                TurnPickedOnce pick ->
+                TurnPickedOnce diceThrow pick ->
                     ( { model
                         | board =
                             model.board
@@ -123,9 +122,17 @@ update msg model =
                     )
 
         ClickedPickedCell ->
-            ( { model | turn = TurnPicking }
-            , Cmd.none
-            )
+            case model.turn of
+                TurnPickedOnce diceThrow _ ->
+                    ( { model | turn = TurnPicking diceThrow }
+                    , Cmd.none
+                    )
+
+                NotTurn ->
+                    ( model, Cmd.none )
+
+                TurnPicking _ ->
+                    ( model, Cmd.none )
 
         ClickedFault ->
             ( { model | board = Board.addFault model.board }
@@ -142,8 +149,8 @@ view model =
     { title = "Cuics"
     , body =
         [ Html.div [ css [ Tw.flex, Tw.flex_col, Tw.justify_center, Tw.items_center, Tw.gap_2, Tw.h_full, Tw.w_full ] ]
-            [ viewDice model.diceThrow
-            , viewBoard model.board model.turn model.diceThrow
+            [ viewDiceIfThrown model.turn
+            , viewBoard model.board model.turn
             , Css.Global.global Tw.globalStyles
             ]
             |> Html.toUnstyled
@@ -170,6 +177,19 @@ type DieColor
     | DieYellow
     | DieGreen
     | DieBlue
+
+
+viewDiceIfThrown : Turn -> Html Msg
+viewDiceIfThrown turn =
+    case turn of
+        NotTurn ->
+            Html.text ""
+
+        TurnPicking diceThrow ->
+            viewDice diceThrow
+
+        TurnPickedOnce diceThrow _ ->
+            viewDice diceThrow
 
 
 viewDice : DiceThrow -> Html Msg
@@ -244,21 +264,21 @@ viewDiePip twColor xOffset yOffset =
 -- VIEW BOARD
 
 
-viewBoard : Board -> Turn -> DiceThrow -> Html Msg
-viewBoard board turn diceThrow =
+viewBoard : Board -> Turn -> Html Msg
+viewBoard board turn =
     Html.div [ css [ Tw.flex, Tw.flex_col, Tw.gap_3 ] ]
-        [ viewColorRows board turn diceThrow
+        [ viewColorRows board turn
         , viewFaults ClickedFault (Board.getFaults board)
         , viewScoreboard board
         ]
 
 
-viewColorRows : Board -> Turn -> DiceThrow -> Html Msg
-viewColorRows board turn diceThrow =
+viewColorRows : Board -> Turn -> Html Msg
+viewColorRows board turn =
     let
         colorRow : Color -> Html Msg
         colorRow color =
-            viewColorRow (Board.getRow color board) turn diceThrow color
+            viewColorRow (Board.getRow color board) turn color
     in
     Html.div [ css [ Tw.flex, Tw.flex_col, Tw.gap_1 ] ]
         [ colorRow Red
@@ -268,8 +288,8 @@ viewColorRows board turn diceThrow =
         ]
 
 
-viewColorRow : Row -> Turn -> DiceThrow -> Color -> Html Msg
-viewColorRow row turn diceThrow color =
+viewColorRow : Row -> Turn -> Color -> Html Msg
+viewColorRow row turn color =
     let
         reverse : Bool
         reverse =
@@ -280,7 +300,7 @@ viewColorRow row turn diceThrow color =
             let
                 status : CellStatus
                 status =
-                    getStatus reverse row turn diceThrow color num
+                    getStatus reverse row turn color num
             in
             viewColorRowCell (ClickedCell color num) color num status
 
@@ -469,12 +489,12 @@ viewScoreboardSquare twColor content =
 -- CELL STATUS
 
 
-getStatus : Bool -> Row -> Turn -> DiceThrow -> Color -> Num -> CellStatus
-getStatus reverse row turn diceThrow color num =
+getStatus : Bool -> Row -> Turn -> Color -> Num -> CellStatus
+getStatus reverse row turn color num =
     let
         isPicked =
             case turn of
-                TurnPickedOnce pick ->
+                TurnPickedOnce _ pick ->
                     pick.color == color && pick.num == num
 
                 _ ->
@@ -499,7 +519,7 @@ getStatus reverse row turn diceThrow color num =
                 Unavailable
 
         availableNums =
-            availableNumsByDiceThrow turn diceThrow color
+            availableNumsByDiceThrow turn color
     in
     if isPicked then
         Picked
@@ -517,23 +537,16 @@ getStatus reverse row turn diceThrow color num =
                 basicAvailability
 
 
-availableNumsByDiceThrow : Turn -> DiceThrow -> Color -> List Num
-availableNumsByDiceThrow turn diceThrow color =
-    let
-        whitePicks =
-            [ addPips diceThrow.dieWhite1 diceThrow.dieWhite2 ]
-
-        coloredPicks =
-            getColoredPicks diceThrow color
-    in
+availableNumsByDiceThrow : Turn -> Color -> List Num
+availableNumsByDiceThrow turn color =
     case turn of
         NotTurn ->
             []
 
-        TurnPicking ->
-            whitePicks ++ coloredPicks
+        TurnPicking diceThrow ->
+            getWhitePicks diceThrow ++ getColoredPicks diceThrow color
 
-        TurnPickedOnce pick ->
+        TurnPickedOnce diceThrow pick ->
             let
                 firstPickedWhite =
                     List.member pick.num whitePicks
@@ -541,6 +554,12 @@ availableNumsByDiceThrow turn diceThrow color =
                 firstPickedColor =
                     getColoredPicks diceThrow pick.color
                         |> List.member pick.num
+
+                whitePicks =
+                    getWhitePicks diceThrow
+
+                coloredPicks =
+                    getColoredPicks diceThrow color
             in
             if firstPickedWhite && not firstPickedColor then
                 coloredPicks
@@ -560,6 +579,11 @@ availableNumsByDiceThrow turn diceThrow color =
             else
                 -- Could've been either.
                 whitePicks ++ coloredPicks
+
+
+getWhitePicks : DiceThrow -> List Num
+getWhitePicks diceThrow =
+    [ addPips diceThrow.dieWhite1 diceThrow.dieWhite2 ]
 
 
 getColoredPicks : DiceThrow -> Color -> List Num
