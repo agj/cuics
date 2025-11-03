@@ -104,7 +104,7 @@ view : Model -> Browser.Document Msg
 view model =
     { title = "Cuics"
     , body =
-        [ Html.div [ css [ Tw.flex, Tw.flex_col, Tw.justify_center, Tw.items_center, Tw.h_full, Tw.w_full ] ]
+        [ Html.div [ css [ Tw.flex, Tw.flex_col, Tw.justify_center, Tw.items_center, Tw.gap_2, Tw.h_full, Tw.w_full ] ]
             [ viewDice model.diceThrow
             , viewBoard model.board
             , Css.Global.global Tw.globalStyles
