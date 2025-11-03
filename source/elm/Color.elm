@@ -1,4 +1,6 @@
-module Color exposing (Color(..), all, isReverse)
+module Color exposing (Color(..), all, growth)
+
+import Num
 
 
 type Color
@@ -13,17 +15,17 @@ all =
     [ Red, Yellow, Green, Blue ]
 
 
-isReverse : Color -> Bool
-isReverse color =
+growth : Color -> Num.Growth
+growth color =
     case color of
         Red ->
-            False
+            Num.Grows
 
         Yellow ->
-            False
+            Num.Grows
 
         Green ->
-            True
+            Num.Shrinks
 
         Blue ->
-            True
+            Num.Shrinks

@@ -291,27 +291,22 @@ viewColorRows board turn =
 viewColorRow : Row -> Turn -> Color -> Html Msg
 viewColorRow row turn color =
     let
-        reverse : Bool
-        reverse =
-            Color.isReverse color
+        growth : Num.Growth
+        growth =
+            Color.growth color
 
         cell : Num -> Html Msg
         cell num =
             let
                 status : CellStatus
                 status =
-                    getCellStatus reverse row turn color num
+                    getCellStatus growth row turn color num
             in
             viewColorRowCell (ClickedCell color num) color num status
 
         cells : List (Html Msg)
         cells =
-            (if Color.isReverse color then
-                Num.allBackward
-
-             else
-                Num.allForward
-            )
+            Num.all (Color.growth color)
                 |> List.map cell
 
         colors =
@@ -322,7 +317,7 @@ viewColorRow row turn color =
         , css [ Tw.bg_color colors.fg ]
         ]
         ([ cells
-         , [ viewLockCell color (Row.getLock (Color.isReverse color) row) ]
+         , [ viewLockCell color (Row.getLock (Color.growth color) row) ]
          ]
             |> List.concat
         )
@@ -462,8 +457,8 @@ viewScoreboardColorPoints color row =
     in
     viewScoreboardPoints
         colors.fg
-        (Row.xCount (Color.isReverse color) row)
-        (Row.points (Color.isReverse color) row)
+        (Row.xCount (Color.growth color) row)
+        (Row.points (Color.growth color) row)
 
 
 viewScoreboardPoints : Twc.Color -> Int -> Int -> Html Msg
@@ -489,8 +484,8 @@ viewScoreboardSquare twColor content =
 -- CELL STATUS
 
 
-getCellStatus : Bool -> Row -> Turn -> Color -> Num -> CellStatus
-getCellStatus reverse row turn color num =
+getCellStatus : Num.Growth -> Row -> Turn -> Color -> Num -> CellStatus
+getCellStatus growth row turn color num =
     let
         isPicked =
             case turn of
@@ -504,9 +499,9 @@ getCellStatus reverse row turn color num =
             if Row.get num row then
                 Xed
 
-            else if cellIsAvailable reverse row num then
-                if Num.isLast reverse num then
-                    if Row.xCount reverse row >= 5 then
+            else if cellIsAvailable growth row num then
+                if Num.isLast growth num then
+                    if Row.xCount growth row >= 5 then
                         Available
 
                     else
@@ -548,24 +543,34 @@ availableNumsByDiceThrow turn color =
 
         TurnPickedOnce diceThrow pick ->
             let
+                whitePicks : List Num
                 whitePicks =
                     getWhitePicks diceThrow
 
+                coloredPicks : List Num
                 coloredPicks =
                     getColoredPicks diceThrow color
 
                 filterPicks : Bool -> List Num -> List Num
                 filterPicks toTheLeft =
-                    List.filter
-                        (cellIsAvailable
-                            (if toTheLeft then
-                                Color.isReverse color
+                    let
+                        growth : Num.Growth
+                        growth =
+                            case ( toTheLeft, Color.growth color ) of
+                                ( True, growth_ ) ->
+                                    growth_
 
-                             else
-                                not (Color.isReverse color)
-                            )
-                            (Row.init |> Row.set pick.num True)
-                        )
+                                ( False, Num.Grows ) ->
+                                    Num.Shrinks
+
+                                ( False, Num.Shrinks ) ->
+                                    Num.Grows
+
+                        rowWithXedPick : Row
+                        rowWithXedPick =
+                            Row.init |> Row.set pick.num True
+                    in
+                    List.filter (cellIsAvailable growth rowWithXedPick)
             in
             case getFirstPickType diceThrow pick of
                 FirstPickedWhite ->
@@ -646,14 +651,14 @@ getColoredPicks diceThrow color =
             ]
 
 
-cellIsAvailable : Bool -> Row -> Num -> Bool
-cellIsAvailable reverse row num =
-    case ( Row.get num row, Num.next reverse num ) of
+cellIsAvailable : Num.Growth -> Row -> Num -> Bool
+cellIsAvailable growth row num =
+    case ( Row.get num row, Num.next growth num ) of
         ( True, _ ) ->
             False
 
         ( False, Just n ) ->
-            cellIsAvailable reverse row n
+            cellIsAvailable growth row n
 
         ( False, Nothing ) ->
             True

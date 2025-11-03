@@ -1,7 +1,7 @@
 module Row exposing (Row, get, getLock, init, points, set, xCount)
 
 import Array exposing (Array)
-import Num exposing (Num(..), allForward)
+import Num exposing (Num(..))
 
 
 type Row
@@ -74,9 +74,9 @@ get num (Row row) =
             row.num12
 
 
-getLock : Bool -> Row -> Bool
-getLock reverse row =
-    get (Num.getLast reverse) row
+getLock : Num.Growth -> Row -> Bool
+getLock growth row =
+    get (Num.getLast growth) row
 
 
 set : Num -> Bool -> Row -> Row
@@ -116,17 +116,17 @@ set num value (Row row) =
             Row { row | num12 = value }
 
 
-xCount : Bool -> Row -> Int
-xCount reverse row =
+xCount : Num.Growth -> Row -> Int
+xCount growth row =
     let
         baseCount =
-            allForward
+            Num.all Num.Grows
                 |> List.map (\num -> get num row)
                 |> List.filter identity
                 |> List.length
 
         lockBonus =
-            if getLock reverse row then
+            if getLock growth row then
                 1
 
             else
@@ -135,10 +135,10 @@ xCount reverse row =
     baseCount + lockBonus
 
 
-points : Bool -> Row -> Int
-points reverse row =
+points : Num.Growth -> Row -> Int
+points growth row =
     pointsTable
-        |> Array.get (xCount reverse row - 1)
+        |> Array.get (xCount growth row - 1)
         |> Maybe.withDefault 0
 
 

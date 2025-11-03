@@ -1,7 +1,7 @@
 module Num exposing
-    ( Num(..)
-    , allBackward
-    , allForward
+    ( Growth(..)
+    , Num(..)
+    , all
     , getLast
     , isLast
     , next
@@ -23,119 +23,113 @@ type Num
     | Num12
 
 
-allForward : List Num
-allForward =
-    [ Num2
-    , Num3
-    , Num4
-    , Num5
-    , Num6
-    , Num7
-    , Num8
-    , Num9
-    , Num10
-    , Num11
-    , Num12
-    ]
+type Growth
+    = Grows
+    | Shrinks
 
 
-allBackward : List Num
-allBackward =
-    [ Num12
-    , Num11
-    , Num10
-    , Num9
-    , Num8
-    , Num7
-    , Num6
-    , Num5
-    , Num4
-    , Num3
-    , Num2
-    ]
+all : Growth -> List Num
+all growth =
+    case growth of
+        Grows ->
+            allGrowing
+
+        Shrinks ->
+            allShrinking
 
 
-isLast : Bool -> Num -> Bool
-isLast reverse num =
-    getLast reverse == num
+allGrowing : List Num
+allGrowing =
+    [ Num2, Num3, Num4, Num5, Num6, Num7, Num8, Num9, Num10, Num11, Num12 ]
 
 
-getLast : Bool -> Num
-getLast reverse =
-    if reverse then
-        Num2
-
-    else
-        Num12
+allShrinking : List Num
+allShrinking =
+    [ Num12, Num11, Num10, Num9, Num8, Num7, Num6, Num5, Num4, Num3, Num2 ]
 
 
-next : Bool -> Num -> Maybe Num
-next reverse num =
-    case ( reverse, num ) of
-        ( False, Num2 ) ->
+isLast : Growth -> Num -> Bool
+isLast growth num =
+    getLast growth == num
+
+
+getLast : Growth -> Num
+getLast growth =
+    case growth of
+        Grows ->
+            Num12
+
+        Shrinks ->
+            Num2
+
+
+next : Growth -> Num -> Maybe Num
+next growth num =
+    case ( growth, num ) of
+        ( Grows, Num2 ) ->
             Just Num3
 
-        ( False, Num3 ) ->
+        ( Grows, Num3 ) ->
             Just Num4
 
-        ( False, Num4 ) ->
+        ( Grows, Num4 ) ->
             Just Num5
 
-        ( False, Num5 ) ->
+        ( Grows, Num5 ) ->
             Just Num6
 
-        ( False, Num6 ) ->
+        ( Grows, Num6 ) ->
             Just Num7
 
-        ( False, Num7 ) ->
+        ( Grows, Num7 ) ->
             Just Num8
 
-        ( False, Num8 ) ->
+        ( Grows, Num8 ) ->
             Just Num9
 
-        ( False, Num9 ) ->
+        ( Grows, Num9 ) ->
             Just Num10
 
-        ( False, Num10 ) ->
+        ( Grows, Num10 ) ->
             Just Num11
 
-        ( False, Num11 ) ->
+        ( Grows, Num11 ) ->
             Just Num12
 
-        ( False, Num12 ) ->
+        ( Grows, Num12 ) ->
             Nothing
 
-        ( True, Num2 ) ->
+        ( Shrinks, Num2 ) ->
             Nothing
 
-        ( True, Num3 ) ->
+        ( Shrinks, Num3 ) ->
             Just Num2
 
-        ( True, Num4 ) ->
+        ( Shrinks, Num4 ) ->
             Just Num3
 
-        ( True, Num5 ) ->
+        ( Shrinks, Num5 ) ->
             Just Num4
 
-        ( True, Num6 ) ->
+        ( Shrinks, Num6 ) ->
             Just Num5
 
-        ( True, Num7 ) ->
+        ( Shrinks, Num7 ) ->
             Just Num6
 
-        ( True, Num8 ) ->
+        ( Shrinks, Num8 ) ->
             Just Num7
 
-        ( True, Num9 ) ->
+        ( Shrinks, Num9 ) ->
             Just Num8
 
-        ( True, Num10 ) ->
+        ( Shrinks, Num10 ) ->
             Just Num9
 
-        ( True, Num11 ) ->
+        ( Shrinks, Num11 ) ->
             Just Num10
 
-        ( True, Num12 ) ->
+        ( Shrinks, Num12 ) ->
             Just Num11
 
 

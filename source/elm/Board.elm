@@ -67,7 +67,7 @@ getFaults (Board board) =
 points : Board -> Int
 points board =
     (Color.all
-        |> List.map (\color -> Row.points (Color.isReverse color) (getRow color board))
+        |> List.map (\color -> Row.points (Color.growth color) (getRow color board))
         |> List.foldl (+) 0
     )
         - faultPoints board
