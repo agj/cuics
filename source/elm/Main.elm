@@ -135,9 +135,16 @@ update msg model =
                     ( model, Cmd.none )
 
         ClickedFault ->
-            ( { model | board = Board.addFault model.board }
-            , Cmd.none
-            )
+            if canAddFault model.turn then
+                ( { model
+                    | board = Board.addFault model.board
+                    , turn = NotTurn
+                  }
+                , Cmd.none
+                )
+
+            else
+                ( model, Cmd.none )
 
 
 
@@ -268,7 +275,7 @@ viewBoard : Board -> Turn -> Html Msg
 viewBoard board turn =
     Html.div [ css [ Tw.flex, Tw.flex_col, Tw.gap_3 ] ]
         [ viewColorRows board turn
-        , viewFaults ClickedFault (Board.getFaults board)
+        , viewFaults (canAddFault turn) (Board.getFaults board)
         , viewScoreboard board
         ]
 
@@ -380,12 +387,12 @@ viewLockCell color xed =
 -- VIEW FAULTS
 
 
-viewFaults : Msg -> Int -> Html Msg
-viewFaults onClick count =
+viewFaults : Bool -> Int -> Html Msg
+viewFaults active count =
     let
         faultButtons =
             [ 1, 2, 3, 4 ]
-                |> List.map (\n -> viewFaultButton onClick (n <= count))
+                |> List.map (\n -> viewFaultButton active (n <= count))
     in
     Html.div [ css [ Tw.flex, Tw.flex_row, Tw.gap_1, Tw.justify_end, Tw.items_center ] ]
         ([ [ Html.div [ css [ Tw.mr_3 ] ]
@@ -397,21 +404,29 @@ viewFaults onClick count =
         )
 
 
-viewFaultButton : Msg -> Bool -> Html Msg
-viewFaultButton onClick xed =
+viewFaultButton : Bool -> Bool -> Html Msg
+viewFaultButton active xed =
     let
         conditionalStyles =
-            if xed then
+            [ mergeIf xed
                 [ css [ Tw.cursor_default ]
                 , class "xed"
                 ]
-
-            else
-                [ Events.onClick onClick ]
+            , mergeIf active
+                [ css [ Tw.border_color faultColors.fg ]
+                , Events.onClick ClickedFault
+                ]
+            , mergeIf (not active)
+                [ css [ Tw.border_color faultColors.fgDisabled ] ]
+            , mergeIf (not active && not xed)
+                [ css [ Tw.cursor_not_allowed ] ]
+            ]
+                |> List.concat
     in
     Html.button
         ([ css [ Tw.w_8, Tw.h_8 ]
-         , css [ Tw.border_2, Tw.border_color faultColors.fg, Tw.rounded_lg ]
+         , css [ Tw.bg_color faultColors.bg ]
+         , css [ Tw.border_2, Tw.rounded_lg ]
          , attributeIf xed (class "xed")
          ]
             ++ conditionalStyles
@@ -781,6 +796,19 @@ addPips pips1 pips2 =
             addPips pips2 pips1
 
 
+canAddFault : Turn -> Bool
+canAddFault turn =
+    case turn of
+        TurnPicking _ ->
+            True
+
+        NotTurn ->
+            False
+
+        TurnPickedOnce _ _ ->
+            False
+
+
 mergeIf : Bool -> List a -> List a
 mergeIf condition items =
     if condition then
@@ -846,9 +874,8 @@ getColors color status =
             { fg = Twc.blue_200, bg = Twc.blue_50, b = Twc.blue_700 }
 
 
-faultColors : { fg : Twc.Color, bg : Twc.Color }
 faultColors =
-    { fg = Twc.gray_400, bg = Twc.gray_50 }
+    { fg = Twc.gray_400, fgDisabled = Twc.gray_200, bg = Twc.gray_50 }
 
 
 getDieColors : DieColor -> { face : Twc.Color, border : Twc.Color, pip : Twc.Color }
