@@ -523,39 +523,8 @@ availableNumsByDiceThrow turn diceThrow color =
         whitePicks =
             [ addPips diceThrow.dieWhite1 diceThrow.dieWhite2 ]
 
-        redPicks =
-            [ addPips diceThrow.dieWhite1 diceThrow.dieRed
-            , addPips diceThrow.dieWhite2 diceThrow.dieRed
-            ]
-
-        yellowPicks =
-            [ addPips diceThrow.dieWhite1 diceThrow.dieYellow
-            , addPips diceThrow.dieWhite2 diceThrow.dieYellow
-            ]
-
-        greenPicks =
-            [ addPips diceThrow.dieWhite1 diceThrow.dieGreen
-            , addPips diceThrow.dieWhite2 diceThrow.dieGreen
-            ]
-
-        bluePicks =
-            [ addPips diceThrow.dieWhite1 diceThrow.dieBlue
-            , addPips diceThrow.dieWhite2 diceThrow.dieBlue
-            ]
-
         coloredPicks =
-            case color of
-                Red ->
-                    redPicks
-
-                Yellow ->
-                    yellowPicks
-
-                Green ->
-                    greenPicks
-
-                Blue ->
-                    bluePicks
+            getColoredPicks diceThrow color
     in
     case turn of
         NotTurn ->
@@ -570,18 +539,7 @@ availableNumsByDiceThrow turn diceThrow color =
                     List.member pick.num whitePicks
 
                 picksByAlreadyPickedColor =
-                    case pick.color of
-                        Red ->
-                            redPicks
-
-                        Yellow ->
-                            yellowPicks
-
-                        Green ->
-                            greenPicks
-
-                        Blue ->
-                            bluePicks
+                    getColoredPicks diceThrow pick.color
 
                 alreadyPickedColor =
                     List.member pick.num picksByAlreadyPickedColor
@@ -594,6 +552,30 @@ availableNumsByDiceThrow turn diceThrow color =
 
             else
                 []
+
+
+getColoredPicks : DiceThrow -> Color -> List Num
+getColoredPicks diceThrow color =
+    case color of
+        Red ->
+            [ addPips diceThrow.dieWhite1 diceThrow.dieRed
+            , addPips diceThrow.dieWhite2 diceThrow.dieRed
+            ]
+
+        Yellow ->
+            [ addPips diceThrow.dieWhite1 diceThrow.dieYellow
+            , addPips diceThrow.dieWhite2 diceThrow.dieYellow
+            ]
+
+        Green ->
+            [ addPips diceThrow.dieWhite1 diceThrow.dieGreen
+            , addPips diceThrow.dieWhite2 diceThrow.dieGreen
+            ]
+
+        Blue ->
+            [ addPips diceThrow.dieWhite1 diceThrow.dieBlue
+            , addPips diceThrow.dieWhite2 diceThrow.dieBlue
+            ]
 
 
 cellIsAvailable : Bool -> Row -> Num -> Bool
