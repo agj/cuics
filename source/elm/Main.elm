@@ -553,14 +553,25 @@ availableNumsByDiceThrow turn color =
 
                 coloredPicks =
                     getColoredPicks diceThrow color
+
+                filterPicks : Bool -> List Num -> List Num
+                filterPicks toTheLeft =
+                    List.filter
+                        (cellIsAvailable
+                            (if toTheLeft then
+                                Color.isReverse color
+
+                             else
+                                not (Color.isReverse color)
+                            )
+                            (Row.init |> Row.set pick.num True)
+                        )
             in
             case getFirstPickType diceThrow pick of
                 FirstPickedWhite ->
                     if color == pick.color then
                         -- Remove all cells to the left.
-                        coloredPicks
-                            |> List.filter
-                                (cellIsAvailable (Color.isReverse color) (Row.init |> Row.set pick.num True))
+                        filterPicks True coloredPicks
 
                     else
                         coloredPicks
@@ -571,9 +582,7 @@ availableNumsByDiceThrow turn color =
                         -- the rules say you have to first pick white, so the
                         -- previous move was made in the wrong order and we have
                         -- to accomodate for that.
-                        whitePicks
-                            |> List.filter
-                                (cellIsAvailable (not (Color.isReverse color)) (Row.init |> Row.set pick.num True))
+                        filterPicks False whitePicks
 
                     else
                         whitePicks
