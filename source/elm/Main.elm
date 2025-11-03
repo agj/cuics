@@ -86,7 +86,7 @@ init _ =
 
 
 type Msg
-    = ClickedCell Color Num
+    = ClickedCell Pick
     | ClickedPickedCell
     | ClickedFault
     | DiceThrown DiceThrow
@@ -100,21 +100,21 @@ update msg model =
             , Cmd.none
             )
 
-        ClickedCell color num ->
+        ClickedCell pick ->
             case model.turn of
                 NotTurn ->
                     ( model, Cmd.none )
 
                 TurnPicking diceThrow ->
-                    ( { model | turn = TurnPickedOnce diceThrow { color = color, num = num } }
+                    ( { model | turn = TurnPickedOnce diceThrow pick }
                     , Cmd.none
                     )
 
-                TurnPickedOnce _ pick ->
+                TurnPickedOnce _ previousPick ->
                     ( { model
                         | board =
                             model.board
-                                |> Board.addX color num
+                                |> Board.addX previousPick.color previousPick.num
                                 |> Board.addX pick.color pick.num
                         , turn = NotTurn
                       }
@@ -302,7 +302,7 @@ viewColorRow row turn color =
                 status =
                     getCellStatus growth row turn color num
             in
-            viewColorRowCell (ClickedCell color num) color num status
+            viewColorRowCell (ClickedCell { color = color, num = num }) color num status
 
         cells : List (Html Msg)
         cells =
