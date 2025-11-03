@@ -9,6 +9,8 @@ import Html.Styled.Attributes as Attributes exposing (class, css)
 import Html.Styled.Events as Events
 import List
 import Num exposing (Num(..))
+import Random
+import Random.Extra as Random
 import Row exposing (Row)
 import Svg.Styled as Svg exposing (Svg)
 import Svg.Styled.Attributes as Svga
@@ -73,17 +75,9 @@ type alias Pick =
 init : () -> ( Model, Cmd Msg )
 init _ =
     ( { board = Board.init
-      , turn =
-            TurnPicking
-                { dieWhite1 = Pips1
-                , dieWhite2 = Pips2
-                , dieRed = Pips3
-                , dieYellow = Pips4
-                , dieGreen = Pips5
-                , dieBlue = Pips6
-                }
+      , turn = NotTurn
       }
-    , Cmd.none
+    , throwDice
     )
 
 
@@ -95,11 +89,17 @@ type Msg
     = ClickedCell Color Num
     | ClickedPickedCell
     | ClickedFault
+    | DiceThrown DiceThrow
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        DiceThrown diceThrow ->
+            ( { model | turn = TurnPicking diceThrow }
+            , Cmd.none
+            )
+
         ClickedCell color num ->
             case model.turn of
                 NotTurn ->
@@ -110,7 +110,7 @@ update msg model =
                     , Cmd.none
                     )
 
-                TurnPickedOnce diceThrow pick ->
+                TurnPickedOnce _ pick ->
                     ( { model
                         | board =
                             model.board
@@ -666,6 +666,48 @@ cellIsAvailable growth row num =
 
 
 -- UTILS
+
+
+throwDice : Cmd Msg
+throwDice =
+    Random.generate DiceThrown diceThrowGenerator
+
+
+diceThrowGenerator : Random.Generator DiceThrow
+diceThrowGenerator =
+    Random.constant DiceThrow
+        |> Random.andMap pipsGenerator
+        |> Random.andMap pipsGenerator
+        |> Random.andMap pipsGenerator
+        |> Random.andMap pipsGenerator
+        |> Random.andMap pipsGenerator
+        |> Random.andMap pipsGenerator
+
+
+pipsGenerator : Random.Generator Pips
+pipsGenerator =
+    Random.int 1 6
+        |> Random.map
+            (\n ->
+                case n of
+                    1 ->
+                        Pips1
+
+                    2 ->
+                        Pips2
+
+                    3 ->
+                        Pips3
+
+                    4 ->
+                        Pips4
+
+                    5 ->
+                        Pips5
+
+                    _ ->
+                        Pips6
+            )
 
 
 addPips : Pips -> Pips -> Num
