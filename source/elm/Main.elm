@@ -56,8 +56,14 @@ type alias DiceThrow =
 
 type Turn
     = NotTurn
-    | TurnPickingWhite
-    | TurnPickingColored
+    | TurnPicking
+    | TurnPickedOnce Pick
+
+
+type alias Pick =
+    { color : Color
+    , num : Num
+    }
 
 
 
@@ -75,7 +81,7 @@ init _ =
             , dieGreen = Pips5
             , dieBlue = Pips6
             }
-      , turn = TurnPickingColored
+      , turn = TurnPicking
       }
     , Cmd.none
     )
@@ -94,9 +100,29 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         ClickedCell color num ->
-            ( { model | board = Board.updateRow color (Row.set num True) model.board }
-            , Cmd.none
-            )
+            let
+                updatedBoard =
+                    Board.updateRow color (Row.set num True) model.board
+            in
+            case model.turn of
+                NotTurn ->
+                    ( model, Cmd.none )
+
+                TurnPicking ->
+                    ( { model
+                        | board = updatedBoard
+                        , turn = TurnPickedOnce { color = color, num = num }
+                      }
+                    , Cmd.none
+                    )
+
+                TurnPickedOnce _ ->
+                    ( { model
+                        | board = updatedBoard
+                        , turn = NotTurn
+                      }
+                    , Cmd.none
+                    )
 
         ClickedFault ->
             ( { model | board = Board.addFault model.board }
@@ -474,34 +500,81 @@ getStatus reverse row turn diceThrow color num =
 
 availableNumsByDiceThrow : Turn -> DiceThrow -> Color -> List Num
 availableNumsByDiceThrow turn diceThrow color =
+    let
+        whitePicks =
+            [ addPips diceThrow.dieWhite1 diceThrow.dieWhite2 ]
+
+        redPicks =
+            [ addPips diceThrow.dieWhite1 diceThrow.dieRed
+            , addPips diceThrow.dieWhite2 diceThrow.dieRed
+            ]
+
+        yellowPicks =
+            [ addPips diceThrow.dieWhite1 diceThrow.dieYellow
+            , addPips diceThrow.dieWhite2 diceThrow.dieYellow
+            ]
+
+        greenPicks =
+            [ addPips diceThrow.dieWhite1 diceThrow.dieGreen
+            , addPips diceThrow.dieWhite2 diceThrow.dieGreen
+            ]
+
+        bluePicks =
+            [ addPips diceThrow.dieWhite1 diceThrow.dieBlue
+            , addPips diceThrow.dieWhite2 diceThrow.dieBlue
+            ]
+
+        coloredPicks =
+            case color of
+                Red ->
+                    redPicks
+
+                Yellow ->
+                    yellowPicks
+
+                Green ->
+                    greenPicks
+
+                Blue ->
+                    bluePicks
+    in
     case turn of
         NotTurn ->
             []
 
-        TurnPickingWhite ->
-            [ addPips diceThrow.dieWhite1 diceThrow.dieWhite2 ]
+        TurnPicking ->
+            whitePicks ++ coloredPicks
 
-        TurnPickingColored ->
-            case color of
-                Red ->
-                    [ addPips diceThrow.dieWhite1 diceThrow.dieRed
-                    , addPips diceThrow.dieWhite2 diceThrow.dieRed
-                    ]
+        TurnPickedOnce pick ->
+            let
+                alreadyPickedWhite =
+                    List.member pick.num whitePicks
 
-                Yellow ->
-                    [ addPips diceThrow.dieWhite1 diceThrow.dieYellow
-                    , addPips diceThrow.dieWhite2 diceThrow.dieYellow
-                    ]
+                picksByAlreadyPickedColor =
+                    case pick.color of
+                        Red ->
+                            redPicks
 
-                Green ->
-                    [ addPips diceThrow.dieWhite1 diceThrow.dieGreen
-                    , addPips diceThrow.dieWhite2 diceThrow.dieGreen
-                    ]
+                        Yellow ->
+                            yellowPicks
 
-                Blue ->
-                    [ addPips diceThrow.dieWhite1 diceThrow.dieBlue
-                    , addPips diceThrow.dieWhite2 diceThrow.dieBlue
-                    ]
+                        Green ->
+                            greenPicks
+
+                        Blue ->
+                            bluePicks
+
+                alreadyPickedColor =
+                    List.member pick.num picksByAlreadyPickedColor
+            in
+            if alreadyPickedColor && not alreadyPickedWhite then
+                whitePicks
+
+            else if alreadyPickedWhite && not alreadyPickedColor then
+                coloredPicks
+
+            else
+                []
 
 
 addPips : Pips -> Pips -> Num
