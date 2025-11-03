@@ -41,6 +41,7 @@ type alias Model =
 type CellStatus
     = Available
     | Xed
+    | Picked
     | Unavailable
 
 
@@ -93,6 +94,7 @@ init _ =
 
 type Msg
     = ClickedCell Color Num
+    | ClickedPickedCell
     | ClickedFault
 
 
@@ -100,29 +102,30 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         ClickedCell color num ->
-            let
-                updatedBoard =
-                    Board.updateRow color (Row.set num True) model.board
-            in
             case model.turn of
                 NotTurn ->
                     ( model, Cmd.none )
 
                 TurnPicking ->
-                    ( { model
-                        | board = updatedBoard
-                        , turn = TurnPickedOnce { color = color, num = num }
-                      }
+                    ( { model | turn = TurnPickedOnce { color = color, num = num } }
                     , Cmd.none
                     )
 
-                TurnPickedOnce _ ->
+                TurnPickedOnce pick ->
                     ( { model
-                        | board = updatedBoard
+                        | board =
+                            model.board
+                                |> Board.updateRow color (Row.set num True)
+                                |> Board.updateRow pick.color (Row.set pick.num True)
                         , turn = NotTurn
                       }
                     , Cmd.none
                     )
+
+        ClickedPickedCell ->
+            ( { model | turn = TurnPicking }
+            , Cmd.none
+            )
 
         ClickedFault ->
             ( { model | board = Board.addFault model.board }
@@ -314,11 +317,15 @@ viewColorRowCell onClick color num status =
         conditionalStyles =
             case status of
                 Available ->
-                    [ Events.onClick onClick
-                    ]
+                    [ Events.onClick onClick ]
 
                 Xed ->
                     [ css [ Tw.cursor_default ]
+                    , class "xed"
+                    ]
+
+                Picked ->
+                    [ Events.onClick ClickedPickedCell
                     , class "xed"
                     ]
 
@@ -465,6 +472,14 @@ viewScoreboardSquare twColor content =
 getStatus : Bool -> Row -> Turn -> DiceThrow -> Color -> Num -> CellStatus
 getStatus reverse row turn diceThrow color num =
     let
+        isPicked =
+            case turn of
+                TurnPickedOnce pick ->
+                    pick.color == color && pick.num == num
+
+                _ ->
+                    False
+
         basicAvailability =
             if Row.get num row then
                 Xed
@@ -486,16 +501,20 @@ getStatus reverse row turn diceThrow color num =
         availableNums =
             availableNumsByDiceThrow turn diceThrow color
     in
-    case basicAvailability of
-        Available ->
-            if List.member num availableNums then
-                Available
+    if isPicked then
+        Picked
 
-            else
-                Unavailable
+    else
+        case basicAvailability of
+            Available ->
+                if List.member num availableNums then
+                    Available
 
-        _ ->
-            basicAvailability
+                else
+                    Unavailable
+
+            _ ->
+                basicAvailability
 
 
 availableNumsByDiceThrow : Turn -> DiceThrow -> Color -> List Num
@@ -696,6 +715,18 @@ getColors color status =
 
         ( Xed, Blue ) ->
             { fg = Twc.blue_500, bg = Twc.blue_50, b = Twc.blue_700 }
+
+        ( Picked, Red ) ->
+            { fg = Twc.red_500, bg = Twc.black, b = Twc.red_700 }
+
+        ( Picked, Yellow ) ->
+            { fg = Twc.yellow_500, bg = Twc.black, b = Twc.yellow_700 }
+
+        ( Picked, Green ) ->
+            { fg = Twc.green_500, bg = Twc.black, b = Twc.green_700 }
+
+        ( Picked, Blue ) ->
+            { fg = Twc.blue_500, bg = Twc.black, b = Twc.blue_700 }
 
         ( Unavailable, Red ) ->
             { fg = Twc.red_200, bg = Twc.red_50, b = Twc.red_700 }
