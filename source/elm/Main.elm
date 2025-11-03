@@ -466,7 +466,7 @@ viewScoreboardSquare twColor content =
 
 
 
--- UTILS
+-- CELL STATUS
 
 
 getStatus : Bool -> Row -> Turn -> DiceThrow -> Color -> Num -> CellStatus
@@ -596,6 +596,23 @@ availableNumsByDiceThrow turn diceThrow color =
                 []
 
 
+cellIsAvailable : Bool -> Row -> Num -> Bool
+cellIsAvailable reverse row num =
+    case ( Row.get num row, Num.next reverse num ) of
+        ( True, _ ) ->
+            False
+
+        ( False, Just n ) ->
+            cellIsAvailable reverse row n
+
+        ( False, Nothing ) ->
+            True
+
+
+
+-- UTILS
+
+
 addPips : Pips -> Pips -> Num
 addPips pips1 pips2 =
     case ( pips1, pips2 ) of
@@ -665,19 +682,6 @@ addPips pips1 pips2 =
         _ ->
             -- Bigger number is the second, so we turn them around and try again.
             addPips pips2 pips1
-
-
-cellIsAvailable : Bool -> Row -> Num -> Bool
-cellIsAvailable reverse row num =
-    case ( Row.get num row, Num.next reverse num ) of
-        ( True, _ ) ->
-            False
-
-        ( False, Just n ) ->
-            cellIsAvailable reverse row n
-
-        ( False, Nothing ) ->
-            True
 
 
 mergeIf : Bool -> List a -> List a
