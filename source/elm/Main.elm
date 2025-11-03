@@ -32,7 +32,9 @@ main =
 
 
 type alias Model =
-    { board : Board }
+    { board : Board
+    , diceThrow : DiceThrow
+    }
 
 
 type CellStatus
@@ -41,13 +43,32 @@ type CellStatus
     | Unavailable
 
 
+type alias DiceThrow =
+    { dieWhite1 : Pips
+    , dieWhite2 : Pips
+    , dieRed : Pips
+    , dieYellow : Pips
+    , dieGreen : Pips
+    , dieBlue : Pips
+    }
+
+
 
 -- INIT
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( { board = Board.init }
+    ( { board = Board.init
+      , diceThrow =
+            { dieWhite1 = Pips1
+            , dieWhite2 = Pips2
+            , dieRed = Pips3
+            , dieYellow = Pips4
+            , dieGreen = Pips5
+            , dieBlue = Pips6
+            }
+      }
     , Cmd.none
     )
 
@@ -84,7 +105,7 @@ view model =
     { title = "Cuics"
     , body =
         [ Html.div [ css [ Tw.flex, Tw.flex_col, Tw.justify_center, Tw.items_center, Tw.h_full, Tw.w_full ] ]
-            [ viewDice
+            [ viewDice model.diceThrow
             , viewBoard model.board
             , Css.Global.global Tw.globalStyles
             ]
@@ -114,15 +135,15 @@ type DieColor
     | DieBlue
 
 
-viewDice : Html Msg
-viewDice =
+viewDice : DiceThrow -> Html Msg
+viewDice diceThrow =
     Html.div [ css [ Tw.flex, Tw.flex_row, Tw.gap_2 ] ]
-        [ viewDie DieWhite Pips1
-        , viewDie DieWhite Pips2
-        , viewDie DieRed Pips3
-        , viewDie DieYellow Pips4
-        , viewDie DieGreen Pips5
-        , viewDie DieBlue Pips6
+        [ viewDie DieWhite diceThrow.dieWhite1
+        , viewDie DieWhite diceThrow.dieWhite2
+        , viewDie DieRed diceThrow.dieRed
+        , viewDie DieYellow diceThrow.dieYellow
+        , viewDie DieGreen diceThrow.dieGreen
+        , viewDie DieBlue diceThrow.dieBlue
         ]
 
 
