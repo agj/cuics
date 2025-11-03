@@ -183,7 +183,7 @@ viewDiceIfThrown : Turn -> Html Msg
 viewDiceIfThrown turn =
     case turn of
         NotTurn ->
-            Html.text ""
+            Html.div [ css [ Tw.h_16 ] ] []
 
         TurnPicking diceThrow ->
             viewDice diceThrow
