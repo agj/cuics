@@ -540,7 +540,16 @@ viewFaultButton active xed =
 activeGlow : Attribute Msg
 activeGlow =
     css
-        [ Css.boxShadow5 (Css.px 0) (Css.px 0) (Css.px 0) (Css.px 1.5) (Css.rgb 255 255 255)
+        [ Css.boxShadow5
+            -- X translation.
+            (Css.px 0)
+            -- Y translation.
+            (Css.px 0)
+            -- Blur.
+            (Css.px 0)
+            -- Growth.
+            (Css.px 2)
+            (Css.rgb 255 255 255)
         ]
 
 
