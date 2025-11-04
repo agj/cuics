@@ -222,10 +222,10 @@ viewDoneButton showing disabled =
         let
             conditionalStyles =
                 if disabled then
-                    [ css [ Tw.bg_color Twc.purple_300, Tw.cursor_not_allowed ] ]
+                    [ css [ Tw.bg_color Twc.gray_300, Tw.cursor_not_allowed ] ]
 
                 else
-                    [ css [ Tw.bg_color Twc.purple_800 ]
+                    [ css [ Tw.bg_color Twc.purple_500 ]
                     , Events.onClick ClickedDone
                     ]
         in
@@ -446,7 +446,7 @@ viewLockCell : Color -> Bool -> Html Msg
 viewLockCell color xed =
     let
         colors =
-            getColors color Available
+            getColors color Xed
     in
     Html.div
         [ css [ Tw.w_16, Tw.h_16, Tw.flex, Tw.justify_center, Tw.items_center ]
@@ -483,17 +483,16 @@ viewFaults active count =
 viewFaultButton : Bool -> Bool -> Html Msg
 viewFaultButton active xed =
     let
+        faultColors =
+            getFaultColors active xed
+
         conditionalStyles =
             [ mergeIf xed
                 [ css [ Tw.cursor_default ]
                 , class "xed"
                 ]
             , mergeIf active
-                [ css [ Tw.border_color faultColors.fg ]
-                , Events.onClick ClickedFault
-                ]
-            , mergeIf (not active)
-                [ css [ Tw.border_color faultColors.fgDisabled ] ]
+                [ Events.onClick ClickedFault ]
             , mergeIf (not active && not xed)
                 [ css [ Tw.cursor_not_allowed ] ]
             ]
@@ -502,7 +501,7 @@ viewFaultButton active xed =
     Html.button
         ([ css [ Tw.w_8, Tw.h_8 ]
          , css [ Tw.bg_color faultColors.bg ]
-         , css [ Tw.border_2, Tw.rounded_lg ]
+         , css [ Tw.border_2, Tw.rounded_lg, Tw.border_color faultColors.fg ]
          , attributeIf xed (class "xed")
          ]
             ++ conditionalStyles
@@ -531,7 +530,7 @@ viewScoreboard board =
         , between "+"
         , viewScoreboardColorPoints Blue (Board.getRow Blue board)
         , between "−"
-        , viewScoreboardPoints faultColors.fg (Board.getFaults board) (Board.faultPoints board)
+        , viewScoreboardPoints (getFaultColors True True).fg (Board.getFaults board) (Board.faultPoints board)
         , between "="
         , viewScoreboardSquare Twc.black
             [ Html.div [ css [ Tw.font_bold, Tw.text_2xl, Tw.text_color Twc.black ] ]
@@ -902,16 +901,28 @@ getColors : Color -> CellStatus -> { fg : Twc.Color, bg : Twc.Color, b : Twc.Col
 getColors color status =
     case ( status, color ) of
         ( Available, Red ) ->
-            { fg = Twc.red_500, bg = Twc.red_50, b = Twc.red_700 }
+            { fg = Twc.red_500, bg = Twc.purple_50, b = Twc.purple_500 }
 
         ( Available, Yellow ) ->
-            { fg = Twc.yellow_500, bg = Twc.yellow_50, b = Twc.yellow_700 }
+            { fg = Twc.yellow_500, bg = Twc.purple_50, b = Twc.purple_500 }
 
         ( Available, Green ) ->
-            { fg = Twc.green_500, bg = Twc.green_50, b = Twc.green_700 }
+            { fg = Twc.green_500, bg = Twc.purple_50, b = Twc.purple_500 }
 
         ( Available, Blue ) ->
-            { fg = Twc.blue_500, bg = Twc.blue_50, b = Twc.blue_700 }
+            { fg = Twc.blue_500, bg = Twc.purple_50, b = Twc.purple_500 }
+
+        ( Picked, Red ) ->
+            { fg = Twc.red_500, bg = Twc.purple_900, b = Twc.purple_500 }
+
+        ( Picked, Yellow ) ->
+            { fg = Twc.yellow_500, bg = Twc.purple_900, b = Twc.purple_500 }
+
+        ( Picked, Green ) ->
+            { fg = Twc.green_500, bg = Twc.purple_900, b = Twc.purple_500 }
+
+        ( Picked, Blue ) ->
+            { fg = Twc.blue_500, bg = Twc.purple_900, b = Twc.purple_500 }
 
         ( Xed, Red ) ->
             { fg = Twc.red_500, bg = Twc.red_50, b = Twc.red_700 }
@@ -924,18 +935,6 @@ getColors color status =
 
         ( Xed, Blue ) ->
             { fg = Twc.blue_500, bg = Twc.blue_50, b = Twc.blue_700 }
-
-        ( Picked, Red ) ->
-            { fg = Twc.red_500, bg = Twc.black, b = Twc.red_700 }
-
-        ( Picked, Yellow ) ->
-            { fg = Twc.yellow_500, bg = Twc.black, b = Twc.yellow_700 }
-
-        ( Picked, Green ) ->
-            { fg = Twc.green_500, bg = Twc.black, b = Twc.green_700 }
-
-        ( Picked, Blue ) ->
-            { fg = Twc.blue_500, bg = Twc.black, b = Twc.blue_700 }
 
         ( Unavailable, Red ) ->
             { fg = Twc.red_200, bg = Twc.red_50, b = Twc.red_700 }
@@ -950,8 +949,14 @@ getColors color status =
             { fg = Twc.blue_200, bg = Twc.blue_50, b = Twc.blue_700 }
 
 
-faultColors =
-    { fg = Twc.gray_400, fgDisabled = Twc.gray_200, bg = Twc.gray_50 }
+getFaultColors : Bool -> Bool -> { fg : Twc.Color, bg : Twc.Color }
+getFaultColors active xed =
+    case ( xed, active ) of
+        ( False, True ) ->
+            { fg = Twc.purple_500, bg = Twc.purple_50 }
+
+        ( _, _ ) ->
+            { fg = Twc.gray_400, bg = Twc.gray_50 }
 
 
 getDieColors : DieColor -> { face : Twc.Color, border : Twc.Color, pip : Twc.Color }
