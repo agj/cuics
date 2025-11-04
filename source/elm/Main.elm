@@ -326,7 +326,7 @@ viewDie dieColor pips showOrder rotation =
         , css [ Tw.w_16, Tw.h_16, Tw.bg_color colors.face, Tw.rounded_2xl ]
         , css [ Tw.border_2, Tw.border_color colors.border ]
         , css
-            [ transition [ Css.Transitions.opacity2 0 (toFloat showOrder * 100) ]
+            [ transition [ Css.Transitions.opacity2 0 (toFloat showOrder * 90) ]
             , Css.transforms [ Css.rotate rotation ]
             ]
         ]
