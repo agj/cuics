@@ -13,8 +13,17 @@
         font-size: 13pt;
       }
 
-      :root, body {
+      :root,
+      body {
         height: 100%;
+      }
+
+      .die {
+        opacity: 1;
+
+        @starting-style {
+          opacity: 0;
+        }
       }
     </style>
   </head>

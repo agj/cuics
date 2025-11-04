@@ -5,6 +5,7 @@ import Browser
 import Color exposing (Color(..))
 import Css
 import Css.Global
+import Css.Transitions exposing (transition)
 import Html.Styled as Html exposing (Attribute, Html)
 import Html.Styled.Attributes as Attributes exposing (class, css)
 import Html.Styled.Events as Events
@@ -49,8 +50,8 @@ type CellStatus
 
 type Turn
     = NotTurn
-    | TurnPicking DiceThrow
-    | TurnPickedOnce DiceThrow Pick
+    | TurnPicking DiceThrow DiceRotations
+    | TurnPickedOnce DiceThrow DiceRotations Pick
 
 
 type alias DiceThrow =
@@ -60,6 +61,16 @@ type alias DiceThrow =
     , dieYellow : Pips
     , dieGreen : Pips
     , dieBlue : Pips
+    }
+
+
+type alias DiceRotations =
+    { dieWhite1 : Css.AngleOrDirection (Css.Angle {})
+    , dieWhite2 : Css.AngleOrDirection (Css.Angle {})
+    , dieRed : Css.AngleOrDirection (Css.Angle {})
+    , dieYellow : Css.AngleOrDirection (Css.Angle {})
+    , dieGreen : Css.AngleOrDirection (Css.Angle {})
+    , dieBlue : Css.AngleOrDirection (Css.Angle {})
     }
 
 
@@ -87,7 +98,7 @@ init _ =
 
 
 type Msg
-    = DiceThrown DiceThrow
+    = DiceThrown DiceThrow DiceRotations
     | ClickedAvailableCell Pick
     | ClickedPickedCell
     | ClickedDone
@@ -97,20 +108,20 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        DiceThrown diceThrow ->
-            ( { model | turn = TurnPicking diceThrow }
+        DiceThrown diceThrow diceRotations ->
+            ( { model | turn = TurnPicking diceThrow diceRotations }
             , Cmd.none
             )
 
         ClickedAvailableCell pick ->
             case model.turn of
-                TurnPicking diceThrow ->
+                TurnPicking diceThrow diceRotations ->
                     -- Pick a cell.
-                    ( { model | turn = TurnPickedOnce diceThrow pick }
+                    ( { model | turn = TurnPickedOnce diceThrow diceRotations pick }
                     , Cmd.none
                     )
 
-                TurnPickedOnce _ previousPick ->
+                TurnPickedOnce _ _ previousPick ->
                     -- X the two picks and finish the turn.
                     ( { model
                         | board =
@@ -127,21 +138,21 @@ update msg model =
 
         ClickedPickedCell ->
             case model.turn of
-                TurnPickedOnce diceThrow _ ->
+                TurnPickedOnce diceThrow diceRotations _ ->
                     -- Undo the first pick.
-                    ( { model | turn = TurnPicking diceThrow }
+                    ( { model | turn = TurnPicking diceThrow diceRotations }
                     , Cmd.none
                     )
 
                 NotTurn ->
                     ( model, Cmd.none )
 
-                TurnPicking _ ->
+                TurnPicking _ _ ->
                     ( model, Cmd.none )
 
         ClickedDone ->
             case model.turn of
-                TurnPickedOnce _ pick ->
+                TurnPickedOnce _ _ pick ->
                     -- End turn with a single X.
                     ( { model
                         | board =
@@ -152,7 +163,7 @@ update msg model =
                     , throwDice
                     )
 
-                TurnPicking _ ->
+                TurnPicking _ _ ->
                     ( model, Cmd.none )
 
                 NotTurn ->
@@ -201,10 +212,10 @@ viewTop turn =
                 NotTurn ->
                     ( False, False )
 
-                TurnPicking _ ->
+                TurnPicking _ _ ->
                     ( True, False )
 
-                TurnPickedOnce _ _ ->
+                TurnPickedOnce _ _ _ ->
                     ( True, True )
     in
     Html.div [ css [ Tw.flex, Tw.flex_row, Tw.gap_4, Tw.items_center ] ]
@@ -269,27 +280,27 @@ viewDiceIfThrown turn =
         NotTurn ->
             Html.div [ css [ Tw.h_16 ] ] []
 
-        TurnPicking diceThrow ->
-            viewDice diceThrow
+        TurnPicking diceThrow diceRotations ->
+            viewDice diceThrow diceRotations
 
-        TurnPickedOnce diceThrow _ ->
-            viewDice diceThrow
+        TurnPickedOnce diceThrow diceRotations _ ->
+            viewDice diceThrow diceRotations
 
 
-viewDice : DiceThrow -> Html Msg
-viewDice diceThrow =
-    Html.div [ css [ Tw.flex, Tw.flex_row, Tw.gap_2 ] ]
-        [ viewDie DieWhite diceThrow.dieWhite1
-        , viewDie DieWhite diceThrow.dieWhite2
-        , viewDie DieRed diceThrow.dieRed
-        , viewDie DieYellow diceThrow.dieYellow
-        , viewDie DieGreen diceThrow.dieGreen
-        , viewDie DieBlue diceThrow.dieBlue
+viewDice : DiceThrow -> DiceRotations -> Html Msg
+viewDice diceThrow diceRotations =
+    Html.div [ css [ Tw.flex, Tw.flex_row, Tw.gap_3 ] ]
+        [ viewDie DieWhite diceThrow.dieWhite1 1 diceRotations.dieWhite1
+        , viewDie DieWhite diceThrow.dieWhite2 2 diceRotations.dieWhite2
+        , viewDie DieRed diceThrow.dieRed 3 diceRotations.dieRed
+        , viewDie DieYellow diceThrow.dieYellow 4 diceRotations.dieYellow
+        , viewDie DieGreen diceThrow.dieGreen 5 diceRotations.dieGreen
+        , viewDie DieBlue diceThrow.dieBlue 6 diceRotations.dieBlue
         ]
 
 
-viewDie : DieColor -> Pips -> Html Msg
-viewDie dieColor pips =
+viewDie : DieColor -> Pips -> Int -> Css.AngleOrDirection (Css.Angle {}) -> Html Msg
+viewDie dieColor pips showOrder rotation =
     let
         colors =
             getDieColors dieColor
@@ -298,8 +309,13 @@ viewDie dieColor pips =
             viewDiePip colors.pip
     in
     Html.div
-        [ css [ Tw.w_16, Tw.h_16, Tw.bg_color colors.face, Tw.rounded_2xl ]
+        [ class "die"
+        , css [ Tw.w_16, Tw.h_16, Tw.bg_color colors.face, Tw.rounded_2xl ]
         , css [ Tw.border_2, Tw.border_color colors.border ]
+        , css
+            [ transition [ Css.Transitions.opacity2 0 (toFloat showOrder * 100) ]
+            , Css.transforms [ Css.rotate rotation ]
+            ]
         ]
         [ Svg.svg [ Svga.viewBox "-10 -10 20 20" ]
             ([ -- Top left
@@ -646,7 +662,7 @@ getCellStatus growth row turn color num =
     let
         isPicked =
             case turn of
-                TurnPickedOnce _ pick ->
+                TurnPickedOnce _ _ pick ->
                     pick.color == color && pick.num == num
 
                 _ ->
@@ -695,10 +711,10 @@ availableNumsByDiceThrow turn color =
         NotTurn ->
             []
 
-        TurnPicking diceThrow ->
+        TurnPicking diceThrow _ ->
             getWhitePicks diceThrow ++ getColoredPicks diceThrow color
 
-        TurnPickedOnce diceThrow pick ->
+        TurnPickedOnce diceThrow _ pick ->
             let
                 whitePicks : List Num
                 whitePicks =
@@ -827,7 +843,8 @@ cellIsAvailable growth row num =
 
 throwDice : Cmd Msg
 throwDice =
-    Random.generate DiceThrown diceThrowGenerator
+    Random.map2 DiceThrown diceThrowGenerator diceRotationsGenerator
+        |> Random.generate identity
 
 
 diceThrowGenerator : Random.Generator DiceThrow
@@ -865,6 +882,23 @@ pipsGenerator =
                     _ ->
                         Pips6
             )
+
+
+diceRotationsGenerator : Random.Generator DiceRotations
+diceRotationsGenerator =
+    Random.constant DiceRotations
+        |> Random.andMap diceRotationGenerator
+        |> Random.andMap diceRotationGenerator
+        |> Random.andMap diceRotationGenerator
+        |> Random.andMap diceRotationGenerator
+        |> Random.andMap diceRotationGenerator
+        |> Random.andMap diceRotationGenerator
+
+
+diceRotationGenerator : Random.Generator (Css.AngleOrDirection (Css.Angle {}))
+diceRotationGenerator =
+    Random.float 0 1
+        |> Random.map Css.turn
 
 
 addPips : Pips -> Pips -> Num
@@ -941,13 +975,13 @@ addPips pips1 pips2 =
 canAddFault : Turn -> Bool
 canAddFault turn =
     case turn of
-        TurnPicking _ ->
+        TurnPicking _ _ ->
             True
 
         NotTurn ->
             False
 
-        TurnPickedOnce _ _ ->
+        TurnPickedOnce _ _ _ ->
             False
 
 
