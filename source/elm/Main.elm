@@ -617,7 +617,7 @@ viewScoreboard board =
             Html.div [ css [ Tw.font_bold ] ]
                 [ Html.text string ]
     in
-    Html.div [ css [ Tw.flex, Tw.flex_row, Tw.gap_2, Tw.items_center ] ]
+    Html.div [ css [ Tw.flex, Tw.flex_row, Tw.gap_2, Tw.items_center, Tw.justify_center ] ]
         [ viewScoreboardColorPoints Red (Board.getRow Red board)
         , between "+"
         , viewScoreboardColorPoints Yellow (Board.getRow Yellow board)
@@ -650,9 +650,9 @@ viewScoreboardColorPoints color row =
 viewScoreboardPoints : Twc.Color -> Int -> Int -> Html Msg
 viewScoreboardPoints twColor xs points =
     viewScoreboardSquare twColor
-        [ Html.div []
+        [ Html.div [ css [ Tw.leading_none ] ]
             [ Html.text ("{xs} ╳ =" |> String.replace "{xs}" (String.fromInt xs)) ]
-        , Html.div [ css [ Tw.font_bold, Tw.text_xl, Tw.text_color twColor ] ]
+        , Html.div [ css [ Tw.font_bold, Tw.text_xl, Tw.text_color twColor, Tw.leading_none ] ]
             [ Html.text ("{points} p" |> String.replace "{points}" (String.fromInt points)) ]
         ]
 
@@ -660,7 +660,8 @@ viewScoreboardPoints twColor xs points =
 viewScoreboardSquare : Twc.Color -> List (Html Msg) -> Html Msg
 viewScoreboardSquare twColor content =
     Html.div
-        [ css [ Tw.flex, Tw.flex_col, Tw.gap_1, Tw.w_24, Tw.items_center, Tw.p_2 ]
+        [ css [ Tw.w_24, Tw.h_20 ]
+        , css [ Tw.flex, Tw.flex_col, Tw.gap_1, Tw.items_center, Tw.justify_center ]
         , css [ Tw.border_4, Tw.border_color twColor, Tw.rounded_lg ]
         ]
         content
