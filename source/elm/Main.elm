@@ -3,8 +3,9 @@ module Main exposing (main)
 import Board exposing (Board)
 import Browser
 import Color exposing (Color(..))
+import Css
 import Css.Global
-import Html.Styled as Html exposing (Html)
+import Html.Styled as Html exposing (Attribute, Html)
 import Html.Styled.Attributes as Attributes exposing (class, css)
 import Html.Styled.Events as Events
 import List
@@ -414,13 +415,17 @@ viewColorRowCell onClick color num status =
         conditionalStyles =
             case status of
                 Available ->
-                    [ Events.onClick onClick ]
+                    [ Events.onClick onClick
+                    , activeGlow
+                    ]
 
                 Xed ->
                     [ css [ Tw.cursor_default ] ]
 
                 Picked ->
-                    [ Events.onClick ClickedPickedCell ]
+                    [ Events.onClick ClickedPickedCell
+                    , activeGlow
+                    ]
 
                 Unavailable ->
                     [ css [ Tw.cursor_not_allowed ] ]
@@ -511,7 +516,9 @@ viewFaultButton active xed =
             [ mergeIf xed
                 [ css [ Tw.cursor_default ] ]
             , mergeIf active
-                [ Events.onClick ClickedFault ]
+                [ Events.onClick ClickedFault
+                , activeGlow
+                ]
             , mergeIf (not active && not xed)
                 [ css [ Tw.cursor_not_allowed ] ]
             ]
@@ -528,6 +535,13 @@ viewFaultButton active xed =
         (mergeIf xed
             [ viewX colors.fg ]
         )
+
+
+activeGlow : Attribute Msg
+activeGlow =
+    css
+        [ Css.boxShadow5 (Css.px 0) (Css.px 0) (Css.px 0) (Css.px 1.5) (Css.rgb 255 255 255)
+        ]
 
 
 
