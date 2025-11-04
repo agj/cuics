@@ -385,7 +385,7 @@ viewColorRow row turn color =
                 status =
                     getCellStatus growth row turn color num
             in
-            viewColorRowCell (ClickedAvailableCell { color = color, num = num }) color num status
+            viewNumCell color num status
 
         cells : List (Html Msg)
         cells =
@@ -406,8 +406,8 @@ viewColorRow row turn color =
         )
 
 
-viewColorRowCell : Msg -> Color -> Num -> CellStatus -> Html Msg
-viewColorRowCell onClick color num status =
+viewNumCell : Color -> Num -> CellStatus -> Html Msg
+viewNumCell color num status =
     let
         colors =
             getColors color status
@@ -415,7 +415,7 @@ viewColorRowCell onClick color num status =
         conditionalStyles =
             case status of
                 Available ->
-                    [ Events.onClick onClick
+                    [ Events.onClick (ClickedAvailableCell { color = color, num = num })
                     , activeGlow
                     ]
 
