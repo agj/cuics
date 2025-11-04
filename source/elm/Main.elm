@@ -247,7 +247,7 @@ viewDoneButton showing disabled =
         let
             conditionalStyles =
                 if disabled then
-                    [ css [ Tw.bg_color Twc.gray_300, Tw.cursor_not_allowed ] ]
+                    [ css [ Tw.bg_color Twc.gray_200, Tw.cursor_not_allowed ] ]
 
                 else
                     [ css [ Tw.bg_color Twc.purple_500 ]
@@ -291,7 +291,7 @@ viewDiceIfThrown : Turn -> Html Msg
 viewDiceIfThrown turn =
     case turn of
         NotTurn ->
-            Html.div [ css [ Tw.h_16 ] ] []
+            Html.div [ css [ Tw.h_16, Tw.m_3 ] ] []
 
         TurnPicking diceThrow diceRotations ->
             viewDice diceThrow diceRotations
@@ -302,7 +302,7 @@ viewDiceIfThrown turn =
 
 viewDice : DiceThrow -> DiceRotations -> Html Msg
 viewDice diceThrow diceRotations =
-    Html.div [ css [ Tw.flex, Tw.flex_row, Tw.gap_3 ] ]
+    Html.div [ css [ Tw.flex, Tw.flex_row, Tw.p_3, Tw.gap_3 ] ]
         [ viewDie DieWhite diceThrow.dieWhite1 0 diceRotations.dieWhite1
         , viewDie DieWhite diceThrow.dieWhite2 1 diceRotations.dieWhite2
         , viewDie DieRed diceThrow.dieRed 2 diceRotations.dieRed
