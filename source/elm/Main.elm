@@ -91,9 +91,9 @@ init : () -> ( Model, Cmd Msg )
 init _ =
     ( { board = Board.init
       , turn = NotTurn
-      , seed = Random.initialSeed 44
+      , seed = Random.initialSeed 12345
       }
-    , throwDice (Random.initialSeed 44)
+    , Random.generate GotInitialSeed Random.independentSeed
     )
 
 
@@ -102,7 +102,8 @@ init _ =
 
 
 type Msg
-    = DiceThrown Random.Seed DiceThrow DiceRotations
+    = GotInitialSeed Random.Seed
+    | DiceThrown Random.Seed DiceThrow DiceRotations
     | ClickedAvailableCell Pick
     | ClickedPickedCell
     | ClickedDone
@@ -112,6 +113,11 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        GotInitialSeed newSeed ->
+            ( { model | seed = newSeed }
+            , throwDice newSeed
+            )
+
         DiceThrown newSeed diceThrow diceRotations ->
             ( { model
                 | turn = TurnPicking diceThrow diceRotations
