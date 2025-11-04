@@ -11,6 +11,7 @@ import Html.Styled.Attributes as Attributes exposing (class, css)
 import Html.Styled.Events as Events
 import List
 import Num exposing (Num(..))
+import Process
 import Random
 import Random.Extra as Random
 import Row exposing (Row)
@@ -18,6 +19,7 @@ import Svg.Styled as Svg exposing (Svg)
 import Svg.Styled.Attributes as Svga
 import Tailwind.Theme as Twc
 import Tailwind.Utilities as Tw
+import Task
 
 
 main : Program () Model Msg
@@ -37,6 +39,7 @@ main =
 type alias Model =
     { board : Board
     , turn : Turn
+    , seed : Random.Seed
     }
 
 
@@ -88,8 +91,9 @@ init : () -> ( Model, Cmd Msg )
 init _ =
     ( { board = Board.init
       , turn = NotTurn
+      , seed = Random.initialSeed 44
       }
-    , throwDice
+    , throwDice (Random.initialSeed 44)
     )
 
 
@@ -98,7 +102,7 @@ init _ =
 
 
 type Msg
-    = DiceThrown DiceThrow DiceRotations
+    = DiceThrown Random.Seed DiceThrow DiceRotations
     | ClickedAvailableCell Pick
     | ClickedPickedCell
     | ClickedDone
@@ -108,8 +112,11 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        DiceThrown diceThrow diceRotations ->
-            ( { model | turn = TurnPicking diceThrow diceRotations }
+        DiceThrown newSeed diceThrow diceRotations ->
+            ( { model
+                | turn = TurnPicking diceThrow diceRotations
+                , seed = newSeed
+              }
             , Cmd.none
             )
 
@@ -130,7 +137,7 @@ update msg model =
                                 |> Board.addX pick.color pick.num
                         , turn = NotTurn
                       }
-                    , throwDice
+                    , throwDice model.seed
                     )
 
                 NotTurn ->
@@ -160,7 +167,7 @@ update msg model =
                                 |> Board.addX pick.color pick.num
                         , turn = NotTurn
                       }
-                    , throwDice
+                    , throwDice model.seed
                     )
 
                 TurnPicking _ _ ->
@@ -175,7 +182,7 @@ update msg model =
                     | board = Board.addFault model.board
                     , turn = NotTurn
                   }
-                , throwDice
+                , throwDice model.seed
                 )
 
             else
@@ -290,12 +297,12 @@ viewDiceIfThrown turn =
 viewDice : DiceThrow -> DiceRotations -> Html Msg
 viewDice diceThrow diceRotations =
     Html.div [ css [ Tw.flex, Tw.flex_row, Tw.gap_3 ] ]
-        [ viewDie DieWhite diceThrow.dieWhite1 1 diceRotations.dieWhite1
-        , viewDie DieWhite diceThrow.dieWhite2 2 diceRotations.dieWhite2
-        , viewDie DieRed diceThrow.dieRed 3 diceRotations.dieRed
-        , viewDie DieYellow diceThrow.dieYellow 4 diceRotations.dieYellow
-        , viewDie DieGreen diceThrow.dieGreen 5 diceRotations.dieGreen
-        , viewDie DieBlue diceThrow.dieBlue 6 diceRotations.dieBlue
+        [ viewDie DieWhite diceThrow.dieWhite1 0 diceRotations.dieWhite1
+        , viewDie DieWhite diceThrow.dieWhite2 1 diceRotations.dieWhite2
+        , viewDie DieRed diceThrow.dieRed 2 diceRotations.dieRed
+        , viewDie DieYellow diceThrow.dieYellow 3 diceRotations.dieYellow
+        , viewDie DieGreen diceThrow.dieGreen 4 diceRotations.dieGreen
+        , viewDie DieBlue diceThrow.dieBlue 5 diceRotations.dieBlue
         ]
 
 
@@ -841,10 +848,19 @@ cellIsAvailable growth row num =
 -- UTILS
 
 
-throwDice : Cmd Msg
-throwDice =
-    Random.map2 DiceThrown diceThrowGenerator diceRotationsGenerator
-        |> Random.generate identity
+throwDice : Random.Seed -> Cmd Msg
+throwDice seed =
+    Process.sleep 100
+        |> Task.perform
+            (\() ->
+                let
+                    ( ( diceThrow, diceRotations ), newSeed ) =
+                        Random.step
+                            (Random.map2 Tuple.pair diceThrowGenerator diceRotationsGenerator)
+                            seed
+                in
+                DiceThrown newSeed diceThrow diceRotations
+            )
 
 
 diceThrowGenerator : Random.Generator DiceThrow
