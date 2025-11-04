@@ -43,6 +43,7 @@ type CellStatus
     = Available
     | Xed
     | Picked
+    | Passed
     | Unavailable
 
 
@@ -427,6 +428,9 @@ viewNumCell color num status =
                     , activeGlow
                     ]
 
+                Passed ->
+                    [ css [ Tw.cursor_not_allowed ] ]
+
                 Unavailable ->
                     [ css [ Tw.cursor_not_allowed ] ]
     in
@@ -445,6 +449,8 @@ viewNumCell color num status =
             [ viewX colors.b ]
          , mergeIf (status == Picked)
             [ viewX Twc.purple_500 ]
+         , mergeIf (status == Passed)
+            [ viewStrike colors.fg ]
          ]
             |> List.concat
         )
@@ -475,13 +481,30 @@ viewLockCell color xed =
 viewX : Twc.Color -> Svg Msg
 viewX twColor =
     Svg.svg
-        [ Svga.viewBox "-10 -10 20 20"
+        [ Svga.viewBox "-6 -6 12 12"
         , css [ Tw.w_full, Tw.h_full, Tw.absolute ]
         ]
-        [ Svg.g [ css [ Tw.stroke_color twColor, Tw.stroke_1 ] ]
-            [ Svg.line [ Svga.x1 "-10", Svga.y1 "-10", Svga.x2 "10", Svga.y2 "10" ] []
-            , Svg.line [ Svga.x1 "10", Svga.y1 "-10", Svga.x2 "-10", Svga.y2 "10" ] []
+        [ Svg.g
+            [ css [ Tw.stroke_color twColor ]
+            , Svga.strokeWidth "0.5"
             ]
+            [ Svg.line [ Svga.x1 "-6", Svga.y1 "-6", Svga.x2 "6", Svga.y2 "6" ] []
+            , Svg.line [ Svga.x1 "6", Svga.y1 "-6", Svga.x2 "-6", Svga.y2 "6" ] []
+            ]
+        ]
+
+
+viewStrike : Twc.Color -> Svg Msg
+viewStrike twColor =
+    Svg.svg
+        [ Svga.viewBox "-6 -6 12 12"
+        , css [ Tw.w_full, Tw.h_full, Tw.absolute ]
+        ]
+        [ Svg.g
+            [ css [ Tw.stroke_color twColor ]
+            , Svga.strokeWidth "0.5"
+            ]
+            [ Svg.line [ Svga.x1 "-6", Svga.y1 "0", Svga.x2 "6", Svga.y2 "0" ] [] ]
         ]
 
 
@@ -645,7 +668,7 @@ getCellStatus growth row turn color num =
                     Available
 
             else
-                Unavailable
+                Passed
 
         availableNums =
             availableNumsByDiceThrow turn color
@@ -979,6 +1002,18 @@ getColors color status =
 
         ( Xed, Blue ) ->
             { fg = Twc.blue_500, bg = Twc.blue_50, b = Twc.blue_700 }
+
+        ( Passed, Red ) ->
+            { fg = Twc.gray_200, bg = Twc.gray_50, b = Twc.red_700 }
+
+        ( Passed, Yellow ) ->
+            { fg = Twc.gray_200, bg = Twc.gray_50, b = Twc.yellow_700 }
+
+        ( Passed, Green ) ->
+            { fg = Twc.gray_200, bg = Twc.gray_50, b = Twc.green_700 }
+
+        ( Passed, Blue ) ->
+            { fg = Twc.gray_200, bg = Twc.gray_50, b = Twc.blue_700 }
 
         ( Unavailable, Red ) ->
             { fg = Twc.red_200, bg = Twc.red_50, b = Twc.red_700 }
