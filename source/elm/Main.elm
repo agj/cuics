@@ -418,20 +418,17 @@ viewColorRowCell onClick color num status =
                     [ Events.onClick onClick ]
 
                 Xed ->
-                    [ css [ Tw.cursor_default ]
-                    , class "xed"
-                    ]
+                    [ css [ Tw.cursor_default ] ]
 
                 Picked ->
-                    [ Events.onClick ClickedPickedCell
-                    , class "xed"
-                    ]
+                    [ Events.onClick ClickedPickedCell ]
 
                 Unavailable ->
                     [ css [ Tw.cursor_not_allowed ] ]
     in
     Html.button
-        ([ css [ Tw.w_16, Tw.h_16, Tw.flex, Tw.justify_center, Tw.items_center ]
+        ([ css [ Tw.w_16, Tw.h_16, Tw.relative, Tw.overflow_hidden ]
+         , css [ Tw.flex, Tw.justify_center, Tw.items_center ]
          , css [ Tw.text_2xl, Tw.text_color colors.fg, Tw.font_bold ]
          , css [ Tw.bg_color colors.bg ]
          , css [ Tw.border_2, Tw.border_color colors.b, Tw.rounded_lg ]
@@ -439,7 +436,14 @@ viewColorRowCell onClick color num status =
          ]
             ++ conditionalStyles
         )
-        [ Html.text (num |> Num.toInt |> String.fromInt) ]
+        ([ [ Html.text (num |> Num.toInt |> String.fromInt) ]
+         , mergeIf (status == Xed)
+            [ viewX colors.b ]
+         , mergeIf (status == Picked)
+            [ viewX Twc.purple_500 ]
+         ]
+            |> List.concat
+        )
 
 
 viewLockCell : Color -> Bool -> Html Msg
@@ -449,14 +453,32 @@ viewLockCell color xed =
             getColors color Xed
     in
     Html.div
-        [ css [ Tw.w_16, Tw.h_16, Tw.flex, Tw.justify_center, Tw.items_center ]
+        [ css [ Tw.w_16, Tw.h_16, Tw.relative, Tw.overflow_hidden ]
+        , css [ Tw.flex, Tw.justify_center, Tw.items_center ]
         , css [ Tw.text_3xl, Tw.text_color colors.fg ]
         , css [ Tw.bg_color colors.bg ]
         , css [ Tw.border_2, Tw.border_color colors.b, Tw.rounded_full ]
         , css [ Tw.select_none ]
-        , attributeIf xed (class "xed")
         ]
-        [ Html.text "🔓" ]
+        ([ [ Html.text "🔓" ]
+         , mergeIf xed
+            [ viewX colors.b ]
+         ]
+            |> List.concat
+        )
+
+
+viewX : Twc.Color -> Svg Msg
+viewX twColor =
+    Svg.svg
+        [ Svga.viewBox "-10 -10 20 20"
+        , css [ Tw.w_full, Tw.h_full, Tw.absolute ]
+        ]
+        [ Svg.g [ css [ Tw.stroke_color twColor, Tw.stroke_1 ] ]
+            [ Svg.line [ Svga.x1 "-10", Svga.y1 "-10", Svga.x2 "10", Svga.y2 "10" ] []
+            , Svg.line [ Svga.x1 "10", Svga.y1 "-10", Svga.x2 "-10", Svga.y2 "10" ] []
+            ]
+        ]
 
 
 
@@ -483,14 +505,12 @@ viewFaults active count =
 viewFaultButton : Bool -> Bool -> Html Msg
 viewFaultButton active xed =
     let
-        faultColors =
+        colors =
             getFaultColors active xed
 
         conditionalStyles =
             [ mergeIf xed
-                [ css [ Tw.cursor_default ]
-                , class "xed"
-                ]
+                [ css [ Tw.cursor_default ] ]
             , mergeIf active
                 [ Events.onClick ClickedFault ]
             , mergeIf (not active && not xed)
@@ -499,14 +519,16 @@ viewFaultButton active xed =
                 |> List.concat
     in
     Html.button
-        ([ css [ Tw.w_8, Tw.h_8 ]
-         , css [ Tw.bg_color faultColors.bg ]
-         , css [ Tw.border_2, Tw.rounded_lg, Tw.border_color faultColors.fg ]
-         , attributeIf xed (class "xed")
+        ([ css [ Tw.w_8, Tw.h_8, Tw.relative, Tw.overflow_hidden ]
+         , css [ Tw.flex, Tw.items_center ]
+         , css [ Tw.bg_color colors.bg ]
+         , css [ Tw.border_2, Tw.rounded_lg, Tw.border_color colors.fg ]
          ]
             ++ conditionalStyles
         )
-        []
+        (mergeIf xed
+            [ viewX colors.fg ]
+        )
 
 
 
