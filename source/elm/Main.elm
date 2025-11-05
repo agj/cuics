@@ -577,7 +577,7 @@ viewFaultButton active xed =
         conditionalStyles =
             [ mergeIf xed
                 [ css [ Tw.cursor_default ] ]
-            , mergeIf active
+            , mergeIf (active && not xed)
                 [ Events.onClick ClickedFault
                 , activeGlow
                 ]
