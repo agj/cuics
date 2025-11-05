@@ -12,16 +12,14 @@ module Board exposing
     )
 
 import Color exposing (Color(..))
+import Colors exposing (Colors)
 import Num exposing (Num)
 import Row exposing (Row)
 
 
 type Board
     = Board
-        { redRow : Row
-        , yellowRow : Row
-        , greenRow : Row
-        , blueRow : Row
+        { rows : Colors Row
         , faults : FaultsCount
         }
 
@@ -37,28 +35,14 @@ type FaultsCount
 init : Board
 init =
     Board
-        { redRow = Row.init
-        , yellowRow = Row.init
-        , greenRow = Row.init
-        , blueRow = Row.init
+        { rows = Colors.init Row.init
         , faults = Faults0
         }
 
 
 getRow : Color -> Board -> Row
 getRow color (Board board) =
-    case color of
-        Red ->
-            board.redRow
-
-        Yellow ->
-            board.yellowRow
-
-        Green ->
-            board.greenRow
-
-        Blue ->
-            board.blueRow
+    Colors.get color board.rows
 
 
 getFaults : Board -> Int
@@ -109,18 +93,7 @@ gameEnded ((Board b) as board) =
 
 updateRow : Color -> (Row -> Row) -> Board -> Board
 updateRow color rowUpdater (Board board) =
-    case color of
-        Red ->
-            Board { board | redRow = rowUpdater board.redRow }
-
-        Yellow ->
-            Board { board | yellowRow = rowUpdater board.yellowRow }
-
-        Green ->
-            Board { board | greenRow = rowUpdater board.greenRow }
-
-        Blue ->
-            Board { board | blueRow = rowUpdater board.blueRow }
+    Board { board | rows = Colors.update color rowUpdater board.rows }
 
 
 addX : Color -> Num -> Board -> Board
