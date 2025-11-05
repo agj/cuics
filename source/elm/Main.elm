@@ -115,7 +115,7 @@ update msg model =
     case msg of
         GotInitialSeed newSeed ->
             ( { model | seed = newSeed }
-            , throwDice newSeed
+            , throwDiceIfGameNotEnded model.board newSeed
             )
 
         DiceThrown newSeed diceThrow diceRotations ->
@@ -136,14 +136,17 @@ update msg model =
 
                 TurnPickedOnce _ _ previousPick ->
                     -- X the two picks and finish the turn.
-                    ( { model
-                        | board =
+                    let
+                        newBoard =
                             model.board
                                 |> Board.addX previousPick.color previousPick.num
                                 |> Board.addX pick.color pick.num
+                    in
+                    ( { model
+                        | board = newBoard
                         , turn = NotTurn
                       }
-                    , throwDice model.seed
+                    , throwDiceIfGameNotEnded newBoard model.seed
                     )
 
                 NotTurn ->
@@ -167,13 +170,16 @@ update msg model =
             case model.turn of
                 TurnPickedOnce _ _ pick ->
                     -- End turn with a single X.
-                    ( { model
-                        | board =
+                    let
+                        newBoard =
                             model.board
                                 |> Board.addX pick.color pick.num
+                    in
+                    ( { model
+                        | board = newBoard
                         , turn = NotTurn
                       }
-                    , throwDice model.seed
+                    , throwDiceIfGameNotEnded newBoard model.seed
                     )
 
                 TurnPicking _ _ ->
@@ -184,11 +190,15 @@ update msg model =
 
         ClickedFault ->
             if canAddFault model.turn then
+                let
+                    newBoard =
+                        Board.addFault model.board
+                in
                 ( { model
-                    | board = Board.addFault model.board
+                    | board = newBoard
                     , turn = NotTurn
                   }
-                , throwDice model.seed
+                , throwDiceIfGameNotEnded newBoard model.seed
                 )
 
             else
@@ -853,6 +863,15 @@ cellIsAvailable growth row num =
 
 
 -- UTILS
+
+
+throwDiceIfGameNotEnded : Board -> Random.Seed -> Cmd Msg
+throwDiceIfGameNotEnded board seed =
+    if Board.gameEnded board then
+        Cmd.none
+
+    else
+        throwDice seed
 
 
 throwDice : Random.Seed -> Cmd Msg
