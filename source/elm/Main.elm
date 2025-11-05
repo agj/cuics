@@ -10,6 +10,7 @@ import Html.Styled as Html exposing (Attribute, Html)
 import Html.Styled.Attributes as Attributes exposing (class, css)
 import Html.Styled.Events as Events
 import List
+import Maybe.Extra
 import Num exposing (Num(..))
 import Process
 import Random
@@ -214,7 +215,7 @@ view model =
     { title = "Cuics"
     , body =
         [ Html.div [ css [ Tw.flex, Tw.flex_col, Tw.justify_center, Tw.items_center, Tw.gap_2, Tw.h_full, Tw.w_full ] ]
-            [ viewTop model.turn
+            [ viewTop model.board model.turn
             , viewBoard model.board model.turn
             , Css.Global.global Tw.globalStyles
             ]
@@ -227,8 +228,8 @@ view model =
 -- VIEW TOP
 
 
-viewTop : Turn -> Html Msg
-viewTop turn =
+viewTop : Board -> Turn -> Html Msg
+viewTop board turn =
     let
         ( showingDone, enabledDone ) =
             case turn of
@@ -242,7 +243,7 @@ viewTop turn =
                     ( True, True )
     in
     Html.div [ css [ Tw.flex, Tw.flex_row, Tw.gap_4, Tw.items_center ] ]
-        [ viewDiceIfThrown turn
+        [ viewDiceIfThrown turn (Board.lockedRows board)
         , viewDoneButton showingDone (not enabledDone)
         ]
 
@@ -297,33 +298,45 @@ type DieColor
     | DieBlue
 
 
-viewDiceIfThrown : Turn -> Html Msg
-viewDiceIfThrown turn =
+viewDiceIfThrown : Turn -> List Color -> Html Msg
+viewDiceIfThrown turn lockedRows =
     case turn of
         NotTurn ->
             Html.div [ css [ Tw.h_16, Tw.m_3 ] ] []
 
         TurnPicking diceThrow diceRotations ->
-            viewDice diceThrow diceRotations
+            viewDice diceThrow diceRotations lockedRows
 
         TurnPickedOnce diceThrow diceRotations _ ->
-            viewDice diceThrow diceRotations
+            viewDice diceThrow diceRotations lockedRows
 
 
-viewDice : DiceThrow -> DiceRotations -> Html Msg
-viewDice diceThrow diceRotations =
+viewDice : DiceThrow -> DiceRotations -> List Color -> Html Msg
+viewDice diceThrow diceRotations lockedRows =
+    let
+        ifNotLocked : Color -> view -> Maybe view
+        ifNotLocked color v =
+            if List.member color lockedRows then
+                Nothing
+
+            else
+                Just v
+    in
     Html.div [ css [ Tw.flex, Tw.flex_row, Tw.p_3, Tw.gap_3 ] ]
-        [ viewDie DieWhite diceThrow.dieWhite1 0 diceRotations.dieWhite1
-        , viewDie DieWhite diceThrow.dieWhite2 1 diceRotations.dieWhite2
-        , viewDie DieRed diceThrow.dieRed 2 diceRotations.dieRed
-        , viewDie DieYellow diceThrow.dieYellow 3 diceRotations.dieYellow
-        , viewDie DieGreen diceThrow.dieGreen 4 diceRotations.dieGreen
-        , viewDie DieBlue diceThrow.dieBlue 5 diceRotations.dieBlue
-        ]
+        ([ Just (viewDie DieWhite diceThrow.dieWhite1 diceRotations.dieWhite1)
+         , Just (viewDie DieWhite diceThrow.dieWhite2 diceRotations.dieWhite2)
+         , ifNotLocked Red (viewDie DieRed diceThrow.dieRed diceRotations.dieRed)
+         , ifNotLocked Yellow (viewDie DieYellow diceThrow.dieYellow diceRotations.dieYellow)
+         , ifNotLocked Green (viewDie DieGreen diceThrow.dieGreen diceRotations.dieGreen)
+         , ifNotLocked Blue (viewDie DieBlue diceThrow.dieBlue diceRotations.dieBlue)
+         ]
+            |> Maybe.Extra.values
+            |> List.indexedMap (\index v -> v index)
+        )
 
 
-viewDie : DieColor -> Pips -> Int -> Css.AngleOrDirection (Css.Angle {}) -> Html Msg
-viewDie dieColor pips showOrder rotation =
+viewDie : DieColor -> Pips -> Css.AngleOrDirection (Css.Angle {}) -> Int -> Html Msg
+viewDie dieColor pips rotation showOrder =
     let
         colors =
             getDieColors dieColor
