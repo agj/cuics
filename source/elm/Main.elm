@@ -404,11 +404,7 @@ viewColorRows board turn =
             viewColorRow (Board.getRow color board) turn color
     in
     Html.div [ css [ Tw.flex, Tw.flex_col, Tw.gap_1 ] ]
-        [ colorRow Red
-        , colorRow Yellow
-        , colorRow Green
-        , colorRow Blue
-        ]
+        (Color.all |> List.map colorRow)
 
 
 viewColorRow : Row -> Turn -> Color -> Html Msg
@@ -626,15 +622,19 @@ viewScoreboard board =
         between string =
             Html.div [ css [ Tw.font_bold ] ]
                 [ Html.text string ]
+
+        colorPoints : Color -> Html Msg
+        colorPoints color =
+            viewScoreboardColorPoints color (Board.getRow color board)
     in
     Html.div [ css [ Tw.flex, Tw.flex_row, Tw.gap_2, Tw.items_center, Tw.justify_center ] ]
-        [ viewScoreboardColorPoints Red (Board.getRow Red board)
+        [ colorPoints Red
         , between "+"
-        , viewScoreboardColorPoints Yellow (Board.getRow Yellow board)
+        , colorPoints Yellow
         , between "+"
-        , viewScoreboardColorPoints Green (Board.getRow Green board)
+        , colorPoints Green
         , between "+"
-        , viewScoreboardColorPoints Blue (Board.getRow Blue board)
+        , colorPoints Blue
         , between "−"
         , viewScoreboardPoints (getFaultColors True True).fg (Board.getFaults board) (Board.faultPoints board)
         , between "="
