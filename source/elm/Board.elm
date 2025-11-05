@@ -6,6 +6,7 @@ module Board exposing
     , faults
     , gameEnded
     , init
+    , lockedRows
     , points
     , row
     , updateRow
@@ -64,6 +65,16 @@ faults (Board board) =
             4
 
 
+lockedRows : Board -> List Color
+lockedRows board =
+    Color.all
+        |> List.filter
+            (\color ->
+                row color board
+                    |> Row.locked (Color.growth color)
+            )
+
+
 points : Board -> Int
 points board =
     (Color.all
@@ -82,10 +93,7 @@ gameEnded : Board -> Bool
 gameEnded ((Board b) as board) =
     let
         closedRowsCount =
-            Color.all
-                |> List.map (\color -> Row.locked (Color.growth color) (row color board))
-                |> List.filter identity
-                |> List.length
+            List.length (lockedRows board)
     in
     (closedRowsCount >= 2)
         || ((b.faults |> Debug.log "faults") == Faults4)
