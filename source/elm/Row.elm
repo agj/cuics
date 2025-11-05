@@ -1,4 +1,4 @@
-module Row exposing (Row, get, getLock, init, points, set, xCount)
+module Row exposing (Row, get, init, locked, points, set, xCount)
 
 import Array exposing (Array)
 import Num exposing (Num(..))
@@ -74,9 +74,9 @@ get num (Row row) =
             row.num12
 
 
-getLock : Num.Growth -> Row -> Bool
-getLock growth row =
-    get (Num.getLast growth) row
+locked : Num.Growth -> Row -> Bool
+locked growth row =
+    get (Num.last growth) row
 
 
 set : Num -> Bool -> Row -> Row
@@ -126,7 +126,7 @@ xCount growth row =
                 |> List.length
 
         lockBonus =
-            if getLock growth row then
+            if locked growth row then
                 1
 
             else

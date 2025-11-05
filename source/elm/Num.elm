@@ -2,8 +2,8 @@ module Num exposing
     ( Growth(..)
     , Num(..)
     , all
-    , getLast
     , isLast
+    , last
     , next
     , toInt
     )
@@ -50,11 +50,11 @@ allShrinking =
 
 isLast : Growth -> Num -> Bool
 isLast growth num =
-    getLast growth == num
+    last growth == num
 
 
-getLast : Growth -> Num
-getLast growth =
+last : Growth -> Num
+last growth =
     case growth of
         Grows ->
             Num12

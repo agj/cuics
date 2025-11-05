@@ -3,11 +3,11 @@ module Board exposing
     , addFault
     , addX
     , faultPoints
+    , faults
     , gameEnded
-    , getFaults
-    , getRow
     , init
     , points
+    , row
     , updateRow
     )
 
@@ -40,13 +40,13 @@ init =
         }
 
 
-getRow : Color -> Board -> Row
-getRow color (Board board) =
+row : Color -> Board -> Row
+row color (Board board) =
     Colors.get color board.rows
 
 
-getFaults : Board -> Int
-getFaults (Board board) =
+faults : Board -> Int
+faults (Board board) =
     case board.faults of
         Faults0 ->
             0
@@ -67,7 +67,7 @@ getFaults (Board board) =
 points : Board -> Int
 points board =
     (Color.all
-        |> List.map (\color -> Row.points (Color.growth color) (getRow color board))
+        |> List.map (\color -> Row.points (Color.growth color) (row color board))
         |> List.foldl (+) 0
     )
         - faultPoints board
@@ -75,7 +75,7 @@ points board =
 
 faultPoints : Board -> Int
 faultPoints board =
-    getFaults board * 5
+    faults board * 5
 
 
 gameEnded : Board -> Bool
@@ -83,7 +83,7 @@ gameEnded ((Board b) as board) =
     let
         closedRowsCount =
             Color.all
-                |> List.map (\color -> Row.getLock (Color.growth color) (getRow color board))
+                |> List.map (\color -> Row.locked (Color.growth color) (row color board))
                 |> List.filter identity
                 |> List.length
     in

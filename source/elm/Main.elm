@@ -391,7 +391,7 @@ viewBoard : Board -> Turn -> Html Msg
 viewBoard board turn =
     Html.div [ css [ Tw.flex, Tw.flex_col, Tw.gap_3 ] ]
         [ viewColorRows board turn
-        , viewFaults (canAddFault turn) (Board.getFaults board)
+        , viewFaults (canAddFault turn) (Board.faults board)
         , viewScoreboard board
         ]
 
@@ -401,7 +401,7 @@ viewColorRows board turn =
     let
         colorRow : Color -> Html Msg
         colorRow color =
-            viewColorRow (Board.getRow color board) turn color
+            viewColorRow (Board.row color board) turn color
     in
     Html.div [ css [ Tw.flex, Tw.flex_col, Tw.gap_1 ] ]
         (Color.all |> List.map colorRow)
@@ -436,7 +436,7 @@ viewColorRow row turn color =
         , css [ Tw.bg_color colors.fg ]
         ]
         ([ cells
-         , [ viewLockCell color (Row.getLock (Color.growth color) row) ]
+         , [ viewLockCell color (Row.locked (Color.growth color) row) ]
          ]
             |> List.concat
         )
@@ -625,7 +625,7 @@ viewScoreboard board =
 
         colorPoints : Color -> Html Msg
         colorPoints color =
-            viewScoreboardColorPoints color (Board.getRow color board)
+            viewScoreboardColorPoints color (Board.row color board)
     in
     Html.div [ css [ Tw.flex, Tw.flex_row, Tw.gap_2, Tw.items_center, Tw.justify_center ] ]
         [ colorPoints Red
@@ -636,7 +636,7 @@ viewScoreboard board =
         , between "+"
         , colorPoints Blue
         , between "−"
-        , viewScoreboardPoints (getFaultColors True True).fg (Board.getFaults board) (Board.faultPoints board)
+        , viewScoreboardPoints (getFaultColors True True).fg (Board.faults board) (Board.faultPoints board)
         , between "="
         , viewScoreboardSquare Twc.black
             [ Html.div [ css [ Tw.font_bold, Tw.text_2xl, Tw.text_color Twc.black ] ]
