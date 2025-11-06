@@ -1,5 +1,7 @@
 import Main from "../elm/Main.elm";
 
 Main.init({
-  flags: {},
+  flags: {
+    viewport: { width: window.innerWidth, height: window.innerHeight },
+  },
 });

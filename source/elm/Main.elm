@@ -2,13 +2,16 @@ module Main exposing (main)
 
 import Board exposing (Board)
 import Browser
+import Browser.Events
 import Color exposing (Color(..))
+import Constants
 import Css
 import Css.Global
 import Css.Transitions exposing (transition)
 import Html.Styled as Html exposing (Attribute, Html)
 import Html.Styled.Attributes as Attributes exposing (class, css)
 import Html.Styled.Events as Events
+import Json.Decode as Decode
 import List
 import Maybe.Extra
 import Num exposing (Num(..))
@@ -23,13 +26,13 @@ import Tailwind.Utilities as Tw
 import Task
 
 
-main : Program () Model Msg
+main : Program Decode.Value Model Msg
 main =
     Browser.document
         { init = init
         , view = view
         , update = update
-        , subscriptions = \_ -> Sub.none
+        , subscriptions = subscriptions
         }
 
 
@@ -40,6 +43,7 @@ main =
 type alias Model =
     { board : Board
     , turn : Turn
+    , viewport : Viewport
     , seed : Random.Seed
     }
 
@@ -84,18 +88,38 @@ type alias Pick =
     }
 
 
+type alias Viewport =
+    { width : Int, height : Int }
+
+
 
 -- INIT
 
 
-init : () -> ( Model, Cmd Msg )
-init _ =
+init : Decode.Value -> ( Model, Cmd Msg )
+init flags =
+    let
+        viewport : Viewport
+        viewport =
+            Decode.decodeValue flagsDecoder flags
+                |> Result.withDefault { width = 1025, height = 768 }
+    in
     ( { board = Board.init
       , turn = NotTurn
+      , viewport = viewport
       , seed = Random.initialSeed 12345
       }
     , Random.generate GotInitialSeed Random.independentSeed
     )
+
+
+flagsDecoder : Decode.Decoder Viewport
+flagsDecoder =
+    Decode.field "viewport"
+        (Decode.map2 Viewport
+            (Decode.field "width" Decode.int)
+            (Decode.field "height" Decode.int)
+        )
 
 
 
@@ -109,6 +133,7 @@ type Msg
     | ClickedPickedCell
     | ClickedDone
     | ClickedFault
+    | ViewportResized Int Int
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -205,6 +230,20 @@ update msg model =
             else
                 ( model, Cmd.none )
 
+        ViewportResized width height ->
+            ( { model | viewport = { width = width, height = height } }
+            , Cmd.none
+            )
+
+
+
+-- SUBSCRIPTIONS
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Browser.Events.onResize ViewportResized
+
 
 
 -- VIEW
@@ -214,14 +253,52 @@ view : Model -> Browser.Document Msg
 view model =
     { title = "Cuics"
     , body =
-        [ Html.div [ css [ Tw.flex, Tw.flex_col, Tw.justify_center, Tw.items_center, Tw.gap_2, Tw.h_full, Tw.w_full ] ]
-            [ viewTop model.board model.turn
-            , viewBoard model.board model.turn
-            , Css.Global.global Tw.globalStyles
-            ]
-            |> Html.toUnstyled
+        [ Html.div
+            [ css [ Tw.h_full, Tw.w_full, Tw.flex, Tw.flex_col, Tw.justify_center, Tw.items_center ] ]
+            [ viewContent model ]
+        , Css.Global.global Tw.globalStyles
         ]
+            |> List.map Html.toUnstyled
     }
+
+
+viewContent : Model -> Html Msg
+viewContent model =
+    let
+        scale : Float
+        scale =
+            min scaleX scaleY
+
+        scaleX : Float
+        scaleX =
+            toFloat model.viewport.width
+                / (contentWidth * Constants.remInPx)
+                |> min 1
+
+        scaleY : Float
+        scaleY =
+            toFloat model.viewport.height
+                / (contentHeight * Constants.remInPx)
+                |> min 1
+
+        contentWidth : Float
+        contentWidth =
+            53
+
+        contentHeight : Float
+        contentHeight =
+            35
+    in
+    Html.div
+        [ css [ Css.width (Css.rem contentWidth), Css.height (Css.rem contentHeight) ]
+        , css [ Tw.flex, Tw.flex_col, Tw.justify_center, Tw.items_center, Tw.gap_2 ]
+        , css [ Tw.bg_color Twc.gray_50 ]
+        , css [ Tw.shrink_0 ]
+        , css [ Css.transforms [ Css.scale scale ] ]
+        ]
+        [ viewTop model.board model.turn
+        , viewBoard model.board model.turn
+        ]
 
 
 
