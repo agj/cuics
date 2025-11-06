@@ -6,6 +6,7 @@ import Browser.Events
 import Color exposing (Color(..))
 import Constants
 import Css
+import Css.Animations
 import Css.Global
 import Css.Transitions exposing (transition)
 import Html.Styled as Html exposing (Attribute, Html)
@@ -422,12 +423,29 @@ viewDie dieColor pips rotation showOrder =
             viewDiePip colors.pip
     in
     Html.div
-        [ class "die"
-        , css [ Tw.w_16, Tw.h_16, Tw.bg_color colors.face, Tw.rounded_2xl ]
+        [ css [ Tw.w_16, Tw.h_16, Tw.bg_color colors.face, Tw.rounded_2xl ]
         , css [ Tw.border_2, Tw.border_color colors.border ]
         , css
-            [ transition [ Css.Transitions.opacity2 0 (toFloat showOrder * 90) ]
-            , Css.transforms [ Css.rotate rotation ]
+            [ Css.opacity (Css.num 0)
+            , Css.animationName
+                (Css.Animations.keyframes
+                    [ ( 0
+                      , [ Css.Animations.transform [ Css.scale 0.5, Css.rotate rotation ]
+                        , Css.Animations.opacity (Css.num 1)
+                        ]
+                      )
+                    , ( 50, [ Css.Animations.transform [ Css.scale 1.1, Css.rotate rotation ] ] )
+                    , ( 100
+                      , [ Css.Animations.transform [ Css.scale 1, Css.rotate rotation ]
+                        , Css.Animations.opacity (Css.num 1)
+                        ]
+                      )
+                    ]
+                )
+            , Css.animationDuration (Css.sec 0.25)
+            , Css.property "animation-timing-function" "ease-out"
+            , Css.animationDelay (Css.ms (toFloat showOrder * 90))
+            , Css.property "animation-fill-mode" "forwards"
             ]
         ]
         [ Svg.svg [ Svga.viewBox "-6 -6 12 12" ]
