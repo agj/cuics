@@ -74,12 +74,12 @@ type alias DiceThrow =
 
 
 type alias DiceRotations =
-    { dieWhite1 : Css.AngleOrDirection (Css.Angle {})
-    , dieWhite2 : Css.AngleOrDirection (Css.Angle {})
-    , dieRed : Css.AngleOrDirection (Css.Angle {})
-    , dieYellow : Css.AngleOrDirection (Css.Angle {})
-    , dieGreen : Css.AngleOrDirection (Css.Angle {})
-    , dieBlue : Css.AngleOrDirection (Css.Angle {})
+    { dieWhite1 : Float
+    , dieWhite2 : Float
+    , dieRed : Float
+    , dieYellow : Float
+    , dieGreen : Float
+    , dieBlue : Float
     }
 
 
@@ -413,8 +413,8 @@ viewDice diceThrow diceRotations lockedRows =
         )
 
 
-viewDie : DieColor -> Pips -> Css.AngleOrDirection (Css.Angle {}) -> Int -> Html Msg
-viewDie dieColor pips rotation showOrder =
+viewDie : DieColor -> Pips -> Float -> Int -> Html Msg
+viewDie dieColor pips rotationTurns showOrder =
     let
         colors =
             getDieColors dieColor
@@ -425,26 +425,40 @@ viewDie dieColor pips rotation showOrder =
     Html.div
         [ css [ Tw.w_16, Tw.h_16, Tw.bg_color colors.face, Tw.rounded_2xl ]
         , css [ Tw.border_2, Tw.border_color colors.border ]
+
+        -- Appearance animation.
         , css
             [ Css.opacity (Css.num 0)
             , Css.animationName
                 (Css.Animations.keyframes
                     [ ( 0
-                      , [ Css.Animations.transform [ Css.scale 0.5, Css.rotate rotation ]
+                      , [ Css.Animations.transform
+                            [ Css.scale 0.3
+                            , Css.rotate (Css.turn (rotationTurns + 0.1))
+                            ]
                         , Css.Animations.opacity (Css.num 1)
                         ]
                       )
-                    , ( 50, [ Css.Animations.transform [ Css.scale 1.1, Css.rotate rotation ] ] )
+                    , ( 50
+                      , [ Css.Animations.transform
+                            [ Css.scale 1.1
+                            , Css.rotate (Css.turn (rotationTurns + 0.05))
+                            ]
+                        ]
+                      )
                     , ( 100
-                      , [ Css.Animations.transform [ Css.scale 1, Css.rotate rotation ]
+                      , [ Css.Animations.transform
+                            [ Css.scale 1
+                            , Css.rotate (Css.turn rotationTurns)
+                            ]
                         , Css.Animations.opacity (Css.num 1)
                         ]
                       )
                     ]
                 )
-            , Css.animationDuration (Css.sec 0.25)
-            , Css.property "animation-timing-function" "ease-out"
+            , Css.animationDuration (Css.ms 250)
             , Css.animationDelay (Css.ms (toFloat showOrder * 90))
+            , Css.property "animation-timing-function" "ease-out"
             , Css.property "animation-fill-mode" "forwards"
             ]
         ]
@@ -1045,10 +1059,9 @@ diceRotationsGenerator =
         |> Random.andMap diceRotationGenerator
 
 
-diceRotationGenerator : Random.Generator (Css.AngleOrDirection (Css.Angle {}))
+diceRotationGenerator : Random.Generator Float
 diceRotationGenerator =
     Random.float 0 1
-        |> Random.map Css.turn
 
 
 addPips : Pips -> Pips -> Num
