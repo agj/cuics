@@ -430,7 +430,7 @@ viewDie dieColor pips rotation showOrder =
             , Css.transforms [ Css.rotate rotation ]
             ]
         ]
-        [ Svg.svg [ Svga.viewBox "-10 -10 20 20" ]
+        [ Svg.svg [ Svga.viewBox "-6 -6 12 12" ]
             ([ -- Top left
                mergeIf (List.member pips [ Pips4, Pips5, Pips6 ])
                 [ pip -1 -1 ]
@@ -465,9 +465,9 @@ viewDie dieColor pips rotation showOrder =
 viewDiePip : Twc.Color -> Int -> Int -> Svg Msg
 viewDiePip twColor xOffset yOffset =
     Svg.circle
-        [ Svga.cx (String.fromInt (xOffset * 4))
-        , Svga.cy (String.fromInt (yOffset * 4))
-        , Svga.r "1.2"
+        [ Svga.cx (String.fromInt (xOffset * 3))
+        , Svga.cy (String.fromInt (yOffset * 3))
+        , Svga.r "0.06rem"
         , css [ Tw.fill_color twColor ]
         ]
         []
