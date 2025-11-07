@@ -300,9 +300,9 @@ viewContent model =
     in
     Html.div
         [ css [ Css.width (Css.rem contentWidth), Css.height (Css.rem contentHeight) ]
-        , css [ Tw.flex, Tw.flex_col, Tw.justify_center, Tw.items_center, Tw.gap_2 ]
+        , css [ Tw.flex, Tw.flex_col, Tw.justify_center, Tw.items_center, Tw.gap_2, Tw.shrink_0 ]
         , css [ Tw.bg_color Twc.gray_50 ]
-        , css [ Tw.shrink_0 ]
+        , css [ Tw.font_sans ]
         , css [ Css.transforms [ Css.scale scale ] ]
         ]
         [ viewTop model.language model.board model.turn
