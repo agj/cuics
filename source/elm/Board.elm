@@ -96,7 +96,7 @@ gameEnded ((Board b) as board) =
             List.length (lockedRows board)
     in
     (closedRowsCount >= 2)
-        || ((b.faults |> Debug.log "faults") == Faults4)
+        || (b.faults == Faults4)
 
 
 updateRow : Color -> (Row -> Row) -> Board -> Board

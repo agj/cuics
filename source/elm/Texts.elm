@@ -1,4 +1,6 @@
-module Texts exposing (Language(..), Texts, for)
+module Texts exposing (Texts, for)
+
+import Language exposing (Language(..))
 
 
 type alias Texts =
@@ -6,13 +8,6 @@ type alias Texts =
     , faults : String
     , p : String
     }
-
-
-type Language
-    = Spanish
-    | English
-    | Japanese
-    | ChineseTraditional
 
 
 for : Language -> Texts

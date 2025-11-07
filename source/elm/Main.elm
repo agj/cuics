@@ -13,6 +13,7 @@ import Html.Styled as Html exposing (Attribute, Html)
 import Html.Styled.Attributes as Attributes exposing (class, css)
 import Html.Styled.Events as Events
 import Json.Decode as Decode
+import Language exposing (Language)
 import List
 import Maybe.Extra
 import Num exposing (Num(..))
@@ -25,7 +26,7 @@ import Svg.Styled.Attributes as Svga
 import Tailwind.Theme as Twc
 import Tailwind.Utilities as Tw
 import Task
-import Texts exposing (Language(..))
+import Texts
 
 
 main : Program Decode.Value Model Msg
@@ -104,26 +105,29 @@ init flags =
     let
         viewport : Viewport
         viewport =
-            Decode.decodeValue flagsDecoder flags
+            Decode.decodeValue (Decode.field "viewport" viewportDecoder) flags
                 |> Result.withDefault { width = 1025, height = 768 }
+
+        language : Language
+        language =
+            Decode.decodeValue (Decode.field "languages" Language.decoderFromList) flags
+                |> Result.withDefault Language.English
     in
     ( { board = Board.init
       , turn = NotTurn
       , viewport = viewport
       , seed = Random.initialSeed 12345
-      , language = English
+      , language = language
       }
     , Random.generate GotInitialSeed Random.independentSeed
     )
 
 
-flagsDecoder : Decode.Decoder Viewport
-flagsDecoder =
-    Decode.field "viewport"
-        (Decode.map2 Viewport
-            (Decode.field "width" Decode.int)
-            (Decode.field "height" Decode.int)
-        )
+viewportDecoder : Decode.Decoder Viewport
+viewportDecoder =
+    Decode.map2 Viewport
+        (Decode.field "width" Decode.int)
+        (Decode.field "height" Decode.int)
 
 
 
