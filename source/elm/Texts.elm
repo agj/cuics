@@ -28,7 +28,7 @@ for language =
 
 spanish : Texts
 spanish =
-    { done = "Listo"
+    { done = "Terminar turno"
     , faults = "Faltas"
     , p = " p"
     }
@@ -36,7 +36,7 @@ spanish =
 
 english : Texts
 english =
-    { done = "Done"
+    { done = "End turn"
     , faults = "Faults"
     , p = " p"
     }
@@ -52,7 +52,7 @@ japanese =
 
 chineseTraditional : Texts
 chineseTraditional =
-    { done = "結束"
+    { done = "決定"
     , faults = "錯誤"
     , p = "分"
     }

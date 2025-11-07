@@ -686,7 +686,7 @@ viewFaults language active count =
     in
     Html.div [ css [ Tw.flex, Tw.flex_row, Tw.gap_1, Tw.justify_end, Tw.items_center ] ]
         ([ [ Html.div [ css [ Tw.mr_3 ] ]
-                [ Html.text ((Texts.for language).faults ++ ":") ]
+                [ Html.text (Texts.for language).faults ]
            ]
          , faultButtons
          ]
