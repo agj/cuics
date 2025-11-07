@@ -25,6 +25,7 @@ import Svg.Styled.Attributes as Svga
 import Tailwind.Theme as Twc
 import Tailwind.Utilities as Tw
 import Task
+import Texts exposing (Language(..))
 
 
 main : Program Decode.Value Model Msg
@@ -46,6 +47,7 @@ type alias Model =
     , turn : Turn
     , viewport : Viewport
     , seed : Random.Seed
+    , language : Language
     }
 
 
@@ -109,6 +111,7 @@ init flags =
       , turn = NotTurn
       , viewport = viewport
       , seed = Random.initialSeed 12345
+      , language = English
       }
     , Random.generate GotInitialSeed Random.independentSeed
     )
@@ -297,8 +300,8 @@ viewContent model =
         , css [ Tw.shrink_0 ]
         , css [ Css.transforms [ Css.scale scale ] ]
         ]
-        [ viewTop model.board model.turn
-        , viewBoard model.board model.turn
+        [ viewTop model.language model.board model.turn
+        , viewBoard model.language model.board model.turn
         ]
 
 
@@ -306,8 +309,8 @@ viewContent model =
 -- VIEW TOP
 
 
-viewTop : Board -> Turn -> Html Msg
-viewTop board turn =
+viewTop : Language -> Board -> Turn -> Html Msg
+viewTop language board turn =
     let
         ( showingDone, enabledDone ) =
             case turn of
@@ -322,7 +325,7 @@ viewTop board turn =
     in
     Html.div [ css [ Tw.flex, Tw.flex_row, Tw.gap_4, Tw.items_center ] ]
         [ viewDiceIfThrown turn (Board.lockedRows board)
-        , viewDoneButton showingDone (not enabledDone)
+        , viewDoneButton language showingDone (not enabledDone)
         ]
 
 
@@ -330,8 +333,8 @@ viewTop board turn =
 -- VIEW DONE BUTTON
 
 
-viewDoneButton : Bool -> Bool -> Html Msg
-viewDoneButton showing disabled =
+viewDoneButton : Language -> Bool -> Bool -> Html Msg
+viewDoneButton language showing disabled =
     if showing then
         let
             conditionalStyles =
@@ -349,7 +352,7 @@ viewDoneButton showing disabled =
              ]
                 ++ conditionalStyles
             )
-            [ Html.text "Listo" ]
+            [ Html.text (Texts.for language).done ]
 
     else
         Html.div [ css [ Tw.w_32 ] ] []
@@ -509,12 +512,12 @@ viewDiePip twColor xOffset yOffset =
 -- VIEW BOARD
 
 
-viewBoard : Board -> Turn -> Html Msg
-viewBoard board turn =
+viewBoard : Language -> Board -> Turn -> Html Msg
+viewBoard language board turn =
     Html.div [ css [ Tw.flex, Tw.flex_col, Tw.gap_3 ] ]
         [ viewColorRows board turn
-        , viewFaults (canAddFault turn) (Board.faults board)
-        , viewScoreboard board
+        , viewFaults language (canAddFault turn) (Board.faults board)
+        , viewScoreboard language board
         ]
 
 
@@ -669,8 +672,8 @@ viewStrike twColor =
 -- VIEW FAULTS
 
 
-viewFaults : Bool -> Int -> Html Msg
-viewFaults active count =
+viewFaults : Language -> Bool -> Int -> Html Msg
+viewFaults language active count =
     let
         faultButtons =
             [ 1, 2, 3, 4 ]
@@ -678,7 +681,7 @@ viewFaults active count =
     in
     Html.div [ css [ Tw.flex, Tw.flex_row, Tw.gap_1, Tw.justify_end, Tw.items_center ] ]
         ([ [ Html.div [ css [ Tw.mr_3 ] ]
-                [ Html.text "Faltas:" ]
+                [ Html.text ((Texts.for language).faults ++ ":") ]
            ]
          , faultButtons
          ]
@@ -737,8 +740,8 @@ activeGlow =
 -- VIEW SCOREBOARD
 
 
-viewScoreboard : Board -> Html Msg
-viewScoreboard board =
+viewScoreboard : Language -> Board -> Html Msg
+viewScoreboard language board =
     let
         between : String -> Html Msg
         between string =
@@ -747,7 +750,7 @@ viewScoreboard board =
 
         colorPoints : Color -> Html Msg
         colorPoints color =
-            viewScoreboardColorPoints color (Board.row color board)
+            viewScoreboardColorPoints language color (Board.row color board)
     in
     Html.div [ css [ Tw.flex, Tw.flex_row, Tw.gap_2, Tw.items_center, Tw.justify_center ] ]
         [ colorPoints Red
@@ -758,34 +761,40 @@ viewScoreboard board =
         , between "+"
         , colorPoints Blue
         , between "−"
-        , viewScoreboardPoints (getFaultColors True True).fg (Board.faults board) (Board.faultPoints board)
+        , viewScoreboardPoints language (getFaultColors True True).fg (Board.faults board) (Board.faultPoints board)
         , between "="
         , viewScoreboardSquare Twc.black
             [ Html.div [ css [ Tw.font_bold, Tw.text_2xl, Tw.text_color Twc.black ] ]
-                [ Html.text (String.fromInt (Board.points board) ++ " p") ]
+                [ Html.text (String.fromInt (Board.points board) ++ (Texts.for language).p) ]
             ]
         ]
 
 
-viewScoreboardColorPoints : Color -> Row -> Html Msg
-viewScoreboardColorPoints color row =
+viewScoreboardColorPoints : Language -> Color -> Row -> Html Msg
+viewScoreboardColorPoints language color row =
     let
         colors =
             getColors color Available
     in
     viewScoreboardPoints
+        language
         colors.fg
         (Row.xCount (Color.growth color) row)
         (Row.points (Color.growth color) row)
 
 
-viewScoreboardPoints : Twc.Color -> Int -> Int -> Html Msg
-viewScoreboardPoints twColor xs points =
+viewScoreboardPoints : Language -> Twc.Color -> Int -> Int -> Html Msg
+viewScoreboardPoints language twColor xs points =
     viewScoreboardSquare twColor
         [ Html.div [ css [ Tw.leading_none ] ]
             [ Html.text ("{xs} ╳ =" |> String.replace "{xs}" (String.fromInt xs)) ]
         , Html.div [ css [ Tw.font_bold, Tw.text_xl, Tw.text_color twColor, Tw.leading_none ] ]
-            [ Html.text ("{points} p" |> String.replace "{points}" (String.fromInt points)) ]
+            [ Html.text
+                ("{points}{p}"
+                    |> String.replace "{points}" (String.fromInt points)
+                    |> String.replace "{p}" (Texts.for language).p
+                )
+            ]
         ]
 
 
