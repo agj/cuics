@@ -17,6 +17,7 @@ import Language exposing (Language)
 import List
 import Maybe.Extra
 import Num exposing (Num(..))
+import Phosphor
 import Process
 import Random
 import Random.Extra as Random
@@ -634,7 +635,7 @@ viewLockCell color xed =
         , css [ Tw.border_2, Tw.border_color colors.b, Tw.rounded_full ]
         , css [ Tw.select_none ]
         ]
-        ([ [ Html.text "🔓" ]
+        ([ [ icon (Phosphor.lock Phosphor.Regular) ]
          , mergeIf xed
             [ viewX colors.b ]
          ]
@@ -998,6 +999,15 @@ cellIsAvailable growth row num =
 
 
 -- UTILS
+
+
+icon : Phosphor.IconVariant -> Html Msg
+icon iconVariant =
+    iconVariant
+        |> Phosphor.withSize 1
+        |> Phosphor.withSizeUnit "em"
+        |> Phosphor.toHtml []
+        |> Html.fromUnstyled
 
 
 throwDiceIfGameNotEnded : Board -> Random.Seed -> Cmd Msg
