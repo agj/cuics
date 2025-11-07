@@ -791,8 +791,11 @@ viewScoreboardColorPoints language color row =
 viewScoreboardPoints : Language -> Twc.Color -> Int -> Int -> Html Msg
 viewScoreboardPoints language twColor xs points =
     viewScoreboardSquare twColor
-        [ Html.div [ css [ Tw.leading_none ] ]
-            [ Html.text ("{xs} ╳ =" |> String.replace "{xs}" (String.fromInt xs)) ]
+        [ Html.div [ css [ Tw.flex, Tw.flex_row, Tw.items_center ] ]
+            [ Html.text (String.fromInt xs)
+            , Html.div [ css [ Css.marginBottom (Css.rem -0.05) ] ]
+                [ icon (Phosphor.x Phosphor.Bold) ]
+            ]
         , Html.div [ css [ Tw.font_bold, Tw.text_xl, Tw.text_color twColor, Tw.leading_none ] ]
             [ Html.text
                 ("{points}{p}"
