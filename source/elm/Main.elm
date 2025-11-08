@@ -156,13 +156,20 @@ type Msg
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case msg of
-        GotInitialSeed newSeed ->
+    let
+        interactive =
+            model.dialog == NoDialog
+
+        ignore =
+            ( model, Cmd.none )
+    in
+    case ( interactive, msg ) of
+        ( True, GotInitialSeed newSeed ) ->
             ( { model | seed = newSeed }
             , throwDiceIfGameNotEnded model.board newSeed
             )
 
-        DiceThrown newSeed diceThrow diceRotations ->
+        ( True, DiceThrown newSeed diceThrow diceRotations ) ->
             ( { model
                 | turn = TurnPicking diceThrow diceRotations
                 , seed = newSeed
@@ -170,7 +177,7 @@ update msg model =
             , Cmd.none
             )
 
-        ClickedAvailableCell pick ->
+        ( True, ClickedAvailableCell pick ) ->
             case model.turn of
                 TurnPicking diceThrow diceRotations ->
                     -- Pick a cell.
@@ -194,9 +201,9 @@ update msg model =
                     )
 
                 NotTurn ->
-                    ( model, Cmd.none )
+                    ignore
 
-        ClickedPickedCell ->
+        ( True, ClickedPickedCell ) ->
             case model.turn of
                 TurnPickedOnce diceThrow diceRotations _ ->
                     -- Undo the first pick.
@@ -205,12 +212,12 @@ update msg model =
                     )
 
                 NotTurn ->
-                    ( model, Cmd.none )
+                    ignore
 
                 TurnPicking _ _ ->
-                    ( model, Cmd.none )
+                    ignore
 
-        ClickedDone ->
+        ( True, ClickedDone ) ->
             case model.turn of
                 TurnPickedOnce _ _ pick ->
                     -- End turn with a single X.
@@ -227,12 +234,12 @@ update msg model =
                     )
 
                 TurnPicking _ _ ->
-                    ( model, Cmd.none )
+                    ignore
 
                 NotTurn ->
-                    ( model, Cmd.none )
+                    ignore
 
-        ClickedFault ->
+        ( True, ClickedFault ) ->
             if canAddFault model.turn then
                 let
                     newBoard =
@@ -246,22 +253,25 @@ update msg model =
                 )
 
             else
-                ( model, Cmd.none )
+                ignore
 
-        LanguageSelected selected ->
+        ( _, LanguageSelected selected ) ->
             ( { model | language = Language.setSelection selected model.language }
             , Cmd.none
             )
 
-        DialogDismissed ->
+        ( _, DialogDismissed ) ->
             ( { model | dialog = NoDialog }
             , Cmd.none
             )
 
-        ViewportResized width height ->
+        ( _, ViewportResized width height ) ->
             ( { model | viewport = { width = width, height = height } }
             , Cmd.none
             )
+
+        ( False, _ ) ->
+            ignore
 
 
 
