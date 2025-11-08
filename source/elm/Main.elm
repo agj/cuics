@@ -8,7 +8,6 @@ import Constants
 import Css
 import Css.Animations
 import Css.Global
-import Css.Transitions exposing (transition)
 import Html.Styled as Html exposing (Attribute, Html)
 import Html.Styled.Attributes as Attributes exposing (class, css)
 import Html.Styled.Events as Events
@@ -28,6 +27,7 @@ import Tailwind.Theme as Twt
 import Tailwind.Utilities as Tw
 import Task
 import Texts
+import Util.Html.Styled exposing (viewIfLazy)
 
 
 main : Program Decode.Value Model Msg
@@ -150,7 +150,7 @@ type Msg
     | ClickedDone
     | ClickedFault
     | LanguageSelected (Maybe Language)
-    | DialogDismissed
+    | DialogRequested Dialog
     | ViewportResized Int Int
 
 
@@ -260,8 +260,8 @@ update msg model =
             , Cmd.none
             )
 
-        ( _, DialogDismissed ) ->
-            ( { model | dialog = NoDialog }
+        ( _, DialogRequested dialog ) ->
+            ( { model | dialog = dialog }
             , Cmd.none
             )
 
@@ -330,10 +330,6 @@ viewContent model =
         language : Language
         language =
             Language.selectionToLanguage model.language
-
-        selectedLanguage : Maybe Language
-        selectedLanguage =
-            Language.selected model.language
     in
     Html.div
         [ css [ Css.width (Css.rem contentWidth), Css.height (Css.rem contentHeight) ]
@@ -345,20 +341,54 @@ viewContent model =
         ]
         [ viewTop language model.board model.turn
         , viewBoard language model.board model.turn
-        , if model.dialog == SettingsDialog then
-            viewDialog
-                (Html.div [ css [ Tw.flex, Tw.flex_row, Tw.gap_1 ] ]
-                    ([ [ viewLanguageRadioButton Nothing (selectedLanguage == Nothing) ]
-                     , Language.all
-                        |> List.map (\lang -> viewLanguageRadioButton (Just lang) (selectedLanguage == Just lang))
-                     ]
-                        |> List.concat
-                    )
-                )
-
-          else
-            Html.text ""
+        , viewSettingsButton
+        , viewIfLazy (model.dialog == SettingsDialog)
+            (\() -> viewSettingsDialog (Language.selected model.language))
         ]
+
+
+
+-- VIEW DIALOG
+
+
+viewDialog : Html Msg -> Html Msg
+viewDialog content =
+    Html.div
+        [ css [ Tw.w_8over12, Tw.max_h_80, Tw.p_4 ]
+        , css [ Tw.absolute ]
+        , css [ Tw.bg_color Twt.white, Tw.drop_shadow_xl ]
+        , css [ Tw.rounded_xl ]
+        , Events.onClick (DialogRequested NoDialog)
+        ]
+        [ content ]
+
+
+
+-- VIEW SETTINGS
+
+
+viewSettingsButton : Html Msg
+viewSettingsButton =
+    Html.button
+        [ css [ Tw.absolute, Tw.right_2, Tw.top_2, Tw.p_2 ]
+        , css [ Tw.rounded_lg, Tw.bg_color Twt.purple_200 ]
+        , css [ Tw.text_xl, Tw.text_color Twt.purple_800 ]
+        , Events.onClick (DialogRequested SettingsDialog)
+        ]
+        [ icon (Phosphor.wrench Phosphor.Bold) ]
+
+
+viewSettingsDialog : Maybe Language -> Html Msg
+viewSettingsDialog selectedLanguage =
+    viewDialog
+        (Html.div [ css [ Tw.flex, Tw.flex_row, Tw.gap_1 ] ]
+            ([ [ viewLanguageRadioButton Nothing (selectedLanguage == Nothing) ]
+             , Language.all
+                |> List.map (\lang -> viewLanguageRadioButton (Just lang) (selectedLanguage == Just lang))
+             ]
+                |> List.concat
+            )
+        )
 
 
 viewLanguageRadioButton : Maybe Language -> Bool -> Html Msg
@@ -395,22 +425,6 @@ viewLanguageRadioButton language selected =
             , Html.text languageName
             ]
         ]
-
-
-
--- VIEW DIALOG
-
-
-viewDialog : Html Msg -> Html Msg
-viewDialog content =
-    Html.div
-        [ css [ Tw.w_8over12, Tw.max_h_80, Tw.p_4 ]
-        , css [ Tw.absolute ]
-        , css [ Tw.bg_color Twt.white, Tw.drop_shadow_xl ]
-        , css [ Tw.rounded_xl ]
-        , Events.onClick DialogDismissed
-        ]
-        [ content ]
 
 
 
