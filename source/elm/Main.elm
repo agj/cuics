@@ -380,10 +380,14 @@ viewDialog content =
 
 viewSettingsButton : Html Msg
 viewSettingsButton =
+    let
+        colors =
+            getButtonColors True
+    in
     Html.button
         [ css [ Tw.absolute, Tw.right_2, Tw.top_2, Tw.p_2 ]
-        , css [ Tw.rounded_lg, Tw.bg_color Twt.purple_200 ]
-        , css [ Tw.text_xl, Tw.text_color Twt.purple_800 ]
+        , css [ Tw.rounded_lg, Tw.bg_color colors.bg ]
+        , css [ Tw.text_xl, Tw.text_color colors.fg ]
         , Events.onClick (DialogRequested SettingsDialog)
         ]
         [ icon (Phosphor.wrench Phosphor.Bold) ]
@@ -412,12 +416,15 @@ viewLanguageRadioButton language selected =
         radioIcon : Html Msg
         radioIcon =
             if selected then
-                Html.div [ css [ Tw.text_color Twt.blue_800 ] ]
+                Html.div [ css [ Tw.text_xl ] ]
                     [ icon (Phosphor.radioButton Phosphor.Fill) ]
 
             else
-                Html.div [ css [ Tw.text_color Twt.gray_400 ] ]
+                Html.div [ css [ Tw.text_xl, Tw.text_color Twt.gray_400 ] ]
                     [ icon (Phosphor.radioButton Phosphor.Regular) ]
+
+        colors =
+            getButtonColors True
     in
     Html.label []
         [ Html.input
@@ -429,7 +436,8 @@ viewLanguageRadioButton language selected =
             []
         , Html.button
             [ css [ Tw.flex, Tw.flex_row, Tw.gap_1, Tw.items_center ]
-            , css [ Tw.rounded_lg, Tw.px_2, Tw.py_1, Tw.bg_color Twt.gray_200 ]
+            , css [ Tw.text_color colors.fg ]
+            , css [ Tw.rounded_lg, Tw.px_2, Tw.py_1, Tw.bg_color colors.bg ]
             , Events.onClick (LanguageSelected language)
             ]
             [ radioIcon
@@ -472,16 +480,19 @@ viewDoneButton language showing disabled =
         let
             conditionalStyles =
                 if disabled then
-                    [ css [ Tw.bg_color Twt.gray_200, Tw.cursor_not_allowed ] ]
+                    [ css [ Tw.cursor_not_allowed ] ]
 
                 else
-                    [ css [ Tw.bg_color Twt.purple_500 ]
-                    , Events.onClick ClickedDone
+                    [ Events.onClick ClickedDone
                     ]
+
+            colors =
+                getButtonColors (not disabled)
         in
         Html.button
             ([ css [ Tw.w_32, Tw.h_10, Tw.rounded_lg ]
-             , css [ Tw.text_color Twt.white ]
+             , css [ Tw.text_color colors.bg ]
+             , css [ Tw.bg_color colors.fg ]
              ]
                 ++ conditionalStyles
             )
@@ -1410,3 +1421,12 @@ getDieColors dieColor =
 
         DieBlue ->
             { face = Twt.blue_500, border = Twt.blue_700, pip = Twt.white }
+
+
+getButtonColors : Bool -> { fg : Twt.Color, bg : Twt.Color }
+getButtonColors enabled =
+    if enabled then
+        { fg = Twt.purple_800, bg = Twt.purple_100 }
+
+    else
+        { fg = Twt.gray_300, bg = Twt.gray_100 }
