@@ -26,6 +26,9 @@ for language =
         ChineseTraditional ->
             chineseTraditional
 
+        ChineseSimplified ->
+            chineseSimplified
+
 
 spanish : Texts
 spanish =
@@ -60,4 +63,13 @@ chineseTraditional =
     , faults = "錯誤"
     , p = "分"
     , default = "預設值"
+    }
+
+
+chineseSimplified : Texts
+chineseSimplified =
+    { done = "决定"
+    , faults = "错误"
+    , p = "分"
+    , default = "预设值"
     }

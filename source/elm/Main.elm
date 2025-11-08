@@ -423,7 +423,7 @@ viewSettingsButton =
         , css [ Tw.text_xl, Tw.text_color colors.fg ]
         , Events.onClick (DialogRequested SettingsDialog)
         ]
-        [ icon (Phosphor.wrench Phosphor.Bold) ]
+        [ icon (Phosphor.gearSix Phosphor.Bold) ]
 
 
 viewSettingsDialog : Language.Selection -> Html Msg

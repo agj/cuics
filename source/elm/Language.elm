@@ -2,6 +2,11 @@ module Language exposing (Language(..), Selection, all, code, decoder, decoderFr
 
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
+import LanguageTag exposing (emptySubtags)
+import LanguageTag.Language
+import LanguageTag.Parser
+import LanguageTag.Region
+import LanguageTag.Script
 import Maybe.Extra
 
 
@@ -10,6 +15,7 @@ type Language
     | English
     | Japanese
     | ChineseTraditional
+    | ChineseSimplified
 
 
 type Selection
@@ -25,6 +31,7 @@ all =
     , English
     , Japanese
     , ChineseTraditional
+    , ChineseSimplified
     ]
 
 
@@ -53,21 +60,37 @@ name language =
         ChineseTraditional ->
             "繁體中文"
 
+        ChineseSimplified ->
+            "简体中文"
+
 
 code : Language -> String
 code language =
     case language of
         Spanish ->
-            "es"
+            LanguageTag.Language.es
+                |> LanguageTag.build emptySubtags
+                |> LanguageTag.toString
 
         English ->
-            "en"
+            LanguageTag.Language.en
+                |> LanguageTag.build emptySubtags
+                |> LanguageTag.toString
 
         Japanese ->
-            "ja"
+            LanguageTag.Language.ja
+                |> LanguageTag.build emptySubtags
+                |> LanguageTag.toString
 
         ChineseTraditional ->
-            "zh"
+            LanguageTag.Language.zh
+                |> LanguageTag.build { emptySubtags | script = Just LanguageTag.Script.hant }
+                |> LanguageTag.toString
+
+        ChineseSimplified ->
+            LanguageTag.Language.zh
+                |> LanguageTag.build { emptySubtags | script = Just LanguageTag.Script.hans }
+                |> LanguageTag.toString
 
 
 selectionToLanguage : Selection -> Language
@@ -95,20 +118,41 @@ decoder =
     Decode.string
         |> Decode.andThen
             (\string ->
-                if String.startsWith "en" string then
-                    Decode.succeed English
+                let
+                    parsed =
+                        LanguageTag.Parser.parseBcp47 string
 
-                else if String.startsWith "es" string then
-                    Decode.succeed Spanish
+                    fail =
+                        Decode.fail "Language not supported"
+                in
+                case parsed of
+                    Just ( language, options ) ->
+                        if language == LanguageTag.Language.en then
+                            Decode.succeed English
 
-                else if String.startsWith "ja" string then
-                    Decode.succeed Japanese
+                        else if language == LanguageTag.Language.es then
+                            Decode.succeed Spanish
 
-                else if String.startsWith "zh" string then
-                    Decode.succeed ChineseTraditional
+                        else if language == LanguageTag.Language.ja then
+                            Decode.succeed Japanese
 
-                else
-                    Decode.fail "Language not supported"
+                        else if language == LanguageTag.Language.zh then
+                            if
+                                (options.script == Just LanguageTag.Script.hant)
+                                    || (options.region == Just LanguageTag.Region.tw)
+                                    || (options.region == Just LanguageTag.Region.hk)
+                                    || (options.region == Just LanguageTag.Region.mo)
+                            then
+                                Decode.succeed ChineseTraditional
+
+                            else
+                                Decode.succeed ChineseSimplified
+
+                        else
+                            fail
+
+                    Nothing ->
+                        fail
             )
 
 
