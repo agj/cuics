@@ -380,9 +380,10 @@ viewDialog content =
 
 viewSettingsButton : Html Msg
 viewSettingsButton =
-    viewButton
-        [ css [ Tw.absolute, Tw.right_2, Tw.top_2 ]
-        , css [ Tw.text_xl ]
+    Html.button
+        [ css [ Tw.absolute, Tw.right_2, Tw.top_2, Tw.p_2 ]
+        , css [ Tw.rounded_lg, Tw.bg_color Twt.purple_200 ]
+        , css [ Tw.text_xl, Tw.text_color Twt.purple_800 ]
         , Events.onClick (DialogRequested SettingsDialog)
         ]
         [ icon (Phosphor.wrench Phosphor.Bold) ]
@@ -411,11 +412,11 @@ viewLanguageRadioButton language selected =
         radioIcon : Html Msg
         radioIcon =
             if selected then
-                Html.div [ css [ Tw.text_xl ] ]
+                Html.div [ css [ Tw.text_color Twt.blue_800 ] ]
                     [ icon (Phosphor.radioButton Phosphor.Fill) ]
 
             else
-                Html.div [ css [ Tw.text_xl, Tw.text_color Twt.purple_300 ] ]
+                Html.div [ css [ Tw.text_color Twt.gray_400 ] ]
                     [ icon (Phosphor.radioButton Phosphor.Regular) ]
     in
     Html.label []
@@ -426,8 +427,9 @@ viewLanguageRadioButton language selected =
             , css [ Tw.hidden ]
             ]
             []
-        , viewButton
+        , Html.button
             [ css [ Tw.flex, Tw.flex_row, Tw.gap_1, Tw.items_center ]
+            , css [ Tw.rounded_lg, Tw.px_2, Tw.py_1, Tw.bg_color Twt.gray_200 ]
             , Events.onClick (LanguageSelected language)
             ]
             [ radioIcon
@@ -1137,18 +1139,6 @@ icon iconVariant =
         |> Phosphor.withSizeUnit "em"
         |> Phosphor.toHtml []
         |> Html.fromUnstyled
-
-
-viewButton : List (Attribute Msg) -> List (Html Msg) -> Html Msg
-viewButton attributes children =
-    Html.button
-        ([ css [ Tw.p_2, Tw.rounded_lg ]
-         , css [ Tw.text_color Twt.purple_800 ]
-         , css [ Tw.bg_color Twt.purple_100 ]
-         ]
-            ++ attributes
-        )
-        children
 
 
 
