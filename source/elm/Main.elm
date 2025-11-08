@@ -24,7 +24,7 @@ import Random.Extra as Random
 import Row exposing (Row)
 import Svg.Styled as Svg exposing (Svg)
 import Svg.Styled.Attributes as Svga
-import Tailwind.Theme as Twc
+import Tailwind.Theme as Twt
 import Tailwind.Utilities as Tw
 import Task
 import Texts
@@ -316,7 +316,7 @@ viewContent model =
         [ css [ Css.width (Css.rem contentWidth), Css.height (Css.rem contentHeight) ]
         , css [ Tw.flex, Tw.flex_col, Tw.justify_center, Tw.items_center, Tw.gap_2, Tw.shrink_0 ]
         , css [ Tw.relative ]
-        , css [ Tw.bg_color Twc.gray_50 ]
+        , css [ Tw.bg_color Twt.gray_50 ]
         , css [ Tw.font_sans ]
         , css [ Css.transforms [ Css.scale scale ] ]
         ]
@@ -344,11 +344,11 @@ viewLanguageRadioButton language selected =
         radioIcon : Html Msg
         radioIcon =
             if selected then
-                Html.div [ css [ Tw.text_color Twc.blue_800 ] ]
+                Html.div [ css [ Tw.text_color Twt.blue_800 ] ]
                     [ icon (Phosphor.radioButton Phosphor.Fill) ]
 
             else
-                Html.div [ css [ Tw.text_color Twc.gray_400 ] ]
+                Html.div [ css [ Tw.text_color Twt.gray_400 ] ]
                     [ icon (Phosphor.radioButton Phosphor.Regular) ]
     in
     Html.label []
@@ -361,7 +361,7 @@ viewLanguageRadioButton language selected =
             []
         , Html.button
             [ css [ Tw.flex, Tw.flex_row, Tw.gap_1, Tw.items_center ]
-            , css [ Tw.rounded_lg, Tw.px_2, Tw.py_1, Tw.bg_color Twc.gray_200 ]
+            , css [ Tw.rounded_lg, Tw.px_2, Tw.py_1, Tw.bg_color Twt.gray_200 ]
             , Events.onClick (LanguageSelected language)
             ]
             [ radioIcon
@@ -379,7 +379,7 @@ viewDialog content =
     Html.div
         [ css [ Tw.w_8over12, Tw.max_h_80, Tw.p_4 ]
         , css [ Tw.absolute ]
-        , css [ Tw.bg_color Twc.white, Tw.drop_shadow_xl ]
+        , css [ Tw.bg_color Twt.white, Tw.drop_shadow_xl ]
         , css [ Tw.rounded_xl ]
         ]
         [ content ]
@@ -419,16 +419,16 @@ viewDoneButton language showing disabled =
         let
             conditionalStyles =
                 if disabled then
-                    [ css [ Tw.bg_color Twc.gray_200, Tw.cursor_not_allowed ] ]
+                    [ css [ Tw.bg_color Twt.gray_200, Tw.cursor_not_allowed ] ]
 
                 else
-                    [ css [ Tw.bg_color Twc.purple_500 ]
+                    [ css [ Tw.bg_color Twt.purple_500 ]
                     , Events.onClick ClickedDone
                     ]
         in
         Html.button
             ([ css [ Tw.w_32, Tw.h_10, Tw.rounded_lg ]
-             , css [ Tw.text_color Twc.white ]
+             , css [ Tw.text_color Twt.white ]
              ]
                 ++ conditionalStyles
             )
@@ -577,7 +577,7 @@ viewDie dieColor pips rotationTurns showOrder =
         ]
 
 
-viewDiePip : Twc.Color -> Int -> Int -> Svg Msg
+viewDiePip : Twt.Color -> Int -> Int -> Svg Msg
 viewDiePip twColor xOffset yOffset =
     Svg.circle
         [ Svga.cx (String.fromInt (xOffset * 3))
@@ -688,7 +688,7 @@ viewNumCell color num status =
          , mergeIf (status == Xed)
             [ viewX colors.b ]
          , mergeIf (status == Picked)
-            [ viewX Twc.purple_500 ]
+            [ viewX Twt.purple_500 ]
          , mergeIf (status == Passed)
             [ viewStrike colors.fg ]
          ]
@@ -718,7 +718,7 @@ viewLockCell color xed =
         )
 
 
-viewX : Twc.Color -> Svg Msg
+viewX : Twt.Color -> Svg Msg
 viewX twColor =
     Svg.svg
         [ Svga.viewBox "-6 -6 12 12"
@@ -734,7 +734,7 @@ viewX twColor =
         ]
 
 
-viewStrike : Twc.Color -> Svg Msg
+viewStrike : Twt.Color -> Svg Msg
 viewStrike twColor =
     Svg.svg
         [ Svga.viewBox "-6 -6 12 12"
@@ -843,8 +843,8 @@ viewScoreboard language board =
         , between "−"
         , viewScoreboardPoints language (getFaultColors True True).fg (Board.faults board) (Board.faultPoints board)
         , between "="
-        , viewScoreboardSquare Twc.black
-            [ Html.div [ css [ Tw.font_bold, Tw.text_2xl, Tw.text_color Twc.black ] ]
+        , viewScoreboardSquare Twt.black
+            [ Html.div [ css [ Tw.font_bold, Tw.text_2xl, Tw.text_color Twt.black ] ]
                 [ Html.text (String.fromInt (Board.points board) ++ (Texts.for language).p) ]
             ]
         ]
@@ -863,7 +863,7 @@ viewScoreboardColorPoints language color row =
         (Row.points (Color.growth color) row)
 
 
-viewScoreboardPoints : Language -> Twc.Color -> Int -> Int -> Html Msg
+viewScoreboardPoints : Language -> Twt.Color -> Int -> Int -> Html Msg
 viewScoreboardPoints language twColor xs points =
     viewScoreboardSquare twColor
         [ Html.div [ css [ Tw.flex, Tw.flex_row, Tw.items_center ] ]
@@ -881,7 +881,7 @@ viewScoreboardPoints language twColor xs points =
         ]
 
 
-viewScoreboardSquare : Twc.Color -> List (Html Msg) -> Html Msg
+viewScoreboardSquare : Twt.Color -> List (Html Msg) -> Html Msg
 viewScoreboardSquare twColor content =
     Html.div
         [ css [ Tw.w_24, Tw.h_20 ]
@@ -1262,94 +1262,94 @@ mergeIf condition items =
 -- COLORS
 
 
-getColors : Color -> CellStatus -> { fg : Twc.Color, bg : Twc.Color, b : Twc.Color }
+getColors : Color -> CellStatus -> { fg : Twt.Color, bg : Twt.Color, b : Twt.Color }
 getColors color status =
     case ( status, color ) of
         ( Available, Red ) ->
-            { fg = Twc.red_500, bg = Twc.purple_50, b = Twc.purple_500 }
+            { fg = Twt.red_500, bg = Twt.purple_50, b = Twt.purple_500 }
 
         ( Available, Yellow ) ->
-            { fg = Twc.yellow_500, bg = Twc.purple_50, b = Twc.purple_500 }
+            { fg = Twt.yellow_500, bg = Twt.purple_50, b = Twt.purple_500 }
 
         ( Available, Green ) ->
-            { fg = Twc.green_500, bg = Twc.purple_50, b = Twc.purple_500 }
+            { fg = Twt.green_500, bg = Twt.purple_50, b = Twt.purple_500 }
 
         ( Available, Blue ) ->
-            { fg = Twc.blue_500, bg = Twc.purple_50, b = Twc.purple_500 }
+            { fg = Twt.blue_500, bg = Twt.purple_50, b = Twt.purple_500 }
 
         ( Picked, Red ) ->
-            { fg = Twc.red_500, bg = Twc.purple_900, b = Twc.purple_500 }
+            { fg = Twt.red_500, bg = Twt.purple_900, b = Twt.purple_500 }
 
         ( Picked, Yellow ) ->
-            { fg = Twc.yellow_500, bg = Twc.purple_900, b = Twc.purple_500 }
+            { fg = Twt.yellow_500, bg = Twt.purple_900, b = Twt.purple_500 }
 
         ( Picked, Green ) ->
-            { fg = Twc.green_500, bg = Twc.purple_900, b = Twc.purple_500 }
+            { fg = Twt.green_500, bg = Twt.purple_900, b = Twt.purple_500 }
 
         ( Picked, Blue ) ->
-            { fg = Twc.blue_500, bg = Twc.purple_900, b = Twc.purple_500 }
+            { fg = Twt.blue_500, bg = Twt.purple_900, b = Twt.purple_500 }
 
         ( Xed, Red ) ->
-            { fg = Twc.red_500, bg = Twc.red_50, b = Twc.red_700 }
+            { fg = Twt.red_500, bg = Twt.red_50, b = Twt.red_700 }
 
         ( Xed, Yellow ) ->
-            { fg = Twc.yellow_500, bg = Twc.yellow_50, b = Twc.yellow_700 }
+            { fg = Twt.yellow_500, bg = Twt.yellow_50, b = Twt.yellow_700 }
 
         ( Xed, Green ) ->
-            { fg = Twc.green_500, bg = Twc.green_50, b = Twc.green_700 }
+            { fg = Twt.green_500, bg = Twt.green_50, b = Twt.green_700 }
 
         ( Xed, Blue ) ->
-            { fg = Twc.blue_500, bg = Twc.blue_50, b = Twc.blue_700 }
+            { fg = Twt.blue_500, bg = Twt.blue_50, b = Twt.blue_700 }
 
         ( Passed, Red ) ->
-            { fg = Twc.gray_200, bg = Twc.gray_50, b = Twc.red_700 }
+            { fg = Twt.gray_200, bg = Twt.gray_50, b = Twt.red_700 }
 
         ( Passed, Yellow ) ->
-            { fg = Twc.gray_200, bg = Twc.gray_50, b = Twc.yellow_700 }
+            { fg = Twt.gray_200, bg = Twt.gray_50, b = Twt.yellow_700 }
 
         ( Passed, Green ) ->
-            { fg = Twc.gray_200, bg = Twc.gray_50, b = Twc.green_700 }
+            { fg = Twt.gray_200, bg = Twt.gray_50, b = Twt.green_700 }
 
         ( Passed, Blue ) ->
-            { fg = Twc.gray_200, bg = Twc.gray_50, b = Twc.blue_700 }
+            { fg = Twt.gray_200, bg = Twt.gray_50, b = Twt.blue_700 }
 
         ( Unavailable, Red ) ->
-            { fg = Twc.red_200, bg = Twc.red_50, b = Twc.red_700 }
+            { fg = Twt.red_200, bg = Twt.red_50, b = Twt.red_700 }
 
         ( Unavailable, Yellow ) ->
-            { fg = Twc.yellow_200, bg = Twc.yellow_50, b = Twc.yellow_700 }
+            { fg = Twt.yellow_200, bg = Twt.yellow_50, b = Twt.yellow_700 }
 
         ( Unavailable, Green ) ->
-            { fg = Twc.green_200, bg = Twc.green_50, b = Twc.green_700 }
+            { fg = Twt.green_200, bg = Twt.green_50, b = Twt.green_700 }
 
         ( Unavailable, Blue ) ->
-            { fg = Twc.blue_200, bg = Twc.blue_50, b = Twc.blue_700 }
+            { fg = Twt.blue_200, bg = Twt.blue_50, b = Twt.blue_700 }
 
 
-getFaultColors : Bool -> Bool -> { fg : Twc.Color, bg : Twc.Color }
+getFaultColors : Bool -> Bool -> { fg : Twt.Color, bg : Twt.Color }
 getFaultColors active xed =
     case ( xed, active ) of
         ( False, True ) ->
-            { fg = Twc.purple_500, bg = Twc.purple_50 }
+            { fg = Twt.purple_500, bg = Twt.purple_50 }
 
         ( _, _ ) ->
-            { fg = Twc.gray_400, bg = Twc.gray_50 }
+            { fg = Twt.gray_400, bg = Twt.gray_50 }
 
 
-getDieColors : DieColor -> { face : Twc.Color, border : Twc.Color, pip : Twc.Color }
+getDieColors : DieColor -> { face : Twt.Color, border : Twt.Color, pip : Twt.Color }
 getDieColors dieColor =
     case dieColor of
         DieWhite ->
-            { face = Twc.white, border = Twc.gray_300, pip = Twc.black }
+            { face = Twt.white, border = Twt.gray_300, pip = Twt.black }
 
         DieRed ->
-            { face = Twc.red_500, border = Twc.red_700, pip = Twc.white }
+            { face = Twt.red_500, border = Twt.red_700, pip = Twt.white }
 
         DieYellow ->
-            { face = Twc.yellow_500, border = Twc.yellow_700, pip = Twc.white }
+            { face = Twt.yellow_500, border = Twt.yellow_700, pip = Twt.white }
 
         DieGreen ->
-            { face = Twc.green_500, border = Twc.green_700, pip = Twc.white }
+            { face = Twt.green_500, border = Twt.green_700, pip = Twt.white }
 
         DieBlue ->
-            { face = Twc.blue_500, border = Twc.blue_700, pip = Twc.white }
+            { face = Twt.blue_500, border = Twt.blue_700, pip = Twt.white }
