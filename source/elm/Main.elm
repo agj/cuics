@@ -984,7 +984,7 @@ viewScoreboard language board =
         , viewScoreboardPoints language (getFaultColors True True).fg (Board.faults board) (Board.faultPoints board)
         , between "="
         , viewScoreboardSquare Twt.black
-            [ Html.div [ css [ Tw.font_bold, Tw.text_2xl, Tw.text_color Twt.black ] ]
+            [ Html.div [ css [ Tw.font_bold, Tw.text_xl, Tw.text_color Twt.black ] ]
                 [ Html.text (String.fromInt (Board.points board) ++ (Texts.for language).p) ]
             ]
         ]
@@ -1006,12 +1006,15 @@ viewScoreboardColorPoints language color row =
 viewScoreboardPoints : Language -> Twt.Color -> Int -> Int -> Html Msg
 viewScoreboardPoints language twColor xs points =
     viewScoreboardSquare twColor
-        [ Html.div [ css [ Tw.flex, Tw.flex_row, Tw.items_center ] ]
+        [ Html.div
+            [ css [ Tw.flex, Tw.flex_row, Tw.items_center, Tw.text_sm ]
+            , css [ Css.marginTop (Css.rem -0.5) ]
+            ]
             [ Html.text (String.fromInt xs)
             , Html.div [ css [ Css.marginBottom (Css.rem -0.05) ] ]
                 [ icon (Phosphor.x Phosphor.Bold) ]
             ]
-        , Html.div [ css [ Tw.font_bold, Tw.text_xl, Tw.text_color twColor, Tw.leading_none ] ]
+        , Html.div [ css [ Tw.font_bold, Tw.text_lg, Tw.text_color twColor, Tw.leading_none ] ]
             [ Html.text
                 ("{points}{p}"
                     |> String.replace "{points}" (String.fromInt points)
@@ -1024,9 +1027,9 @@ viewScoreboardPoints language twColor xs points =
 viewScoreboardSquare : Twt.Color -> List (Html Msg) -> Html Msg
 viewScoreboardSquare twColor content =
     Html.div
-        [ css [ Tw.w_24, Tw.h_20 ]
-        , css [ Tw.flex, Tw.flex_col, Tw.gap_1, Tw.items_center, Tw.justify_center ]
-        , css [ Tw.border_4, Tw.border_color twColor, Tw.rounded_lg ]
+        [ css [ Tw.w_20, Tw.h_16 ]
+        , css [ Tw.flex, Tw.flex_col, Tw.gap_0_dot_5, Tw.items_center, Tw.justify_center ]
+        , css [ Tw.border_2, Tw.border_color twColor, Tw.rounded_lg ]
         ]
         content
 
