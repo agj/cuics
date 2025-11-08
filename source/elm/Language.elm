@@ -1,4 +1,20 @@
-module Language exposing (Language(..), Selection, all, code, decoder, decoderFromList, default, defaultSelection, encode, encodeMaybe, name, selected, selectionDecoder, selectionToLanguage, setSelection)
+module Language exposing
+    ( Language(..)
+    , Selection
+    , all
+    , code
+    , decoder
+    , decoderFromList
+    , default
+    , defaultSelection
+    , encode
+    , encodeMaybe
+    , name
+    , selected
+    , selectionDecoder
+    , selectionToLanguage
+    , setSelection
+    )
 
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
@@ -127,21 +143,21 @@ decoder =
                 in
                 case parsed of
                     Just ( language, options ) ->
-                        if language == LanguageTag.Language.en then
+                        if sameLanguage language LanguageTag.Language.en then
                             Decode.succeed English
 
-                        else if language == LanguageTag.Language.es then
+                        else if sameLanguage language LanguageTag.Language.es then
                             Decode.succeed Spanish
 
-                        else if language == LanguageTag.Language.ja then
+                        else if sameLanguage language LanguageTag.Language.ja then
                             Decode.succeed Japanese
 
-                        else if language == LanguageTag.Language.zh then
+                        else if sameLanguage language LanguageTag.Language.zh then
                             if
-                                (options.script == Just LanguageTag.Script.hant)
-                                    || (options.region == Just LanguageTag.Region.tw)
-                                    || (options.region == Just LanguageTag.Region.hk)
-                                    || (options.region == Just LanguageTag.Region.mo)
+                                sameScript options.script LanguageTag.Script.hant
+                                    || sameRegion options.region LanguageTag.Region.tw
+                                    || sameRegion options.region LanguageTag.Region.hk
+                                    || sameRegion options.region LanguageTag.Region.mo
                             then
                                 Decode.succeed ChineseTraditional
 
@@ -190,3 +206,25 @@ encodeMaybe language =
 
         Nothing ->
             Encode.null
+
+
+
+-- INTERNAL
+
+
+sameLanguage : LanguageTag.Language.Language -> LanguageTag.Language.Language -> Bool
+sameLanguage a b =
+    String.toLower (LanguageTag.Language.toCodeString a)
+        == String.toLower (LanguageTag.Language.toCodeString b)
+
+
+sameScript : Maybe LanguageTag.Script.Script -> LanguageTag.Script.Script -> Bool
+sameScript a b =
+    String.toLower (a |> Maybe.map LanguageTag.Script.toCodeString |> Maybe.withDefault "")
+        == String.toLower (LanguageTag.Script.toCodeString b)
+
+
+sameRegion : Maybe LanguageTag.Region.Region -> LanguageTag.Region.Region -> Bool
+sameRegion a b =
+    String.toLower (a |> Maybe.map LanguageTag.Region.toCodeString |> Maybe.withDefault "")
+        == String.toLower (LanguageTag.Region.toCodeString b)
