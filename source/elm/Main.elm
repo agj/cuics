@@ -17,6 +17,7 @@ import List
 import Maybe.Extra
 import Num exposing (Num(..))
 import Phosphor
+import Ports
 import Process
 import Random
 import Random.Extra as Random
@@ -258,8 +259,12 @@ update msg model =
                 ignore
 
         ( _, LanguageSelected selected ) ->
-            ( { model | language = Language.setSelection selected model.language }
-            , Cmd.none
+            let
+                newModel =
+                    { model | language = Language.setSelection selected model.language }
+            in
+            ( newModel
+            , saveSettings newModel
             )
 
         ( _, DialogRequested dialog ) ->
@@ -277,6 +282,11 @@ update msg model =
 
         ( False, _ ) ->
             ignore
+
+
+saveSettings : Model -> Cmd Msg
+saveSettings model =
+    Ports.saveSettings { language = Language.selected model.language }
 
 
 

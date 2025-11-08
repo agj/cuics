@@ -1,6 +1,7 @@
-module Language exposing (Language(..), Selection, all, decoder, decoderFromList, default, defaultSelection, name, selected, selectionDecoder, selectionToLanguage, setSelection)
+module Language exposing (Language(..), Selection, all, code, decoder, decoderFromList, default, defaultSelection, encode, encodeMaybe, name, selected, selectionDecoder, selectionToLanguage, setSelection)
 
 import Json.Decode as Decode exposing (Decoder)
+import Json.Encode as Encode
 import Maybe.Extra
 
 
@@ -53,6 +54,22 @@ name language =
             "繁體中文"
 
 
+code : Language -> String
+code language =
+    case language of
+        Spanish ->
+            "es"
+
+        English ->
+            "en"
+
+        Japanese ->
+            "ja"
+
+        ChineseTraditional ->
+            "zh"
+
+
 selectionToLanguage : Selection -> Language
 selectionToLanguage (Selection selection) =
     selection.selected
@@ -100,7 +117,7 @@ decoderFromList =
     Decode.list (Decode.maybe decoder)
         |> Decode.andThen
             (\list ->
-                case list |> Maybe.Extra.values |> List.head of
+                case List.head (Maybe.Extra.values list) of
                     Just language ->
                         Decode.succeed language
 
@@ -114,3 +131,18 @@ selectionDecoder =
     Decode.map2 (\default_ selected_ -> Selection { default = default_, selected = selected_ })
         (Decode.field "default" decoderFromList)
         (Decode.field "selected" (Decode.maybe decoder))
+
+
+encode : Language -> Decode.Value
+encode language =
+    Encode.string (code language)
+
+
+encodeMaybe : Maybe Language -> Decode.Value
+encodeMaybe language =
+    case language of
+        Just lang ->
+            encode lang
+
+        Nothing ->
+            Encode.null
