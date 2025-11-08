@@ -9,6 +9,7 @@ type alias Texts =
     , p : String
     , default : String
     , language : String
+    , close : String
     }
 
 
@@ -38,6 +39,7 @@ spanish =
     , p = " p"
     , default = "Por defecto"
     , language = "Idioma"
+    , close = "Cerrar"
     }
 
 
@@ -48,6 +50,7 @@ english =
     , p = " p"
     , default = "Default"
     , language = "Language"
+    , close = "Close"
     }
 
 
@@ -58,6 +61,7 @@ japanese =
     , p = "点"
     , default = "初期設定"
     , language = "言語"
+    , close = "閉じる"
     }
 
 
@@ -68,6 +72,7 @@ chineseTraditional =
     , p = "分"
     , default = "預設值"
     , language = "語言"
+    , close = "關閉"
     }
 
 
@@ -78,4 +83,5 @@ chineseSimplified =
     , p = "分"
     , default = "预设值"
     , language = "语言"
+    , close = "关闭"
     }

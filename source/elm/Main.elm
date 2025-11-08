@@ -428,13 +428,17 @@ viewSettingsButton =
 
 viewSettingsDialog : Language.Selection -> Html Msg
 viewSettingsDialog languageSelection =
+    let
+        language =
+            Language.selectionToLanguage languageSelection
+    in
     viewDialog
         (Html.div [ css [ Tw.flex, Tw.flex_col, Tw.gap_5 ] ]
             [ viewSettingsGroup
-                [ Html.text (Texts.for (Language.selectionToLanguage languageSelection)).language
+                [ Html.text (Texts.for language).language
                 , viewLanguageSelection languageSelection
                 ]
-            , viewCloseButton
+            , viewCloseButton language
             ]
         )
 
@@ -505,8 +509,8 @@ viewLanguageRadioButton interfaceLanguage buttonLanguage selected =
         ]
 
 
-viewCloseButton : Html Msg
-viewCloseButton =
+viewCloseButton : Language -> Html Msg
+viewCloseButton language =
     let
         colors =
             getButtonColors True
@@ -516,7 +520,7 @@ viewCloseButton =
         , css [ Tw.text_color colors.fg, Tw.bg_color colors.bg ]
         , Events.onClick (DialogRequested NoDialog)
         ]
-        [ Html.text "Close" ]
+        [ Html.text (Texts.for language).close ]
 
 
 
