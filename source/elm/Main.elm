@@ -420,7 +420,7 @@ viewLanguageRadioButton language selected =
                     [ icon (Phosphor.radioButton Phosphor.Fill) ]
 
             else
-                Html.div [ css [ Tw.text_xl, Tw.text_color Twt.gray_400 ] ]
+                Html.div [ css [ Tw.text_xl, Tw.text_color Twt.purple_300 ] ]
                     [ icon (Phosphor.radioButton Phosphor.Regular) ]
 
         colors =
@@ -480,11 +480,10 @@ viewDoneButton language showing disabled =
         let
             conditionalStyles =
                 if disabled then
-                    [ css [ Tw.cursor_not_allowed ] ]
+                    [ Attributes.disabled True ]
 
                 else
-                    [ Events.onClick ClickedDone
-                    ]
+                    [ Events.onClick ClickedDone ]
 
             colors =
                 getButtonColors (not disabled)
