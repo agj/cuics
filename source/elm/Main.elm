@@ -47,10 +47,16 @@ main =
 type alias Model =
     { board : Board
     , turn : Turn
+    , dialog : Dialog
     , viewport : Viewport
     , seed : Random.Seed
     , language : Language.Selection
     }
+
+
+type Dialog
+    = NoDialog
+    | SettingsDialog
 
 
 type CellStatus
@@ -116,6 +122,7 @@ init flags =
     in
     ( { board = Board.init
       , turn = NotTurn
+      , dialog = NoDialog
       , viewport = viewport
       , seed = Random.initialSeed 12345
       , language = language
@@ -143,6 +150,7 @@ type Msg
     | ClickedDone
     | ClickedFault
     | LanguageSelected (Maybe Language)
+    | DialogDismissed
     | ViewportResized Int Int
 
 
@@ -245,6 +253,11 @@ update msg model =
             , Cmd.none
             )
 
+        DialogDismissed ->
+            ( { model | dialog = NoDialog }
+            , Cmd.none
+            )
+
         ViewportResized width height ->
             ( { model | viewport = { width = width, height = height } }
             , Cmd.none
@@ -322,15 +335,19 @@ viewContent model =
         ]
         [ viewTop language model.board model.turn
         , viewBoard language model.board model.turn
-        , viewDialog
-            (Html.div [ css [ Tw.flex, Tw.flex_row, Tw.gap_1 ] ]
-                ([ [ viewLanguageRadioButton Nothing (selectedLanguage == Nothing) ]
-                 , Language.all
-                    |> List.map (\lang -> viewLanguageRadioButton (Just lang) (selectedLanguage == Just lang))
-                 ]
-                    |> List.concat
+        , if model.dialog == SettingsDialog then
+            viewDialog
+                (Html.div [ css [ Tw.flex, Tw.flex_row, Tw.gap_1 ] ]
+                    ([ [ viewLanguageRadioButton Nothing (selectedLanguage == Nothing) ]
+                     , Language.all
+                        |> List.map (\lang -> viewLanguageRadioButton (Just lang) (selectedLanguage == Just lang))
+                     ]
+                        |> List.concat
+                    )
                 )
-            )
+
+          else
+            Html.text ""
         ]
 
 
@@ -381,6 +398,7 @@ viewDialog content =
         , css [ Tw.absolute ]
         , css [ Tw.bg_color Twt.white, Tw.drop_shadow_xl ]
         , css [ Tw.rounded_xl ]
+        , Events.onClick DialogDismissed
         ]
         [ content ]
 
