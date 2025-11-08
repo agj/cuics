@@ -49,7 +49,7 @@ type alias Model =
     , turn : Turn
     , viewport : Viewport
     , seed : Random.Seed
-    , language : Language
+    , language : Language.Selection
     }
 
 
@@ -109,10 +109,10 @@ init flags =
             Decode.decodeValue (Decode.field "viewport" viewportDecoder) flags
                 |> Result.withDefault { width = 1025, height = 768 }
 
-        language : Language
+        language : Language.Selection
         language =
-            Decode.decodeValue (Decode.field "languages" Language.decoderFromList) flags
-                |> Result.withDefault Language.English
+            Decode.decodeValue (Decode.field "languages" Language.selectionDecoder) flags
+                |> Result.withDefault Language.defaultSelection
     in
     ( { board = Board.init
       , turn = NotTurn
@@ -142,6 +142,7 @@ type Msg
     | ClickedPickedCell
     | ClickedDone
     | ClickedFault
+    | LanguageSelected (Maybe Language)
     | ViewportResized Int Int
 
 
@@ -239,6 +240,11 @@ update msg model =
             else
                 ( model, Cmd.none )
 
+        LanguageSelected selected ->
+            ( { model | language = Language.setSelection selected model.language }
+            , Cmd.none
+            )
+
         ViewportResized width height ->
             ( { model | viewport = { width = width, height = height } }
             , Cmd.none
@@ -297,17 +303,86 @@ viewContent model =
         contentHeight : Float
         contentHeight =
             35
+
+        language : Language
+        language =
+            Language.selectionToLanguage model.language
+
+        selectedLanguage : Maybe Language
+        selectedLanguage =
+            Language.selected model.language
     in
     Html.div
         [ css [ Css.width (Css.rem contentWidth), Css.height (Css.rem contentHeight) ]
         , css [ Tw.flex, Tw.flex_col, Tw.justify_center, Tw.items_center, Tw.gap_2, Tw.shrink_0 ]
+        , css [ Tw.relative ]
         , css [ Tw.bg_color Twc.gray_50 ]
         , css [ Tw.font_sans ]
         , css [ Css.transforms [ Css.scale scale ] ]
         ]
-        [ viewTop model.language model.board model.turn
-        , viewBoard model.language model.board model.turn
+        [ viewTop language model.board model.turn
+        , viewBoard language model.board model.turn
+        , viewDialog
+            (Html.div [ css [ Tw.flex, Tw.flex_row, Tw.gap_1 ] ]
+                ([ [ viewLanguageRadioButton Nothing (selectedLanguage == Nothing) ]
+                 , Language.all
+                    |> List.map (\lang -> viewLanguageRadioButton (Just lang) (selectedLanguage == Just lang))
+                 ]
+                    |> List.concat
+                )
+            )
         ]
+
+
+viewLanguageRadioButton : Maybe Language -> Bool -> Html Msg
+viewLanguageRadioButton language selected =
+    let
+        languageName : String
+        languageName =
+            language |> Maybe.map Language.name |> Maybe.withDefault "Default"
+
+        radioIcon : Html Msg
+        radioIcon =
+            if selected then
+                Html.div [ css [ Tw.text_color Twc.blue_800 ] ]
+                    [ icon (Phosphor.radioButton Phosphor.Fill) ]
+
+            else
+                Html.div [ css [ Tw.text_color Twc.gray_400 ] ]
+                    [ icon (Phosphor.radioButton Phosphor.Regular) ]
+    in
+    Html.label []
+        [ Html.input
+            [ Attributes.type_ "radio"
+            , Attributes.value languageName
+            , Attributes.name "language"
+            , css [ Tw.hidden ]
+            ]
+            []
+        , Html.button
+            [ css [ Tw.flex, Tw.flex_row, Tw.gap_1, Tw.items_center ]
+            , css [ Tw.rounded_lg, Tw.px_2, Tw.py_1, Tw.bg_color Twc.gray_200 ]
+            , Events.onClick (LanguageSelected language)
+            ]
+            [ radioIcon
+            , Html.text languageName
+            ]
+        ]
+
+
+
+-- VIEW DIALOG
+
+
+viewDialog : Html Msg -> Html Msg
+viewDialog content =
+    Html.div
+        [ css [ Tw.w_8over12, Tw.max_h_80, Tw.p_4 ]
+        , css [ Tw.absolute ]
+        , css [ Tw.bg_color Twc.white, Tw.drop_shadow_xl ]
+        , css [ Tw.rounded_xl ]
+        ]
+        [ content ]
 
 
 
