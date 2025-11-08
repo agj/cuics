@@ -500,7 +500,7 @@ viewLanguageRadioButton interfaceLanguage buttonLanguage selected =
         , Html.button
             [ css [ Tw.flex, Tw.flex_row, Tw.gap_1, Tw.items_center, Tw.whitespace_nowrap ]
             , css [ Tw.text_color colors.fg ]
-            , css [ Tw.rounded_lg, Tw.px_2, Tw.py_1, Tw.bg_color colors.bg ]
+            , css [ Tw.rounded_lg, Tw.px_3, Tw.py_1, Tw.bg_color colors.bg ]
             , Events.onClick (LanguageSelected buttonLanguage)
             ]
             [ radioIcon
@@ -515,12 +515,14 @@ viewCloseButton language =
         colors =
             getButtonColors True
     in
-    Html.button
-        [ css [ Tw.px_2, Tw.py_1, Tw.rounded_lg, Tw.grow_0 ]
-        , css [ Tw.text_color colors.fg, Tw.bg_color colors.bg ]
-        , Events.onClick (DialogRequested NoDialog)
+    Html.div [ css [ Tw.flex, Tw.flex_row, Tw.justify_center ] ]
+        [ Html.button
+            [ css [ Tw.px_3, Tw.py_1, Tw.rounded_lg ]
+            , css [ Tw.text_color colors.fg, Tw.bg_color colors.bg ]
+            , Events.onClick (DialogRequested NoDialog)
+            ]
+            [ Html.text (Texts.for language).close ]
         ]
-        [ Html.text (Texts.for language).close ]
 
 
 
