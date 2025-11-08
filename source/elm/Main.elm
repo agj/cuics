@@ -431,7 +431,7 @@ viewSettingsDialog languageSelection =
     viewDialog
         (Html.div [ css [ Tw.flex, Tw.flex_col, Tw.gap_5 ] ]
             [ viewSettingsGroup
-                [ Html.text "Language"
+                [ Html.text (Texts.for (Language.selectionToLanguage languageSelection)).language
                 , viewLanguageSelection languageSelection
                 ]
             , viewCloseButton

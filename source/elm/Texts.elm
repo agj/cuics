@@ -8,6 +8,7 @@ type alias Texts =
     , faults : String
     , p : String
     , default : String
+    , language : String
     }
 
 
@@ -36,6 +37,7 @@ spanish =
     , faults = "Faltas"
     , p = " p"
     , default = "Por defecto"
+    , language = "Idioma"
     }
 
 
@@ -45,6 +47,7 @@ english =
     , faults = "Faults"
     , p = " p"
     , default = "Default"
+    , language = "Language"
     }
 
 
@@ -54,6 +57,7 @@ japanese =
     , faults = "欠点"
     , p = "点"
     , default = "初期設定"
+    , language = "言語"
     }
 
 
@@ -63,6 +67,7 @@ chineseTraditional =
     , faults = "錯誤"
     , p = "分"
     , default = "預設值"
+    , language = "語言"
     }
 
 
@@ -72,4 +77,5 @@ chineseSimplified =
     , faults = "错误"
     , p = "分"
     , default = "预设值"
+    , language = "语言"
     }
