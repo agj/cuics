@@ -23,6 +23,7 @@ import Random.Extra as Random
 import Row exposing (Row)
 import Svg.Styled as Svg exposing (Svg)
 import Svg.Styled.Attributes as Svga
+import Tailwind.Color as Twc
 import Tailwind.Theme as Twt
 import Tailwind.Utilities as Tw
 import Task
@@ -152,6 +153,7 @@ type Msg
     | LanguageSelected (Maybe Language)
     | DialogRequested Dialog
     | ViewportResized Int Int
+    | NoOp
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -270,6 +272,9 @@ update msg model =
             , Cmd.none
             )
 
+        ( _, NoOp ) ->
+            ignore
+
         ( False, _ ) ->
             ignore
 
@@ -354,13 +359,19 @@ viewContent model =
 viewDialog : Html Msg -> Html Msg
 viewDialog content =
     Html.div
-        [ css [ Tw.w_8over12, Tw.max_h_80, Tw.p_4 ]
+        [ css [ Tw.w_full, Tw.h_full, Tw.flex, Tw.items_center, Tw.justify_center ]
+        , css [ Tw.bg_color (Twc.withOpacity Twt.opacity50 Twt.gray_200) ]
         , css [ Tw.absolute ]
-        , css [ Tw.bg_color Twt.white, Tw.drop_shadow_xl ]
-        , css [ Tw.rounded_xl ]
         , Events.onClick (DialogRequested NoDialog)
         ]
-        [ content ]
+        [ Html.div
+            [ css [ Tw.w_8over12, Tw.max_h_80, Tw.p_6 ]
+            , css [ Tw.bg_color Twt.white, Tw.drop_shadow_xl ]
+            , css [ Tw.rounded_xl ]
+            , Events.stopPropagationOn "click" (Decode.succeed ( NoOp, True ))
+            ]
+            [ content ]
+        ]
 
 
 
