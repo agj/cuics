@@ -8,6 +8,7 @@ import Constants
 import Css
 import Css.Animations
 import Css.Global
+import Css.Transitions exposing (transition)
 import Html.Styled as Html exposing (Attribute, Html)
 import Html.Styled.Attributes as Attributes exposing (class, css)
 import Html.Styled.Events as Events
@@ -379,6 +380,28 @@ viewDialog content =
             , css [ Tw.bg_color Twt.white, Tw.drop_shadow_xl ]
             , css [ Tw.rounded_xl ]
             , Events.stopPropagationOn "click" (Decode.succeed ( NoOp, True ))
+
+            -- Appearance animation.
+            , css
+                [ Css.opacity (Css.num 0)
+                , Css.animationName
+                    (Css.Animations.keyframes
+                        [ ( 0
+                          , [ Css.Animations.transform [ Css.translateY (Css.rem 1) ]
+                            , Css.Animations.opacity (Css.num 0)
+                            ]
+                          )
+                        , ( 100
+                          , [ Css.Animations.transform [ Css.translateY (Css.rem 0) ]
+                            , Css.Animations.opacity (Css.num 1)
+                            ]
+                          )
+                        ]
+                    )
+                , Css.animationDuration (Css.ms 250)
+                , Css.property "animation-timing-function" "ease-out"
+                , Css.property "animation-fill-mode" "forwards"
+                ]
             ]
             [ content ]
         ]
