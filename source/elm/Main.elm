@@ -358,7 +358,7 @@ viewContent model =
         , viewBoard language model.board model.turn
         , viewSettingsButton
         , viewIfLazy (model.dialog == SettingsDialog)
-            (\() -> viewSettingsDialog (Language.selected model.language))
+            (\() -> viewSettingsDialog model.language)
         ]
 
 
@@ -403,25 +403,51 @@ viewSettingsButton =
         [ icon (Phosphor.wrench Phosphor.Bold) ]
 
 
-viewSettingsDialog : Maybe Language -> Html Msg
-viewSettingsDialog selectedLanguage =
+viewSettingsDialog : Language.Selection -> Html Msg
+viewSettingsDialog languageSelection =
     viewDialog
-        (Html.div [ css [ Tw.flex, Tw.flex_row, Tw.gap_1 ] ]
-            ([ [ viewLanguageRadioButton Nothing (selectedLanguage == Nothing) ]
-             , Language.all
-                |> List.map (\lang -> viewLanguageRadioButton (Just lang) (selectedLanguage == Just lang))
-             ]
-                |> List.concat
-            )
+        (Html.div [ css [ Tw.flex, Tw.flex_col, Tw.gap_5 ] ]
+            [ viewSettingsGroup
+                [ Html.text "Language"
+                , viewLanguageSelection languageSelection
+                ]
+            , viewCloseButton
+            ]
         )
 
 
-viewLanguageRadioButton : Maybe Language -> Bool -> Html Msg
-viewLanguageRadioButton language selected =
+viewSettingsGroup : List (Html Msg) -> Html Msg
+viewSettingsGroup children =
+    Html.div [ css [ Tw.flex, Tw.flex_col, Tw.gap_2 ] ]
+        children
+
+
+viewLanguageSelection : Language.Selection -> Html Msg
+viewLanguageSelection languageSelection =
+    let
+        interfaceLanguage =
+            Language.selectionToLanguage languageSelection
+
+        userSelectedLanguage =
+            Language.selected languageSelection
+    in
+    Html.div [ css [ Tw.flex, Tw.flex_row, Tw.flex_wrap, Tw.gap_1 ] ]
+        ([ [ viewLanguageRadioButton interfaceLanguage Nothing (userSelectedLanguage == Nothing) ]
+         , Language.all
+            |> List.map (\lang -> viewLanguageRadioButton interfaceLanguage (Just lang) (userSelectedLanguage == Just lang))
+         ]
+            |> List.concat
+        )
+
+
+viewLanguageRadioButton : Language -> Maybe Language -> Bool -> Html Msg
+viewLanguageRadioButton interfaceLanguage buttonLanguage selected =
     let
         languageName : String
         languageName =
-            language |> Maybe.map Language.name |> Maybe.withDefault "Default"
+            buttonLanguage
+                |> Maybe.map Language.name
+                |> Maybe.withDefault (Texts.for interfaceLanguage).default
 
         radioIcon : Html Msg
         radioIcon =
@@ -445,15 +471,29 @@ viewLanguageRadioButton language selected =
             ]
             []
         , Html.button
-            [ css [ Tw.flex, Tw.flex_row, Tw.gap_1, Tw.items_center ]
+            [ css [ Tw.flex, Tw.flex_row, Tw.gap_1, Tw.items_center, Tw.whitespace_nowrap ]
             , css [ Tw.text_color colors.fg ]
             , css [ Tw.rounded_lg, Tw.px_2, Tw.py_1, Tw.bg_color colors.bg ]
-            , Events.onClick (LanguageSelected language)
+            , Events.onClick (LanguageSelected buttonLanguage)
             ]
             [ radioIcon
             , Html.text languageName
             ]
         ]
+
+
+viewCloseButton : Html Msg
+viewCloseButton =
+    let
+        colors =
+            getButtonColors True
+    in
+    Html.button
+        [ css [ Tw.px_2, Tw.py_1, Tw.rounded_lg, Tw.grow_0 ]
+        , css [ Tw.text_color colors.fg, Tw.bg_color colors.bg ]
+        , Events.onClick (DialogRequested NoDialog)
+        ]
+        [ Html.text "Close" ]
 
 
 

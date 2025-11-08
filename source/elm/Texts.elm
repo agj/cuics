@@ -7,6 +7,7 @@ type alias Texts =
     { done : String
     , faults : String
     , p : String
+    , default : String
     }
 
 
@@ -31,6 +32,7 @@ spanish =
     { done = "Terminar turno"
     , faults = "Faltas"
     , p = " p"
+    , default = "Por defecto"
     }
 
 
@@ -39,6 +41,7 @@ english =
     { done = "End turn"
     , faults = "Faults"
     , p = " p"
+    , default = "Default"
     }
 
 
@@ -47,6 +50,7 @@ japanese =
     { done = "決定"
     , faults = "欠点"
     , p = "点"
+    , default = "初期設定"
     }
 
 
@@ -55,4 +59,5 @@ chineseTraditional =
     { done = "決定"
     , faults = "錯誤"
     , p = "分"
+    , default = "預設值"
     }
