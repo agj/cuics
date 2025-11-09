@@ -13,6 +13,10 @@ build: install
 develop: install qr
     pnpm exec vite --port {{port}} --clearScreen false --host
 
+# Deploy on Github Pages.
+deploy-ghpages: build
+    pnpm exec gh-pages -d dist
+
 [private]
 install:
     pnpm install
