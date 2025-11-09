@@ -9,6 +9,7 @@ import Css
 import Css.Animations
 import Css.Global
 import Css.Transitions exposing (transition)
+import Dice exposing (Dice)
 import Html.Styled as Html exposing (Attribute, Html)
 import Html.Styled.Attributes as Attributes exposing (class, css)
 import Html.Styled.Events as Events
@@ -77,23 +78,11 @@ type Turn
 
 
 type alias DiceThrow =
-    { dieWhite1 : Pips
-    , dieWhite2 : Pips
-    , dieRed : Pips
-    , dieYellow : Pips
-    , dieGreen : Pips
-    , dieBlue : Pips
-    }
+    Dice Pips
 
 
 type alias DiceRotations =
-    { dieWhite1 : Float
-    , dieWhite2 : Float
-    , dieRed : Float
-    , dieYellow : Float
-    , dieGreen : Float
-    , dieBlue : Float
-    }
+    Dice Float
 
 
 type alias Pick =
@@ -626,12 +615,12 @@ viewDice diceThrow diceRotations lockedRows =
                 Just v
     in
     Html.div [ css [ Tw.flex, Tw.flex_row, Tw.p_3, Tw.gap_3 ] ]
-        ([ Just (viewDie DieWhite diceThrow.dieWhite1 diceRotations.dieWhite1)
-         , Just (viewDie DieWhite diceThrow.dieWhite2 diceRotations.dieWhite2)
-         , ifNotLocked Red (viewDie DieRed diceThrow.dieRed diceRotations.dieRed)
-         , ifNotLocked Yellow (viewDie DieYellow diceThrow.dieYellow diceRotations.dieYellow)
-         , ifNotLocked Green (viewDie DieGreen diceThrow.dieGreen diceRotations.dieGreen)
-         , ifNotLocked Blue (viewDie DieBlue diceThrow.dieBlue diceRotations.dieBlue)
+        ([ Just (viewDie DieWhite (Dice.get Dice.White1 diceThrow) (Dice.get Dice.White1 diceRotations))
+         , Just (viewDie DieWhite (Dice.get Dice.White2 diceThrow) (Dice.get Dice.White2 diceRotations))
+         , ifNotLocked Red (viewDie DieRed (Dice.get Dice.Red diceThrow) (Dice.get Dice.Red diceRotations))
+         , ifNotLocked Yellow (viewDie DieYellow (Dice.get Dice.Yellow diceThrow) (Dice.get Dice.Yellow diceRotations))
+         , ifNotLocked Green (viewDie DieGreen (Dice.get Dice.Green diceThrow) (Dice.get Dice.Green diceRotations))
+         , ifNotLocked Blue (viewDie DieBlue (Dice.get Dice.Blue diceThrow) (Dice.get Dice.Blue diceRotations))
          ]
             |> Maybe.Extra.values
             |> List.indexedMap (\index v -> v index)
@@ -1180,30 +1169,30 @@ getFirstPickType diceThrow pick =
 
 getWhitePicks : DiceThrow -> List Num
 getWhitePicks diceThrow =
-    [ addPips diceThrow.dieWhite1 diceThrow.dieWhite2 ]
+    [ addPips (Dice.get Dice.White1 diceThrow) (Dice.get Dice.White2 diceThrow) ]
 
 
 getColoredPicks : DiceThrow -> Color -> List Num
 getColoredPicks diceThrow color =
     case color of
         Red ->
-            [ addPips diceThrow.dieWhite1 diceThrow.dieRed
-            , addPips diceThrow.dieWhite2 diceThrow.dieRed
+            [ addPips (Dice.get Dice.White1 diceThrow) (Dice.get Dice.Red diceThrow)
+            , addPips (Dice.get Dice.White2 diceThrow) (Dice.get Dice.Red diceThrow)
             ]
 
         Yellow ->
-            [ addPips diceThrow.dieWhite1 diceThrow.dieYellow
-            , addPips diceThrow.dieWhite2 diceThrow.dieYellow
+            [ addPips (Dice.get Dice.White1 diceThrow) (Dice.get Dice.Yellow diceThrow)
+            , addPips (Dice.get Dice.White2 diceThrow) (Dice.get Dice.Yellow diceThrow)
             ]
 
         Green ->
-            [ addPips diceThrow.dieWhite1 diceThrow.dieGreen
-            , addPips diceThrow.dieWhite2 diceThrow.dieGreen
+            [ addPips (Dice.get Dice.White1 diceThrow) (Dice.get Dice.Green diceThrow)
+            , addPips (Dice.get Dice.White2 diceThrow) (Dice.get Dice.Green diceThrow)
             ]
 
         Blue ->
-            [ addPips diceThrow.dieWhite1 diceThrow.dieBlue
-            , addPips diceThrow.dieWhite2 diceThrow.dieBlue
+            [ addPips (Dice.get Dice.White1 diceThrow) (Dice.get Dice.Blue diceThrow)
+            , addPips (Dice.get Dice.White2 diceThrow) (Dice.get Dice.Blue diceThrow)
             ]
 
 
@@ -1263,7 +1252,7 @@ throwDice seed =
 
 diceThrowGenerator : Random.Generator DiceThrow
 diceThrowGenerator =
-    Random.constant DiceThrow
+    Random.constant Dice.build
         |> Random.andMap pipsGenerator
         |> Random.andMap pipsGenerator
         |> Random.andMap pipsGenerator
@@ -1300,7 +1289,7 @@ pipsGenerator =
 
 diceRotationsGenerator : Random.Generator DiceRotations
 diceRotationsGenerator =
-    Random.constant DiceRotations
+    Random.constant Dice.build
         |> Random.andMap diceRotationGenerator
         |> Random.andMap diceRotationGenerator
         |> Random.andMap diceRotationGenerator
