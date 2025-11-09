@@ -1,0 +1,11 @@
+# Editors.
+.helix/
+.vscode/
+
+# Cache.
+elm-stuff/
+node_modules/
+.direnv/
+
+# Cruft.
+.DS_Store
