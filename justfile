@@ -10,7 +10,7 @@ build: install update-sc-texts
     pnpm exec vite build --base ./
 
 # Run development server.
-develop: install qr
+develop: install qr update-sc-texts
     pnpm exec vite --port {{port}} --clearScreen false --host
 
 # Regenerates the simplified Chinese texts.
