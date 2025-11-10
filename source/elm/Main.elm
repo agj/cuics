@@ -24,6 +24,7 @@ import Process
 import Random
 import Random.Extra as Random
 import Row exposing (Row)
+import String.Extra
 import Svg.Styled as Svg exposing (Svg)
 import Svg.Styled.Attributes as Svga
 import Tailwind.Color as Twc
@@ -32,6 +33,7 @@ import Tailwind.Utilities as Tw
 import Task
 import Texts
 import Util.Html.Styled exposing (viewIfLazy)
+import Util.String
 
 
 main : Program Decode.Value Model Msg
@@ -333,7 +335,7 @@ viewContent model =
                     viewSettingsDialog model.language
 
                 GameOverDialog ->
-                    viewGameOverDialog model.board
+                    viewGameOverDialog language model.board
     in
     Html.div
         [ css [ Css.width (Css.rem contentWidth), Css.height (Css.rem contentHeight) ]
@@ -1211,23 +1213,22 @@ cellIsAvailable growth row num =
 -- VIEW GAME OVER
 
 
-viewGameOverDialog : Board -> Html Msg
-viewGameOverDialog board =
+viewGameOverDialog : Language -> Board -> Html Msg
+viewGameOverDialog language board =
+    let
+        texts =
+            (Texts.for language).yourFinalScore (Board.points board)
+    in
     viewDialog
         (Html.div [ css [ Tw.flex, Tw.flex_col, Tw.gap_3 ] ]
             [ Html.h1 [ css [ Tw.text_2xl, Tw.font_bold, Tw.text_center ] ]
-                [ Html.text "Game Over!" ]
+                [ Html.text (Texts.for language).gameOver ]
             , Html.p [ css [ Tw.text_center ] ]
-                [ Html.text "Your final score: "
-                , Html.b []
-                    [ Html.text
-                        ("{p} p"
-                            |> String.replace "{p}" (Board.points board |> String.fromInt)
-                        )
-                    ]
-                , Html.text "."
+                [ Html.text texts.yourFinalScore
+                , Html.b [] [ Html.text texts.score ]
+                , Html.text texts.period
                 ]
-            , viewCloseButton Language.English
+            , viewCloseButton language
             ]
         )
 
