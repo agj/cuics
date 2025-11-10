@@ -1,6 +1,6 @@
 module Main exposing (main)
 
-import Board exposing (Board)
+import Board exposing (Board, gameEnded)
 import Browser
 import Browser.Events
 import Color exposing (Color(..))
@@ -72,9 +72,14 @@ type CellStatus
 
 
 type Turn
-    = NotTurn
+    = NotTurn NotTurnState
     | TurnPicking DiceThrow DiceRotations
     | TurnPickedOnce DiceThrow DiceRotations Pick
+
+
+type NotTurnState
+    = WaitingForDiceThrow
+    | GameOver
 
 
 type alias DiceThrow =
@@ -113,7 +118,7 @@ init flags =
                 |> Result.withDefault Language.defaultSelection
     in
     ( { board = Board.init
-      , turn = NotTurn
+      , turn = NotTurn WaitingForDiceThrow
       , dialog = NoDialog
       , viewport = viewport
       , seed = Random.initialSeed 12345
@@ -158,9 +163,8 @@ update msg model =
     in
     case ( interactive, msg ) of
         ( True, GotInitialSeed newSeed ) ->
-            ( { model | seed = newSeed }
-            , throwDiceIfGameNotEnded model.board newSeed
-            )
+            { model | seed = newSeed }
+                |> throwDiceIfGameNotEnded
 
         ( True, DiceThrown newSeed diceThrow diceRotations ) ->
             ( { model
@@ -180,20 +184,15 @@ update msg model =
 
                 TurnPickedOnce _ _ previousPick ->
                     -- X the two picks and finish the turn.
-                    let
-                        newBoard =
+                    { model
+                        | board =
                             model.board
                                 |> Board.addX previousPick.color previousPick.num
                                 |> Board.addX pick.color pick.num
-                    in
-                    ( { model
-                        | board = newBoard
-                        , turn = NotTurn
-                      }
-                    , throwDiceIfGameNotEnded newBoard model.seed
-                    )
+                    }
+                        |> throwDiceIfGameNotEnded
 
-                NotTurn ->
+                NotTurn _ ->
                     ignore
 
         ( True, ClickedPickedCell ) ->
@@ -204,7 +203,7 @@ update msg model =
                     , Cmd.none
                     )
 
-                NotTurn ->
+                NotTurn _ ->
                     ignore
 
                 TurnPicking _ _ ->
@@ -214,36 +213,23 @@ update msg model =
             case model.turn of
                 TurnPickedOnce _ _ pick ->
                     -- End turn with a single X.
-                    let
-                        newBoard =
+                    { model
+                        | board =
                             model.board
                                 |> Board.addX pick.color pick.num
-                    in
-                    ( { model
-                        | board = newBoard
-                        , turn = NotTurn
-                      }
-                    , throwDiceIfGameNotEnded newBoard model.seed
-                    )
+                    }
+                        |> throwDiceIfGameNotEnded
 
                 TurnPicking _ _ ->
                     ignore
 
-                NotTurn ->
+                NotTurn _ ->
                     ignore
 
         ( True, ClickedFault ) ->
             if canAddFault model.turn then
-                let
-                    newBoard =
-                        Board.addFault model.board
-                in
-                ( { model
-                    | board = newBoard
-                    , turn = NotTurn
-                  }
-                , throwDiceIfGameNotEnded newBoard model.seed
-                )
+                { model | board = Board.addFault model.board }
+                    |> throwDiceIfGameNotEnded
 
             else
                 ignore
@@ -523,7 +509,7 @@ viewTop language board turn =
     let
         ( showingDone, enabledDone ) =
             case turn of
-                NotTurn ->
+                NotTurn _ ->
                     ( False, False )
 
                 TurnPicking _ _ ->
@@ -593,7 +579,7 @@ type DieColor
 viewDiceIfThrown : Turn -> List Color -> Html Msg
 viewDiceIfThrown turn lockedRows =
     case turn of
-        NotTurn ->
+        NotTurn _ ->
             Html.div [ css [ Tw.h_16, Tw.m_3 ] ] []
 
         TurnPicking diceThrow diceRotations ->
@@ -1080,7 +1066,7 @@ getCellStatus growth row turn color num =
 availableNumsByDiceThrow : Turn -> Color -> List Num
 availableNumsByDiceThrow turn color =
     case turn of
-        NotTurn ->
+        NotTurn _ ->
             []
 
         TurnPicking diceThrow _ ->
@@ -1226,13 +1212,17 @@ icon iconVariant =
 -- UTILS
 
 
-throwDiceIfGameNotEnded : Board -> Random.Seed -> Cmd Msg
-throwDiceIfGameNotEnded board seed =
-    if Board.gameEnded board then
-        Cmd.none
+throwDiceIfGameNotEnded : Model -> ( Model, Cmd Msg )
+throwDiceIfGameNotEnded model =
+    if Board.gameEnded model.board then
+        ( { model | turn = NotTurn GameOver }
+        , Cmd.none
+        )
 
     else
-        throwDice seed
+        ( { model | turn = NotTurn WaitingForDiceThrow }
+        , throwDice model.seed
+        )
 
 
 throwDice : Random.Seed -> Cmd Msg
@@ -1380,7 +1370,7 @@ canAddFault turn =
         TurnPicking _ _ ->
             True
 
-        NotTurn ->
+        NotTurn _ ->
             False
 
         TurnPickedOnce _ _ _ ->
