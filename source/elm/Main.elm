@@ -61,6 +61,7 @@ type alias Model =
 type Dialog
     = NoDialog
     | SettingsDialog
+    | GameOverDialog
 
 
 type CellStatus
@@ -321,6 +322,18 @@ viewContent model =
         language : Language
         language =
             Language.selectionToLanguage model.language
+
+        dialog : Html Msg
+        dialog =
+            case model.dialog of
+                NoDialog ->
+                    Html.text ""
+
+                SettingsDialog ->
+                    viewSettingsDialog model.language
+
+                GameOverDialog ->
+                    viewGameOverDialog model.board
     in
     Html.div
         [ css [ Css.width (Css.rem contentWidth), Css.height (Css.rem contentHeight) ]
@@ -333,8 +346,7 @@ viewContent model =
         [ viewTop language model.board model.turn
         , viewBoard language model.board model.turn
         , viewSettingsButton
-        , viewIfLazy (model.dialog == SettingsDialog)
-            (\() -> viewSettingsDialog model.language)
+        , dialog
         ]
 
 
@@ -1196,6 +1208,31 @@ cellIsAvailable growth row num =
 
 
 
+-- VIEW GAME OVER
+
+
+viewGameOverDialog : Board -> Html Msg
+viewGameOverDialog board =
+    viewDialog
+        (Html.div [ css [ Tw.flex, Tw.flex_col, Tw.gap_3 ] ]
+            [ Html.h1 [ css [ Tw.text_2xl, Tw.font_bold, Tw.text_center ] ]
+                [ Html.text "Game Over!" ]
+            , Html.p [ css [ Tw.text_center ] ]
+                [ Html.text "Your final score: "
+                , Html.b []
+                    [ Html.text
+                        ("{p} p"
+                            |> String.replace "{p}" (Board.points board |> String.fromInt)
+                        )
+                    ]
+                , Html.text "."
+                ]
+            , viewCloseButton Language.English
+            ]
+        )
+
+
+
 -- VIEW UTILS
 
 
@@ -1215,7 +1252,10 @@ icon iconVariant =
 throwDiceIfGameNotEnded : Model -> ( Model, Cmd Msg )
 throwDiceIfGameNotEnded model =
     if Board.gameEnded model.board then
-        ( { model | turn = NotTurn GameOver }
+        ( { model
+            | turn = NotTurn GameOver
+            , dialog = GameOverDialog
+          }
         , Cmd.none
         )
 
