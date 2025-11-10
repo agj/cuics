@@ -1,6 +1,6 @@
 module Main exposing (main)
 
-import Board exposing (Board, gameEnded)
+import Board exposing (Board)
 import Browser
 import Browser.Events
 import Color exposing (Color(..))
@@ -8,10 +8,9 @@ import Constants
 import Css
 import Css.Animations
 import Css.Global
-import Css.Transitions exposing (transition)
 import Dice exposing (Dice)
 import Html.Styled as Html exposing (Attribute, Html)
-import Html.Styled.Attributes as Attributes exposing (class, css)
+import Html.Styled.Attributes as Attributes exposing (css)
 import Html.Styled.Events as Events
 import Json.Decode as Decode
 import Language exposing (Language)
@@ -24,7 +23,6 @@ import Process
 import Random
 import Random.Extra as Random
 import Row exposing (Row)
-import String.Extra
 import Svg.Styled as Svg exposing (Svg)
 import Svg.Styled.Attributes as Svga
 import Tailwind.Color as Twc
@@ -32,8 +30,6 @@ import Tailwind.Theme as Twt
 import Tailwind.Utilities as Tw
 import Task
 import Texts
-import Util.Html.Styled exposing (viewIfLazy)
-import Util.String
 
 
 main : Program Decode.Value Model Msg
