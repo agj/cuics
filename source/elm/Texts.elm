@@ -42,7 +42,7 @@ spanish =
     , default = "Por defecto"
     , language = "Idioma"
     , close = "Cerrar"
-    , gameOver = "Terminó el juego"
+    , gameOver = "Se terminó el juego"
     , yourFinalScore =
         \p ->
             { yourFinalScore = "Tu puntaje final: "
@@ -62,7 +62,7 @@ english =
     , default = "Default"
     , language = "Language"
     , close = "Close"
-    , gameOver = "Game over"
+    , gameOver = "Game over!"
     , yourFinalScore =
         \p ->
             { yourFinalScore = "Your final score: "
@@ -102,7 +102,7 @@ chineseTraditional =
     , default = "預設值"
     , language = "語言"
     , close = "關閉"
-    , gameOver = "遊戲結束了"
+    , gameOver = "遊戲結束了！"
     , yourFinalScore =
         \p ->
             { yourFinalScore = "總分數："
@@ -122,7 +122,7 @@ chineseSimplified =
     , default = "预设值"
     , language = "语言"
     , close = "关闭"
-    , gameOver = "游戏结束了"
+    , gameOver = "游戏结束了！"
     , yourFinalScore =
         \p ->
             { yourFinalScore = "总分数："
