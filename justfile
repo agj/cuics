@@ -5,13 +5,17 @@ default:
     just --list
 
 # Build.
-build: install
+build: install update-sc-texts
     rm -rf dist
     pnpm exec vite build --base ./
 
 # Run development server.
 develop: install qr
     pnpm exec vite --port {{port}} --clearScreen false --host
+
+# Regenerates the simplified Chinese texts.
+update-sc-texts:
+    nu ./scripts/generate-chinese-simplified.nu
 
 # Deploy on Github Pages.
 deploy-ghpages: build
