@@ -144,13 +144,13 @@ viewportDecoder =
 type Msg
     = GotInitialSeed Random.Seed
     | DiceThrown Random.Seed DiceThrow DiceRotations
-    | ClickedAvailableCell Pick
-    | ClickedPickedCell
-    | ClickedDone
-    | ClickedFault
-    | ClickedRestart
-    | LanguageSelected (Maybe Language)
-    | DialogRequested Dialog
+    | SelectedAvailableCell Pick
+    | SelectedPickedCell
+    | SelectedDone
+    | SelectedFault
+    | RequestedRestart
+    | SelectedLanguage (Maybe Language)
+    | RequestedDialog Dialog
     | ViewportResized Int Int
     | NoOp
 
@@ -177,7 +177,7 @@ update msg model =
             , Cmd.none
             )
 
-        ( True, ClickedAvailableCell pick ) ->
+        ( True, SelectedAvailableCell pick ) ->
             case model.turn of
                 TurnPicking diceThrow diceRotations ->
                     -- Pick a cell.
@@ -198,7 +198,7 @@ update msg model =
                 NotTurn _ ->
                     ignore
 
-        ( True, ClickedPickedCell ) ->
+        ( True, SelectedPickedCell ) ->
             case model.turn of
                 TurnPickedOnce diceThrow diceRotations _ ->
                     -- Undo the first pick.
@@ -212,7 +212,7 @@ update msg model =
                 TurnPicking _ _ ->
                     ignore
 
-        ( True, ClickedDone ) ->
+        ( True, SelectedDone ) ->
             case model.turn of
                 TurnPickedOnce _ _ pick ->
                     -- End turn with a single X.
@@ -229,7 +229,7 @@ update msg model =
                 NotTurn _ ->
                     ignore
 
-        ( True, ClickedFault ) ->
+        ( True, SelectedFault ) ->
             if canAddFault model.turn then
                 { model | board = Board.addFault model.board }
                     |> throwDiceOrEndGame
@@ -237,16 +237,16 @@ update msg model =
             else
                 ignore
 
-        ( _, LanguageSelected selected ) ->
+        ( _, SelectedLanguage selected ) ->
             { model | language = Language.setSelection selected model.language }
                 |> saveSettings
 
-        ( _, ClickedRestart ) ->
+        ( _, RequestedRestart ) ->
             { model | board = Board.init }
                 |> setDialog NoDialog
                 |> Cmd.andThen throwDiceOrEndGame
 
-        ( _, DialogRequested dialog ) ->
+        ( _, RequestedDialog dialog ) ->
             case ( model.dialog, dialog ) of
                 ( WelcomeDialog, NoDialog ) ->
                     model
@@ -436,7 +436,7 @@ viewDoneButton language showing enabled =
         let
             conditionalStyles =
                 if enabled then
-                    [ Events.onClick ClickedDone ]
+                    [ Events.onClick SelectedDone ]
 
                 else
                     [ Attributes.disabled True ]
@@ -606,7 +606,7 @@ viewRestart language =
     in
     Html.button
         [ css [ Tw.px_3, Tw.py_1, Tw.rounded_lg, Tw.text_color colors.fg, Tw.bg_color colors.bg ]
-        , Events.onClick ClickedRestart
+        , Events.onClick RequestedRestart
         ]
         [ Html.text (Texts.for language).playAgain ]
 
@@ -679,7 +679,7 @@ viewNumCell color num status =
         conditionalStyles =
             case status of
                 Available ->
-                    [ Events.onClick (ClickedAvailableCell { color = color, num = num })
+                    [ Events.onClick (SelectedAvailableCell { color = color, num = num })
                     , activeGlow
                     ]
 
@@ -687,7 +687,7 @@ viewNumCell color num status =
                     [ css [ Tw.cursor_default ] ]
 
                 Picked ->
-                    [ Events.onClick ClickedPickedCell
+                    [ Events.onClick SelectedPickedCell
                     , activeGlow
                     ]
 
@@ -802,7 +802,7 @@ viewFaultButton active xed =
             [ mergeIf xed
                 [ css [ Tw.cursor_default ] ]
             , mergeIf (active && not xed)
-                [ Events.onClick ClickedFault
+                [ Events.onClick SelectedFault
                 , activeGlow
                 ]
             , mergeIf (not active && not xed)
@@ -951,7 +951,7 @@ viewDialog content =
         [ css [ Tw.w_full, Tw.h_full, Tw.flex, Tw.items_center, Tw.justify_center ]
         , css [ Tw.bg_color (Twc.withOpacity Twt.opacity70 Palette.colorGray.light) ]
         , css [ Tw.absolute ]
-        , Events.onClick (DialogRequested NoDialog)
+        , Events.onClick (RequestedDialog NoDialog)
         ]
         [ Html.div
             [ css [ Tw.w_8over12, Tw.max_h_80, Tw.p_10 ]
@@ -995,7 +995,7 @@ viewCloseButton language =
         [ Html.button
             [ css [ Tw.px_3, Tw.py_1, Tw.rounded_lg ]
             , css [ Tw.text_color colors.fg, Tw.bg_color colors.bg ]
-            , Events.onClick (DialogRequested NoDialog)
+            , Events.onClick (RequestedDialog NoDialog)
             ]
             [ Html.text (Texts.for language).close ]
         ]
@@ -1045,7 +1045,7 @@ viewSettingsButton =
         [ css [ Tw.absolute, Tw.right_2, Tw.top_2, Tw.p_2 ]
         , css [ Tw.rounded_lg, Tw.bg_color colors.bg ]
         , css [ Tw.text_xl, Tw.text_color colors.fg ]
-        , Events.onClick (DialogRequested SettingsDialog)
+        , Events.onClick (RequestedDialog SettingsDialog)
         ]
         [ icon (Phosphor.gearSix Phosphor.Bold) ]
 
@@ -1080,7 +1080,7 @@ viewSettingsDialog languageSelection =
             , viewSettingsGroup
                 [ Html.text "Actions"
                 , Html.div [ css [ Tw.flex, Tw.flex_row, Tw.gap_2 ] ]
-                    [ button [ Events.onClick ClickedRestart ]
+                    [ button [ Events.onClick RequestedRestart ]
                         [ Html.text "Restart game" ]
                     , button [] [ Html.text "See intro message" ]
                     ]
@@ -1148,7 +1148,7 @@ viewLanguageRadioButton interfaceLanguage buttonLanguage selected =
             [ css [ Tw.flex, Tw.flex_row, Tw.gap_1, Tw.items_center, Tw.whitespace_nowrap ]
             , css [ Tw.text_color colors.fg ]
             , css [ Tw.rounded_lg, Tw.px_3, Tw.py_1, Tw.bg_color colors.bg ]
-            , Events.onClick (LanguageSelected buttonLanguage)
+            , Events.onClick (SelectedLanguage buttonLanguage)
             ]
             [ radioIcon
             , Html.text languageName
