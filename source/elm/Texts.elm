@@ -42,7 +42,7 @@ spanish =
     , default = "Por defecto"
     , language = "Idioma"
     , close = "Cerrar"
-    , gameOver = "Se terminó el juego"
+    , gameOver = "Resultados del juego"
     , yourFinalScore =
         \p ->
             { yourFinalScore = "Tu puntaje final: "
@@ -62,7 +62,7 @@ english =
     , default = "Default"
     , language = "Language"
     , close = "Close"
-    , gameOver = "Game over!"
+    , gameOver = "Game Over!"
     , yourFinalScore =
         \p ->
             { yourFinalScore = "Your final score: "
@@ -82,21 +82,21 @@ japanese =
     , default = "初期設定"
     , language = "言語"
     , close = "閉じる"
-    , gameOver = "ゲームオーバー"
+    , gameOver = "結果発表"
     , yourFinalScore =
         \p ->
-            { yourFinalScore = "最終点数："
+            { yourFinalScore = "総得点："
             , score =
                 "{p}点"
                     |> String.replace "{p}" (String.fromInt p)
-            , period = "。"
+            , period = ""
             }
     }
 
 
 chineseTraditional : Texts
 chineseTraditional =
-    { done = "決定"
+    { done = "繼續"
     , faults = "錯誤"
     , p = "分"
     , default = "預設值"
@@ -105,18 +105,23 @@ chineseTraditional =
     , gameOver = "遊戲結束了！"
     , yourFinalScore =
         \p ->
-            { yourFinalScore = "總分數："
+            { yourFinalScore = "總分："
             , score =
                 "{p}分"
                     |> String.replace "{p}" (String.fromInt p)
-            , period = "。"
+            , period = ""
             }
     }
 
 
+
+-- Note: The following is automatically generated from the above
+-- `chineseTraditional` definition.
+
+
 chineseSimplified : Texts
 chineseSimplified =
-    { done = "决定"
+    { done = "继续"
     , faults = "错误"
     , p = "分"
     , default = "预设值"
@@ -125,10 +130,10 @@ chineseSimplified =
     , gameOver = "游戏结束了！"
     , yourFinalScore =
         \p ->
-            { yourFinalScore = "总分数："
+            { yourFinalScore = "总分："
             , score =
                 "{p}分"
                     |> String.replace "{p}" (String.fromInt p)
-            , period = "。"
+            , period = ""
             }
     }
