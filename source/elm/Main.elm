@@ -125,7 +125,7 @@ init flags =
       , seed = Random.initialSeed 12345
       , language = language
       }
-    , Random.generate GotInitialSeed Random.independentSeed
+    , Cmd.none
     )
 
 
@@ -245,9 +245,17 @@ update msg model =
                 |> throwDiceOrEndGame
 
         ( _, DialogRequested dialog ) ->
-            ( { model | dialog = dialog }
-            , Cmd.none
-            )
+            let
+                newModel =
+                    { model | dialog = dialog }
+            in
+            case ( model.dialog, dialog ) of
+                ( WelcomeDialog, NoDialog ) ->
+                    newModel
+                        |> startGame
+
+                _ ->
+                    ( newModel, Cmd.none )
 
         ( _, ViewportResized width height ) ->
             ( { model | viewport = { width = width, height = height } }
@@ -259,6 +267,13 @@ update msg model =
 
         ( False, _ ) ->
             ignore
+
+
+startGame : Model -> ( Model, Cmd Msg )
+startGame model =
+    ( model
+    , Random.generate GotInitialSeed Random.independentSeed
+    )
 
 
 throwDiceOrEndGame : Model -> ( Model, Cmd Msg )
