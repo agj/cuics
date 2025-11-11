@@ -110,7 +110,7 @@ init flags =
         viewport : Viewport
         viewport =
             Decode.decodeValue (Decode.field "viewport" viewportDecoder) flags
-                |> Result.withDefault { width = 1025, height = 768 }
+                |> Result.withDefault { width = 1024, height = 768 }
 
         language : Language.Selection
         language =
