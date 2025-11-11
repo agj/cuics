@@ -3,6 +3,7 @@ module Main exposing (main)
 import Board exposing (Board)
 import Browser
 import Browser.Events
+import Cmd.Extra as Cmd
 import Color exposing (Color(..))
 import Constants
 import Css
@@ -242,20 +243,19 @@ update msg model =
 
         ( _, ClickedRestart ) ->
             { model | board = Board.init }
-                |> throwDiceOrEndGame
+                |> setDialog NoDialog
+                |> Cmd.andThen throwDiceOrEndGame
 
         ( _, DialogRequested dialog ) ->
-            let
-                newModel =
-                    { model | dialog = dialog }
-            in
             case ( model.dialog, dialog ) of
                 ( WelcomeDialog, NoDialog ) ->
-                    newModel
-                        |> startGame
+                    model
+                        |> setDialog NoDialog
+                        |> Cmd.andThen startGame
 
                 _ ->
-                    ( newModel, Cmd.none )
+                    model
+                        |> setDialog dialog
 
         ( _, ViewportResized width height ) ->
             ( { model | viewport = { width = width, height = height } }
@@ -296,6 +296,13 @@ saveSettings : Model -> ( Model, Cmd Msg )
 saveSettings model =
     ( model
     , Ports.saveSettings { language = Language.selected model.language }
+    )
+
+
+setDialog : Dialog -> Model -> ( Model, Cmd Msg )
+setDialog dialog model =
+    ( { model | dialog = dialog }
+    , Cmd.none
     )
 
 
@@ -1048,12 +1055,35 @@ viewSettingsDialog languageSelection =
     let
         language =
             Language.selectionToLanguage languageSelection
+
+        texts =
+            Texts.for language
+
+        button : List (Attribute Msg) -> List (Html Msg) -> Html Msg
+        button attributes =
+            Html.button
+                ([ css [ Tw.px_3, Tw.py_1, Tw.rounded_lg ]
+                 , css [ Tw.text_color buttonColors.fg, Tw.bg_color buttonColors.bg ]
+                 ]
+                    ++ attributes
+                )
+
+        buttonColors =
+            getButtonColors True
     in
     viewDialog
         (Html.div [ css [ Tw.flex, Tw.flex_col, Tw.gap_5 ] ]
             [ viewSettingsGroup
-                [ Html.text (Texts.for language).language
+                [ Html.text texts.language
                 , viewLanguageSelection languageSelection
+                ]
+            , viewSettingsGroup
+                [ Html.text "Actions"
+                , Html.div [ css [ Tw.flex, Tw.flex_row, Tw.gap_2 ] ]
+                    [ button [ Events.onClick ClickedRestart ]
+                        [ Html.text "Restart game" ]
+                    , button [] [ Html.text "See intro message" ]
+                    ]
                 ]
             , viewCloseButton language
             ]
