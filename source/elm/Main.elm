@@ -984,7 +984,7 @@ viewCloseButton language =
         colors =
             getButtonColors True
     in
-    Html.div [ css [ Tw.flex, Tw.flex_row, Tw.justify_center ] ]
+    Html.div [ css [ Tw.flex, Tw.flex_row, Tw.justify_center, Tw.mt_4 ] ]
         [ Html.button
             [ css [ Tw.px_3, Tw.py_1, Tw.rounded_lg ]
             , css [ Tw.text_color colors.fg, Tw.bg_color colors.bg ]
@@ -1002,23 +1002,24 @@ viewWelcomeDialog : Language -> Html Msg
 viewWelcomeDialog language =
     viewDialog
         (Html.div [ css [ Tw.flex, Tw.flex_col, Tw.gap_3 ] ]
-            [ Html.h1 [ css [ Tw.text_2xl, Tw.font_bold ] ]
+            [ Html.h1 [ css [ Tw.text_2xl, Tw.font_bold, Tw.text_center ] ]
                 [ Html.text "Cuics" ]
             , Html.p []
                 [ Html.text
                     """
                     This is an unofficial digital version of the dice,
-                    “roll-and-write” game Qwixx. Earn many Xes on each row to
+                    “roll-and-write” game Qwixx. Mark many Xes on each row to
                     get lots of points, and get a high score!
                     """
                 ]
             , Html.p []
                 [ Html.text
                     """
-                    Rules are not explained here, but this implementation does
-                    not allow for illegal moves.
+                    Rules are not explained here. However, this implementation
+                    does not permit illegal moves.
                     """
                 ]
+            , viewCloseButton language
             ]
         )
 
