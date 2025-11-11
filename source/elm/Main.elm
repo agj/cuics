@@ -164,7 +164,7 @@ update msg model =
     case ( interactive, msg ) of
         ( True, GotInitialSeed newSeed ) ->
             { model | seed = newSeed }
-                |> throwDiceIfGameNotEnded
+                |> throwDiceOrEndGame
 
         ( True, DiceThrown newSeed diceThrow diceRotations ) ->
             ( { model
@@ -190,7 +190,7 @@ update msg model =
                                 |> Board.addX previousPick.color previousPick.num
                                 |> Board.addX pick.color pick.num
                     }
-                        |> throwDiceIfGameNotEnded
+                        |> throwDiceOrEndGame
 
                 NotTurn _ ->
                     ignore
@@ -218,7 +218,7 @@ update msg model =
                             model.board
                                 |> Board.addX pick.color pick.num
                     }
-                        |> throwDiceIfGameNotEnded
+                        |> throwDiceOrEndGame
 
                 TurnPicking _ _ ->
                     ignore
@@ -229,23 +229,18 @@ update msg model =
         ( True, ClickedFault ) ->
             if canAddFault model.turn then
                 { model | board = Board.addFault model.board }
-                    |> throwDiceIfGameNotEnded
+                    |> throwDiceOrEndGame
 
             else
                 ignore
 
         ( _, LanguageSelected selected ) ->
-            let
-                newModel =
-                    { model | language = Language.setSelection selected model.language }
-            in
-            ( newModel
-            , saveSettings newModel
-            )
+            { model | language = Language.setSelection selected model.language }
+                |> saveSettings
 
         ( _, ClickedRestart ) ->
             { model | board = Board.init }
-                |> throwDiceIfGameNotEnded
+                |> throwDiceOrEndGame
 
         ( _, DialogRequested dialog ) ->
             ( { model | dialog = dialog }
@@ -264,9 +259,27 @@ update msg model =
             ignore
 
 
-saveSettings : Model -> Cmd Msg
+throwDiceOrEndGame : Model -> ( Model, Cmd Msg )
+throwDiceOrEndGame model =
+    if Board.gameEnded model.board then
+        ( { model
+            | turn = NotTurn GameOver
+            , dialog = GameOverDialog
+          }
+        , Cmd.none
+        )
+
+    else
+        ( { model | turn = NotTurn WaitingForDiceThrow }
+        , throwDice model.seed
+        )
+
+
+saveSettings : Model -> ( Model, Cmd Msg )
 saveSettings model =
-    Ports.saveSettings { language = Language.selected model.language }
+    ( model
+    , Ports.saveSettings { language = Language.selected model.language }
+    )
 
 
 
@@ -1270,22 +1283,6 @@ icon iconVariant =
 
 
 -- UTILS
-
-
-throwDiceIfGameNotEnded : Model -> ( Model, Cmd Msg )
-throwDiceIfGameNotEnded model =
-    if Board.gameEnded model.board then
-        ( { model
-            | turn = NotTurn GameOver
-            , dialog = GameOverDialog
-          }
-        , Cmd.none
-        )
-
-    else
-        ( { model | turn = NotTurn WaitingForDiceThrow }
-        , throwDice model.seed
-        )
 
 
 throwDice : Random.Seed -> Cmd Msg
