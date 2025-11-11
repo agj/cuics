@@ -12,6 +12,7 @@ type alias Texts =
     , close : String
     , gameOver : String
     , yourFinalScore : Int -> { yourFinalScore : String, score : String, period : String }
+    , playAgain : String
     }
 
 
@@ -51,6 +52,7 @@ spanish =
                     |> String.replace "{p}" (String.fromInt p)
             , period = "."
             }
+    , playAgain = "Jugar de nuevo"
     }
 
 
@@ -71,6 +73,7 @@ english =
                     |> String.replace "{p}" (String.fromInt p)
             , period = "."
             }
+    , playAgain = "Play again"
     }
 
 
@@ -91,6 +94,7 @@ japanese =
                     |> String.replace "{p}" (String.fromInt p)
             , period = ""
             }
+    , playAgain = "再戦する"
     }
 
 
@@ -111,6 +115,7 @@ chineseTraditional =
                     |> String.replace "{p}" (String.fromInt p)
             , period = ""
             }
+    , playAgain = "再來一次"
     }
 
 
@@ -136,4 +141,5 @@ chineseSimplified =
                     |> String.replace "{p}" (String.fromInt p)
             , period = ""
             }
+    , playAgain = "再来一次"
     }

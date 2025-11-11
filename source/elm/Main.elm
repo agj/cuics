@@ -392,7 +392,7 @@ viewTop language board turn =
 
         NotTurn GameOver ->
             viewTopWrapper
-                [ viewRestart ]
+                [ viewRestart language ]
 
 
 viewTopWrapper : List (Html Msg) -> Html Msg
@@ -572,8 +572,8 @@ viewDiePip twColor xOffset yOffset =
 -- VIEW RESTART
 
 
-viewRestart : Html Msg
-viewRestart =
+viewRestart : Language -> Html Msg
+viewRestart language =
     let
         colors =
             getButtonColors True
@@ -582,7 +582,7 @@ viewRestart =
         [ css [ Tw.px_3, Tw.py_1, Tw.rounded_lg, Tw.text_color colors.fg, Tw.bg_color colors.bg ]
         , Events.onClick ClickedRestart
         ]
-        [ Html.text "Play again" ]
+        [ Html.text (Texts.for language).playAgain ]
 
 
 
