@@ -59,6 +59,7 @@ type alias Model =
 
 type Dialog
     = NoDialog
+    | WelcomeDialog
     | SettingsDialog
     | GameOverDialog
 
@@ -119,7 +120,7 @@ init flags =
     in
     ( { board = Board.init
       , turn = NotTurn WaitingForDiceThrow
-      , dialog = NoDialog
+      , dialog = WelcomeDialog
       , viewport = viewport
       , seed = Random.initialSeed 12345
       , language = language
@@ -163,11 +164,11 @@ update msg model =
             ( model, Cmd.none )
     in
     case ( interactive, msg ) of
-        ( True, GotInitialSeed newSeed ) ->
+        ( _, GotInitialSeed newSeed ) ->
             { model | seed = newSeed }
                 |> throwDiceOrEndGame
 
-        ( True, DiceThrown newSeed diceThrow diceRotations ) ->
+        ( _, DiceThrown newSeed diceThrow diceRotations ) ->
             ( { model
                 | turn = TurnPicking diceThrow diceRotations
                 , seed = newSeed
@@ -345,6 +346,9 @@ viewContent model =
             case model.dialog of
                 NoDialog ->
                     Html.text ""
+
+                WelcomeDialog ->
+                    viewWelcomeDialog language
 
                 SettingsDialog ->
                     viewSettingsDialog model.language
@@ -928,7 +932,7 @@ viewDialog content =
         , Events.onClick (DialogRequested NoDialog)
         ]
         [ Html.div
-            [ css [ Tw.w_8over12, Tw.max_h_80, Tw.p_6 ]
+            [ css [ Tw.w_8over12, Tw.max_h_80, Tw.p_10 ]
             , css [ Tw.bg_color Palette.colorGray.pale, Tw.drop_shadow_xl ]
             , css [ Tw.rounded_xl ]
             , Events.stopPropagationOn "click" (Decode.succeed ( NoOp, True ))
@@ -973,6 +977,35 @@ viewCloseButton language =
             ]
             [ Html.text (Texts.for language).close ]
         ]
+
+
+
+-- VIEW WELCOME
+
+
+viewWelcomeDialog : Language -> Html Msg
+viewWelcomeDialog language =
+    viewDialog
+        (Html.div [ css [ Tw.flex, Tw.flex_col, Tw.gap_3 ] ]
+            [ Html.h1 [ css [ Tw.text_2xl, Tw.font_bold ] ]
+                [ Html.text "Cuics" ]
+            , Html.p []
+                [ Html.text
+                    """
+                    This is an unofficial digital version of the dice,
+                    “roll-and-write” game Qwixx. Earn many Xes on each row to
+                    get lots of points, and get a high score!
+                    """
+                ]
+            , Html.p []
+                [ Html.text
+                    """
+                    Rules are not explained here, but this implementation does
+                    not allow for illegal moves.
+                    """
+                ]
+            ]
+        )
 
 
 
