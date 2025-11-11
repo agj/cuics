@@ -5,13 +5,17 @@ default:
     just --list
 
 # Build.
-build: install update-sc-texts
+build: install generate-tw update-sc-texts
     rm -rf dist
     pnpm exec vite build --base ./
 
 # Run development server.
-develop: install qr update-sc-texts
+develop: install generate-tw update-sc-texts qr
     pnpm exec vite --port {{port}} --clearScreen false --host
+
+# Generates Tailwind modules.
+generate-tw:
+    pnpm exec elm-tailwind-modules --dir ./generated/elm-tailwind-modules
 
 # Regenerates the simplified Chinese texts.
 update-sc-texts:

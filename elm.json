@@ -1,7 +1,8 @@
 {
     "type": "application",
     "source-directories": [
-        "source/elm"
+        "source/elm",
+        "generated/elm-tailwind-modules"
     ],
     "elm-version": "0.19.1",
     "dependencies": {
@@ -14,7 +15,6 @@
             "elm/random": "1.0.0",
             "elm-community/random-extra": "3.2.0",
             "elmcraft/core-extra": "2.2.0",
-            "matheus23/elm-default-tailwind-modules": "4.0.1",
             "matheus23/elm-tailwind-modules-base": "1.0.0",
             "phosphor-icons/phosphor-elm": "2.1.0",
             "rtfeldman/elm-css": "18.0.0",
