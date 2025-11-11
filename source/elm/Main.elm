@@ -954,7 +954,8 @@ viewDialog content =
         , Events.onClick (RequestedDialog NoDialog)
         ]
         [ Html.div
-            [ css [ Tw.w_8over12, Tw.max_h_80, Tw.p_10 ]
+            [ css [ Tw.w_8over12, Tw.p_10, Tw.overflow_auto ]
+            , css [ Css.maxHeight (Css.calc (Css.pct 100) Css.minus (Css.rem 2)) ]
             , css [ Tw.bg_color Palette.colorGray.pale, Tw.drop_shadow_xl ]
             , css [ Tw.rounded_xl ]
             , Events.stopPropagationOn "click" (Decode.succeed ( NoOp, True ))
@@ -1070,6 +1071,15 @@ viewSettingsDialog languageSelection =
 
         buttonColors =
             getButtonColors True
+
+        link : List (Attribute Msg) -> List (Html Msg) -> Html Msg
+        link attributes =
+            Html.a
+                ([ css [ Tw.underline, Tw.text_color Palette.colorPurple.medium ]
+                 , Attributes.target "_blank"
+                 ]
+                    ++ attributes
+                )
     in
     viewDialog
         (Html.div [ css [ Tw.flex, Tw.flex_col, Tw.gap_5 ] ]
@@ -1082,7 +1092,16 @@ viewSettingsDialog languageSelection =
                 , Html.div [ css [ Tw.flex, Tw.flex_row, Tw.gap_2 ] ]
                     [ button [ Events.onClick RequestedRestart ]
                         [ Html.text "Restart game" ]
-                    , button [] [ Html.text "See intro message" ]
+                    ]
+                ]
+            , viewSettingsGroup
+                [ Html.p []
+                    [ link [ Attributes.href "https://github.com/agj/cuics" ]
+                        [ Html.text "“Cuics”" ]
+                    , Html.text " by "
+                    , link [ Attributes.href "https://agj.cl" ]
+                        [ Html.text "agj" ]
+                    , Html.text ", based on Qwixx."
                     ]
                 ]
             , viewCloseButton language
