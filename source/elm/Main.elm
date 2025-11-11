@@ -145,6 +145,7 @@ type Msg
     | ClickedPickedCell
     | ClickedDone
     | ClickedFault
+    | ClickedRestart
     | LanguageSelected (Maybe Language)
     | DialogRequested Dialog
     | ViewportResized Int Int
@@ -241,6 +242,10 @@ update msg model =
             ( newModel
             , saveSettings newModel
             )
+
+        ( _, ClickedRestart ) ->
+            { model | board = Board.init }
+                |> throwDiceIfGameNotEnded
 
         ( _, DialogRequested dialog ) ->
             ( { model | dialog = dialog }
@@ -589,14 +594,35 @@ type DieColor
 viewDiceIfThrown : Turn -> List Color -> Html Msg
 viewDiceIfThrown turn lockedRows =
     case turn of
-        NotTurn _ ->
-            Html.div [ css [ Tw.h_16, Tw.m_3 ] ] []
-
         TurnPicking diceThrow diceRotations ->
             viewDice diceThrow diceRotations lockedRows
 
         TurnPickedOnce diceThrow diceRotations _ ->
             viewDice diceThrow diceRotations lockedRows
+
+        NotTurn WaitingForDiceThrow ->
+            Html.div [ css [ Tw.h_16, Tw.m_3 ] ] []
+
+        NotTurn GameOver ->
+            viewRestart
+
+
+viewRestart : Html Msg
+viewRestart =
+    let
+        colors =
+            getButtonColors True
+    in
+    Html.div
+        [ css [ Tw.h_16, Tw.m_3 ]
+        , css [ Tw.flex, Tw.flex_col, Tw.items_center, Tw.justify_center ]
+        ]
+        [ Html.button
+            [ css [ Tw.px_3, Tw.py_1, Tw.rounded_lg, Tw.text_color colors.fg, Tw.bg_color colors.bg ]
+            , Events.onClick ClickedRestart
+            ]
+            [ Html.text "Play again" ]
+        ]
 
 
 viewDice : DiceThrow -> DiceRotations -> List Color -> Html Msg
