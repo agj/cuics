@@ -534,27 +534,26 @@ viewCloseButton language =
 
 viewTop : Language -> Board -> Turn -> Html Msg
 viewTop language board turn =
-    case turn of
-        NotTurn GameOver ->
-            viewTopWrapper [ viewRestart ]
-
-        _ ->
-            let
-                ( showingDone, enabledDone ) =
-                    case turn of
-                        NotTurn _ ->
-                            ( False, False )
-
-                        TurnPicking _ _ ->
-                            ( True, False )
-
-                        TurnPickedOnce _ _ _ ->
-                            ( True, True )
-            in
+    let
+        viewGame : Bool -> Bool -> Html Msg
+        viewGame showingDone enabledDone =
             viewTopWrapper
                 [ viewDiceIfThrown turn (Board.lockedRows board)
                 , viewDoneButton language showingDone enabledDone
                 ]
+    in
+    case turn of
+        NotTurn WaitingForDiceThrow ->
+            viewGame False False
+
+        TurnPicking _ _ ->
+            viewGame True False
+
+        TurnPickedOnce _ _ _ ->
+            viewGame True True
+
+        NotTurn GameOver ->
+            viewTopWrapper [ viewRestart ]
 
 
 viewTopWrapper : List (Html Msg) -> Html Msg
