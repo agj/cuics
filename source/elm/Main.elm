@@ -548,7 +548,7 @@ viewTop language board turn =
     in
     Html.div [ css [ Tw.flex, Tw.flex_row, Tw.gap_4, Tw.items_center ] ]
         [ viewDiceIfThrown turn (Board.lockedRows board)
-        , viewDoneButton language showingDone (not enabledDone)
+        , viewDoneButton language showingDone enabledDone
         ]
 
 
@@ -557,18 +557,18 @@ viewTop language board turn =
 
 
 viewDoneButton : Language -> Bool -> Bool -> Html Msg
-viewDoneButton language showing disabled =
+viewDoneButton language showing enabled =
     if showing then
         let
             conditionalStyles =
-                if disabled then
-                    [ Attributes.disabled True ]
-
-                else
+                if enabled then
                     [ Events.onClick ClickedDone ]
 
+                else
+                    [ Attributes.disabled True ]
+
             colors =
-                getButtonColors (not disabled)
+                getButtonColors enabled
         in
         Html.button
             ([ css [ Tw.w_32, Tw.h_10, Tw.rounded_lg ]
