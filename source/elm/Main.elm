@@ -534,22 +534,32 @@ viewCloseButton language =
 
 viewTop : Language -> Board -> Turn -> Html Msg
 viewTop language board turn =
-    let
-        ( showingDone, enabledDone ) =
-            case turn of
-                NotTurn _ ->
-                    ( False, False )
+    case turn of
+        NotTurn GameOver ->
+            viewTopWrapper [ viewRestart ]
 
-                TurnPicking _ _ ->
-                    ( True, False )
+        _ ->
+            let
+                ( showingDone, enabledDone ) =
+                    case turn of
+                        NotTurn _ ->
+                            ( False, False )
 
-                TurnPickedOnce _ _ _ ->
-                    ( True, True )
-    in
+                        TurnPicking _ _ ->
+                            ( True, False )
+
+                        TurnPickedOnce _ _ _ ->
+                            ( True, True )
+            in
+            viewTopWrapper
+                [ viewDiceIfThrown turn (Board.lockedRows board)
+                , viewDoneButton language showingDone enabledDone
+                ]
+
+
+viewTopWrapper : List (Html Msg) -> Html Msg
+viewTopWrapper =
     Html.div [ css [ Tw.flex, Tw.flex_row, Tw.gap_4, Tw.items_center ] ]
-        [ viewDiceIfThrown turn (Board.lockedRows board)
-        , viewDoneButton language showingDone enabledDone
-        ]
 
 
 
@@ -613,29 +623,8 @@ viewDiceIfThrown turn lockedRows =
         TurnPickedOnce diceThrow diceRotations _ ->
             viewDice diceThrow diceRotations lockedRows
 
-        NotTurn WaitingForDiceThrow ->
+        NotTurn _ ->
             Html.div [ css [ Tw.h_16, Tw.m_3 ] ] []
-
-        NotTurn GameOver ->
-            viewRestart
-
-
-viewRestart : Html Msg
-viewRestart =
-    let
-        colors =
-            getButtonColors True
-    in
-    Html.div
-        [ css [ Tw.h_16, Tw.m_3 ]
-        , css [ Tw.flex, Tw.flex_col, Tw.items_center, Tw.justify_center ]
-        ]
-        [ Html.button
-            [ css [ Tw.px_3, Tw.py_1, Tw.rounded_lg, Tw.text_color colors.fg, Tw.bg_color colors.bg ]
-            , Events.onClick ClickedRestart
-            ]
-            [ Html.text "Play again" ]
-        ]
 
 
 viewDice : DiceThrow -> DiceRotations -> List Color -> Html Msg
@@ -752,6 +741,28 @@ viewDiePip twColor xOffset yOffset =
         , css [ Tw.fill_color twColor ]
         ]
         []
+
+
+
+-- VIEW RESTART
+
+
+viewRestart : Html Msg
+viewRestart =
+    let
+        colors =
+            getButtonColors True
+    in
+    Html.div
+        [ css [ Tw.h_16, Tw.m_3 ]
+        , css [ Tw.flex, Tw.flex_col, Tw.items_center, Tw.justify_center ]
+        ]
+        [ Html.button
+            [ css [ Tw.px_3, Tw.py_1, Tw.rounded_lg, Tw.text_color colors.fg, Tw.bg_color colors.bg ]
+            , Events.onClick ClickedRestart
+            ]
+            [ Html.text "Play again" ]
+        ]
 
 
 
