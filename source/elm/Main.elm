@@ -301,7 +301,7 @@ view model =
     { title = "Cuics"
     , body =
         [ Html.div
-            [ css [ Tw.h_full, Tw.w_full, Tw.flex, Tw.flex_col, Tw.justify_center, Tw.items_center ] ]
+            [ css [ Tw.size_full, Tw.flex, Tw.flex_col, Tw.justify_center, Tw.items_center ] ]
             [ viewContent model ]
         , Css.Global.global Tw.globalStyles
         ]
@@ -486,7 +486,7 @@ viewDie dieColor pips rotationTurns showOrder =
             viewDiePip colors.pip
     in
     Html.div
-        [ css [ Tw.w_16, Tw.h_16, Tw.bg_color colors.face, Tw.rounded_2xl ]
+        [ css [ Tw.size_16, Tw.bg_color colors.face, Tw.rounded_2xl ]
         , css [ Tw.border_2, Tw.border_color colors.border ]
 
         -- Appearance animation.
@@ -672,7 +672,7 @@ viewNumCell color num status =
                     [ css [ Tw.cursor_not_allowed ] ]
     in
     Html.button
-        ([ css [ Tw.w_16, Tw.h_16, Tw.relative, Tw.overflow_hidden ]
+        ([ css [ Tw.size_16, Tw.relative, Tw.overflow_hidden ]
          , css [ Tw.flex, Tw.justify_center, Tw.items_center ]
          , css [ Tw.text_2xl, Tw.text_color colors.fg, Tw.font_bold ]
          , css [ Tw.bg_color colors.bg ]
@@ -700,7 +700,7 @@ viewLockCell color xed =
             getColors color Xed
     in
     Html.div
-        [ css [ Tw.w_16, Tw.h_16, Tw.relative, Tw.overflow_hidden ]
+        [ css [ Tw.size_16, Tw.relative, Tw.overflow_hidden ]
         , css [ Tw.flex, Tw.justify_center, Tw.items_center ]
         , css [ Tw.text_3xl, Tw.text_color colors.fg ]
         , css [ Tw.bg_color colors.bg ]
@@ -719,7 +719,7 @@ viewX : Twt.Color -> Svg Msg
 viewX twColor =
     Svg.svg
         [ Svga.viewBox "-6 -6 12 12"
-        , css [ Tw.w_full, Tw.h_full, Tw.absolute ]
+        , css [ Tw.size_full, Tw.absolute ]
         ]
         [ Svg.g
             [ css [ Tw.stroke_color twColor ]
@@ -735,7 +735,7 @@ viewStrike : Twt.Color -> Svg Msg
 viewStrike twColor =
     Svg.svg
         [ Svga.viewBox "-6 -6 12 12"
-        , css [ Tw.w_full, Tw.h_full, Tw.absolute ]
+        , css [ Tw.size_full, Tw.absolute ]
         ]
         [ Svg.g
             [ css [ Tw.stroke_color twColor ]
@@ -785,7 +785,7 @@ viewFaultButton active xed =
                 |> List.concat
     in
     Html.button
-        ([ css [ Tw.w_8, Tw.h_8, Tw.relative, Tw.overflow_hidden ]
+        ([ css [ Tw.size_8, Tw.relative, Tw.overflow_hidden ]
          , css [ Tw.flex, Tw.items_center ]
          , css [ Tw.bg_color colors.bg ]
          , css [ Tw.border_2, Tw.rounded_lg, Tw.border_color colors.fg ]
