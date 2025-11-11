@@ -367,168 +367,6 @@ viewContent model =
 
 
 
--- VIEW DIALOG
-
-
-viewDialog : Html Msg -> Html Msg
-viewDialog content =
-    Html.div
-        [ css [ Tw.w_full, Tw.h_full, Tw.flex, Tw.items_center, Tw.justify_center ]
-        , css [ Tw.bg_color (Twc.withOpacity Twt.opacity50 Twt.gray_200) ]
-        , css [ Tw.absolute ]
-        , Events.onClick (DialogRequested NoDialog)
-        ]
-        [ Html.div
-            [ css [ Tw.w_8over12, Tw.max_h_80, Tw.p_6 ]
-            , css [ Tw.bg_color Twt.white, Tw.drop_shadow_xl ]
-            , css [ Tw.rounded_xl ]
-            , Events.stopPropagationOn "click" (Decode.succeed ( NoOp, True ))
-
-            -- Appearance animation.
-            , css
-                [ Css.opacity (Css.num 0)
-                , Css.animationName
-                    (Css.Animations.keyframes
-                        [ ( 0
-                          , [ Css.Animations.transform [ Css.translateY (Css.rem 1) ]
-                            , Css.Animations.opacity (Css.num 0)
-                            ]
-                          )
-                        , ( 100
-                          , [ Css.Animations.transform [ Css.translateY (Css.rem 0) ]
-                            , Css.Animations.opacity (Css.num 1)
-                            ]
-                          )
-                        ]
-                    )
-                , Css.animationDuration (Css.ms 250)
-                , Css.property "animation-timing-function" "ease-out"
-                , Css.property "animation-fill-mode" "forwards"
-                ]
-            ]
-            [ content ]
-        ]
-
-
-
--- VIEW SETTINGS
-
-
-viewSettingsButton : Html Msg
-viewSettingsButton =
-    let
-        colors =
-            getButtonColors True
-    in
-    Html.button
-        [ css [ Tw.absolute, Tw.right_2, Tw.top_2, Tw.p_2 ]
-        , css [ Tw.rounded_lg, Tw.bg_color colors.bg ]
-        , css [ Tw.text_xl, Tw.text_color colors.fg ]
-        , Events.onClick (DialogRequested SettingsDialog)
-        ]
-        [ icon (Phosphor.gearSix Phosphor.Bold) ]
-
-
-viewSettingsDialog : Language.Selection -> Html Msg
-viewSettingsDialog languageSelection =
-    let
-        language =
-            Language.selectionToLanguage languageSelection
-    in
-    viewDialog
-        (Html.div [ css [ Tw.flex, Tw.flex_col, Tw.gap_5 ] ]
-            [ viewSettingsGroup
-                [ Html.text (Texts.for language).language
-                , viewLanguageSelection languageSelection
-                ]
-            , viewCloseButton language
-            ]
-        )
-
-
-viewSettingsGroup : List (Html Msg) -> Html Msg
-viewSettingsGroup children =
-    Html.div [ css [ Tw.flex, Tw.flex_col, Tw.gap_2 ] ]
-        children
-
-
-viewLanguageSelection : Language.Selection -> Html Msg
-viewLanguageSelection languageSelection =
-    let
-        interfaceLanguage =
-            Language.selectionToLanguage languageSelection
-
-        userSelectedLanguage =
-            Language.selected languageSelection
-    in
-    Html.div [ css [ Tw.flex, Tw.flex_row, Tw.flex_wrap, Tw.gap_1 ] ]
-        ([ [ viewLanguageRadioButton interfaceLanguage Nothing (userSelectedLanguage == Nothing) ]
-         , Language.all
-            |> List.map (\lang -> viewLanguageRadioButton interfaceLanguage (Just lang) (userSelectedLanguage == Just lang))
-         ]
-            |> List.concat
-        )
-
-
-viewLanguageRadioButton : Language -> Maybe Language -> Bool -> Html Msg
-viewLanguageRadioButton interfaceLanguage buttonLanguage selected =
-    let
-        languageName : String
-        languageName =
-            buttonLanguage
-                |> Maybe.map Language.name
-                |> Maybe.withDefault (Texts.for interfaceLanguage).default
-
-        radioIcon : Html Msg
-        radioIcon =
-            if selected then
-                Html.div [ css [ Tw.text_xl ] ]
-                    [ icon (Phosphor.radioButton Phosphor.Fill) ]
-
-            else
-                Html.div [ css [ Tw.text_xl, Tw.text_color Twt.purple_300 ] ]
-                    [ icon (Phosphor.radioButton Phosphor.Regular) ]
-
-        colors =
-            getButtonColors True
-    in
-    Html.label []
-        [ Html.input
-            [ Attributes.type_ "radio"
-            , Attributes.value languageName
-            , Attributes.name "language"
-            , css [ Tw.hidden ]
-            ]
-            []
-        , Html.button
-            [ css [ Tw.flex, Tw.flex_row, Tw.gap_1, Tw.items_center, Tw.whitespace_nowrap ]
-            , css [ Tw.text_color colors.fg ]
-            , css [ Tw.rounded_lg, Tw.px_3, Tw.py_1, Tw.bg_color colors.bg ]
-            , Events.onClick (LanguageSelected buttonLanguage)
-            ]
-            [ radioIcon
-            , Html.text languageName
-            ]
-        ]
-
-
-viewCloseButton : Language -> Html Msg
-viewCloseButton language =
-    let
-        colors =
-            getButtonColors True
-    in
-    Html.div [ css [ Tw.flex, Tw.flex_row, Tw.justify_center ] ]
-        [ Html.button
-            [ css [ Tw.px_3, Tw.py_1, Tw.rounded_lg ]
-            , css [ Tw.text_color colors.fg, Tw.bg_color colors.bg ]
-            , Events.onClick (DialogRequested NoDialog)
-            ]
-            [ Html.text (Texts.for language).close ]
-        ]
-
-
-
 -- VIEW TOP
 
 
@@ -1071,6 +909,205 @@ viewScoreboardSquare twColor content =
 
 
 
+-- VIEW GAME OVER
+
+
+viewGameOverDialog : Language -> Board -> Html Msg
+viewGameOverDialog language board =
+    let
+        texts =
+            (Texts.for language).yourFinalScore (Board.points board)
+    in
+    viewDialog
+        (Html.div [ css [ Tw.flex, Tw.flex_col, Tw.gap_3 ] ]
+            [ Html.h1 [ css [ Tw.text_2xl, Tw.font_bold, Tw.text_center ] ]
+                [ Html.text (Texts.for language).gameOver ]
+            , Html.p [ css [ Tw.text_center ] ]
+                [ Html.text texts.yourFinalScore
+                , Html.b [] [ Html.text texts.score ]
+                , Html.text texts.period
+                ]
+            , viewCloseButton language
+            ]
+        )
+
+
+
+-- VIEW DIALOG
+
+
+viewDialog : Html Msg -> Html Msg
+viewDialog content =
+    Html.div
+        [ css [ Tw.w_full, Tw.h_full, Tw.flex, Tw.items_center, Tw.justify_center ]
+        , css [ Tw.bg_color (Twc.withOpacity Twt.opacity50 Twt.gray_200) ]
+        , css [ Tw.absolute ]
+        , Events.onClick (DialogRequested NoDialog)
+        ]
+        [ Html.div
+            [ css [ Tw.w_8over12, Tw.max_h_80, Tw.p_6 ]
+            , css [ Tw.bg_color Twt.white, Tw.drop_shadow_xl ]
+            , css [ Tw.rounded_xl ]
+            , Events.stopPropagationOn "click" (Decode.succeed ( NoOp, True ))
+
+            -- Appearance animation.
+            , css
+                [ Css.opacity (Css.num 0)
+                , Css.animationName
+                    (Css.Animations.keyframes
+                        [ ( 0
+                          , [ Css.Animations.transform [ Css.translateY (Css.rem 1) ]
+                            , Css.Animations.opacity (Css.num 0)
+                            ]
+                          )
+                        , ( 100
+                          , [ Css.Animations.transform [ Css.translateY (Css.rem 0) ]
+                            , Css.Animations.opacity (Css.num 1)
+                            ]
+                          )
+                        ]
+                    )
+                , Css.animationDuration (Css.ms 250)
+                , Css.property "animation-timing-function" "ease-out"
+                , Css.property "animation-fill-mode" "forwards"
+                ]
+            ]
+            [ content ]
+        ]
+
+
+viewCloseButton : Language -> Html Msg
+viewCloseButton language =
+    let
+        colors =
+            getButtonColors True
+    in
+    Html.div [ css [ Tw.flex, Tw.flex_row, Tw.justify_center ] ]
+        [ Html.button
+            [ css [ Tw.px_3, Tw.py_1, Tw.rounded_lg ]
+            , css [ Tw.text_color colors.fg, Tw.bg_color colors.bg ]
+            , Events.onClick (DialogRequested NoDialog)
+            ]
+            [ Html.text (Texts.for language).close ]
+        ]
+
+
+
+-- VIEW SETTINGS
+
+
+viewSettingsButton : Html Msg
+viewSettingsButton =
+    let
+        colors =
+            getButtonColors True
+    in
+    Html.button
+        [ css [ Tw.absolute, Tw.right_2, Tw.top_2, Tw.p_2 ]
+        , css [ Tw.rounded_lg, Tw.bg_color colors.bg ]
+        , css [ Tw.text_xl, Tw.text_color colors.fg ]
+        , Events.onClick (DialogRequested SettingsDialog)
+        ]
+        [ icon (Phosphor.gearSix Phosphor.Bold) ]
+
+
+viewSettingsDialog : Language.Selection -> Html Msg
+viewSettingsDialog languageSelection =
+    let
+        language =
+            Language.selectionToLanguage languageSelection
+    in
+    viewDialog
+        (Html.div [ css [ Tw.flex, Tw.flex_col, Tw.gap_5 ] ]
+            [ viewSettingsGroup
+                [ Html.text (Texts.for language).language
+                , viewLanguageSelection languageSelection
+                ]
+            , viewCloseButton language
+            ]
+        )
+
+
+viewSettingsGroup : List (Html Msg) -> Html Msg
+viewSettingsGroup children =
+    Html.div [ css [ Tw.flex, Tw.flex_col, Tw.gap_2 ] ]
+        children
+
+
+viewLanguageSelection : Language.Selection -> Html Msg
+viewLanguageSelection languageSelection =
+    let
+        interfaceLanguage =
+            Language.selectionToLanguage languageSelection
+
+        userSelectedLanguage =
+            Language.selected languageSelection
+    in
+    Html.div [ css [ Tw.flex, Tw.flex_row, Tw.flex_wrap, Tw.gap_1 ] ]
+        ([ [ viewLanguageRadioButton interfaceLanguage Nothing (userSelectedLanguage == Nothing) ]
+         , Language.all
+            |> List.map (\lang -> viewLanguageRadioButton interfaceLanguage (Just lang) (userSelectedLanguage == Just lang))
+         ]
+            |> List.concat
+        )
+
+
+viewLanguageRadioButton : Language -> Maybe Language -> Bool -> Html Msg
+viewLanguageRadioButton interfaceLanguage buttonLanguage selected =
+    let
+        languageName : String
+        languageName =
+            buttonLanguage
+                |> Maybe.map Language.name
+                |> Maybe.withDefault (Texts.for interfaceLanguage).default
+
+        radioIcon : Html Msg
+        radioIcon =
+            if selected then
+                Html.div [ css [ Tw.text_xl ] ]
+                    [ icon (Phosphor.radioButton Phosphor.Fill) ]
+
+            else
+                Html.div [ css [ Tw.text_xl, Tw.text_color Twt.purple_300 ] ]
+                    [ icon (Phosphor.radioButton Phosphor.Regular) ]
+
+        colors =
+            getButtonColors True
+    in
+    Html.label []
+        [ Html.input
+            [ Attributes.type_ "radio"
+            , Attributes.value languageName
+            , Attributes.name "language"
+            , css [ Tw.hidden ]
+            ]
+            []
+        , Html.button
+            [ css [ Tw.flex, Tw.flex_row, Tw.gap_1, Tw.items_center, Tw.whitespace_nowrap ]
+            , css [ Tw.text_color colors.fg ]
+            , css [ Tw.rounded_lg, Tw.px_3, Tw.py_1, Tw.bg_color colors.bg ]
+            , Events.onClick (LanguageSelected buttonLanguage)
+            ]
+            [ radioIcon
+            , Html.text languageName
+            ]
+        ]
+
+
+
+-- VIEW UTILS
+
+
+icon : Phosphor.IconVariant -> Html Msg
+icon iconVariant =
+    iconVariant
+        |> Phosphor.withSize 1
+        |> Phosphor.withSizeUnit "em"
+        |> Phosphor.toHtml []
+        |> Html.fromUnstyled
+
+
+
 -- CELL STATUS
 
 
@@ -1252,43 +1289,6 @@ cellIsAvailable growth row num =
 
         ( False, Nothing ) ->
             True
-
-
-
--- VIEW GAME OVER
-
-
-viewGameOverDialog : Language -> Board -> Html Msg
-viewGameOverDialog language board =
-    let
-        texts =
-            (Texts.for language).yourFinalScore (Board.points board)
-    in
-    viewDialog
-        (Html.div [ css [ Tw.flex, Tw.flex_col, Tw.gap_3 ] ]
-            [ Html.h1 [ css [ Tw.text_2xl, Tw.font_bold, Tw.text_center ] ]
-                [ Html.text (Texts.for language).gameOver ]
-            , Html.p [ css [ Tw.text_center ] ]
-                [ Html.text texts.yourFinalScore
-                , Html.b [] [ Html.text texts.score ]
-                , Html.text texts.period
-                ]
-            , viewCloseButton language
-            ]
-        )
-
-
-
--- VIEW UTILS
-
-
-icon : Phosphor.IconVariant -> Html Msg
-icon iconVariant =
-    iconVariant
-        |> Phosphor.withSize 1
-        |> Phosphor.withSizeUnit "em"
-        |> Phosphor.toHtml []
-        |> Html.fromUnstyled
 
 
 
