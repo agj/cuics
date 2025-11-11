@@ -372,31 +372,31 @@ viewContent model =
 
 viewTop : Language -> Board -> Turn -> Html Msg
 viewTop language board turn =
-    let
-        viewGame : Bool -> Bool -> Html Msg
-        viewGame showingDone enabledDone =
-            viewTopWrapper
-                [ viewDiceIfThrown turn (Board.lockedRows board)
-                , viewDoneButton language showingDone enabledDone
-                ]
-    in
     case turn of
         NotTurn WaitingForDiceThrow ->
-            viewGame False False
+            viewTopWrapper
+                [ viewDoneButton language False False ]
 
-        TurnPicking _ _ ->
-            viewGame True False
+        TurnPicking diceThrow diceRotations ->
+            viewTopWrapper
+                [ viewDice diceThrow diceRotations (Board.lockedRows board)
+                , viewDoneButton language True False
+                ]
 
-        TurnPickedOnce _ _ _ ->
-            viewGame True True
+        TurnPickedOnce diceThrow diceRotations _ ->
+            viewTopWrapper
+                [ viewDice diceThrow diceRotations (Board.lockedRows board)
+                , viewDoneButton language True True
+                ]
 
         NotTurn GameOver ->
-            viewTopWrapper [ viewRestart ]
+            viewTopWrapper
+                [ viewRestart ]
 
 
 viewTopWrapper : List (Html Msg) -> Html Msg
 viewTopWrapper =
-    Html.div [ css [ Tw.flex, Tw.flex_row, Tw.gap_4, Tw.items_center ] ]
+    Html.div [ css [ Tw.h_20, Tw.flex, Tw.flex_row, Tw.gap_4, Tw.items_center ] ]
 
 
 
@@ -449,19 +449,6 @@ type DieColor
     | DieYellow
     | DieGreen
     | DieBlue
-
-
-viewDiceIfThrown : Turn -> List Color -> Html Msg
-viewDiceIfThrown turn lockedRows =
-    case turn of
-        TurnPicking diceThrow diceRotations ->
-            viewDice diceThrow diceRotations lockedRows
-
-        TurnPickedOnce diceThrow diceRotations _ ->
-            viewDice diceThrow diceRotations lockedRows
-
-        NotTurn _ ->
-            Html.div [ css [ Tw.h_16, Tw.m_3 ] ] []
 
 
 viewDice : DiceThrow -> DiceRotations -> List Color -> Html Msg
@@ -590,16 +577,11 @@ viewRestart =
         colors =
             getButtonColors True
     in
-    Html.div
-        [ css [ Tw.h_16, Tw.m_3 ]
-        , css [ Tw.flex, Tw.flex_col, Tw.items_center, Tw.justify_center ]
+    Html.button
+        [ css [ Tw.px_3, Tw.py_1, Tw.rounded_lg, Tw.text_color colors.fg, Tw.bg_color colors.bg ]
+        , Events.onClick ClickedRestart
         ]
-        [ Html.button
-            [ css [ Tw.px_3, Tw.py_1, Tw.rounded_lg, Tw.text_color colors.fg, Tw.bg_color colors.bg ]
-            , Events.onClick ClickedRestart
-            ]
-            [ Html.text "Play again" ]
-        ]
+        [ Html.text "Play again" ]
 
 
 
