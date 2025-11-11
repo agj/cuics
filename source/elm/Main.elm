@@ -17,6 +17,7 @@ import Language exposing (Language)
 import List
 import Maybe.Extra
 import Num exposing (Num(..))
+import Palette
 import Phosphor
 import Ports
 import Process
@@ -355,7 +356,7 @@ viewContent model =
         [ css [ Css.width (Css.rem contentWidth), Css.height (Css.rem contentHeight) ]
         , css [ Tw.flex, Tw.flex_col, Tw.justify_center, Tw.items_center, Tw.gap_2, Tw.shrink_0 ]
         , css [ Tw.relative ]
-        , css [ Tw.bg_color Twt.gray_50 ]
+        , css [ Tw.bg_color Palette.colorGray.pale ]
         , css [ Tw.font_sans ]
         , css [ Css.transforms [ Css.scale scale ] ]
         ]
@@ -684,7 +685,7 @@ viewNumCell color num status =
          , mergeIf (status == Xed)
             [ viewX colors.b ]
          , mergeIf (status == Picked)
-            [ viewX Twt.purple_500 ]
+            [ viewX Palette.colorPurple.medium ]
          , mergeIf (status == Passed)
             [ viewStrike colors.fg ]
          ]
@@ -922,7 +923,7 @@ viewDialog : Html Msg -> Html Msg
 viewDialog content =
     Html.div
         [ css [ Tw.w_full, Tw.h_full, Tw.flex, Tw.items_center, Tw.justify_center ]
-        , css [ Tw.bg_color (Twc.withOpacity Twt.opacity50 Twt.gray_200) ]
+        , css [ Tw.bg_color (Twc.withOpacity Twt.opacity70 Palette.colorGray.light) ]
         , css [ Tw.absolute ]
         , Events.onClick (DialogRequested NoDialog)
         ]
@@ -1050,7 +1051,7 @@ viewLanguageRadioButton interfaceLanguage buttonLanguage selected =
                     [ icon (Phosphor.radioButton Phosphor.Fill) ]
 
             else
-                Html.div [ css [ Tw.text_xl, Tw.text_color Twt.purple_300 ] ]
+                Html.div [ css [ Tw.text_xl, Tw.text_color Palette.colorPurple.mediumLight ] ]
                     [ icon (Phosphor.radioButton Phosphor.Regular) ]
 
         colors =
@@ -1446,99 +1447,90 @@ getColors : Color -> CellStatus -> { fg : Twt.Color, bg : Twt.Color, b : Twt.Col
 getColors color status =
     case ( status, color ) of
         ( Available, Red ) ->
-            { fg = Twt.red_500, bg = Twt.purple_50, b = Twt.purple_500 }
+            { fg = Palette.colorRed.medium, bg = Palette.colorPurple.pale, b = Palette.colorPurple.medium }
 
         ( Available, Yellow ) ->
-            { fg = Twt.yellow_500, bg = Twt.purple_50, b = Twt.purple_500 }
+            { fg = Palette.colorYellow.medium, bg = Palette.colorPurple.pale, b = Palette.colorPurple.medium }
 
         ( Available, Green ) ->
-            { fg = Twt.green_500, bg = Twt.purple_50, b = Twt.purple_500 }
+            { fg = Palette.colorGreen.medium, bg = Palette.colorPurple.pale, b = Palette.colorPurple.medium }
 
         ( Available, Blue ) ->
-            { fg = Twt.blue_500, bg = Twt.purple_50, b = Twt.purple_500 }
+            { fg = Palette.colorBlue.medium, bg = Palette.colorPurple.pale, b = Palette.colorPurple.medium }
 
-        ( Picked, Red ) ->
-            { fg = Twt.red_500, bg = Twt.purple_900, b = Twt.purple_500 }
-
-        ( Picked, Yellow ) ->
-            { fg = Twt.yellow_500, bg = Twt.purple_900, b = Twt.purple_500 }
-
-        ( Picked, Green ) ->
-            { fg = Twt.green_500, bg = Twt.purple_900, b = Twt.purple_500 }
-
-        ( Picked, Blue ) ->
-            { fg = Twt.blue_500, bg = Twt.purple_900, b = Twt.purple_500 }
+        ( Picked, _ ) ->
+            { fg = Twt.white, bg = Palette.colorPurple.dark, b = Palette.colorPurple.medium }
 
         ( Xed, Red ) ->
-            { fg = Twt.red_500, bg = Twt.red_50, b = Twt.red_700 }
+            { fg = Palette.colorRed.medium, bg = Palette.colorRed.pale, b = Palette.colorRed.dark }
 
         ( Xed, Yellow ) ->
-            { fg = Twt.yellow_500, bg = Twt.yellow_50, b = Twt.yellow_700 }
+            { fg = Palette.colorYellow.medium, bg = Palette.colorYellow.pale, b = Palette.colorYellow.dark }
 
         ( Xed, Green ) ->
-            { fg = Twt.green_500, bg = Twt.green_50, b = Twt.green_700 }
+            { fg = Palette.colorGreen.medium, bg = Palette.colorGreen.pale, b = Palette.colorGreen.dark }
 
         ( Xed, Blue ) ->
-            { fg = Twt.blue_500, bg = Twt.blue_50, b = Twt.blue_700 }
+            { fg = Palette.colorBlue.medium, bg = Palette.colorBlue.pale, b = Palette.colorBlue.dark }
 
         ( Passed, Red ) ->
-            { fg = Twt.gray_200, bg = Twt.gray_50, b = Twt.red_700 }
+            { fg = Palette.colorGray.light, bg = Palette.colorGray.pale, b = Palette.colorRed.dark }
 
         ( Passed, Yellow ) ->
-            { fg = Twt.gray_200, bg = Twt.gray_50, b = Twt.yellow_700 }
+            { fg = Palette.colorGray.light, bg = Palette.colorGray.pale, b = Palette.colorYellow.dark }
 
         ( Passed, Green ) ->
-            { fg = Twt.gray_200, bg = Twt.gray_50, b = Twt.green_700 }
+            { fg = Palette.colorGray.light, bg = Palette.colorGray.pale, b = Palette.colorGreen.dark }
 
         ( Passed, Blue ) ->
-            { fg = Twt.gray_200, bg = Twt.gray_50, b = Twt.blue_700 }
+            { fg = Palette.colorGray.light, bg = Palette.colorGray.pale, b = Palette.colorBlue.dark }
 
         ( Unavailable, Red ) ->
-            { fg = Twt.red_200, bg = Twt.red_50, b = Twt.red_700 }
+            { fg = Palette.colorRed.light, bg = Palette.colorRed.pale, b = Palette.colorRed.dark }
 
         ( Unavailable, Yellow ) ->
-            { fg = Twt.yellow_200, bg = Twt.yellow_50, b = Twt.yellow_700 }
+            { fg = Palette.colorYellow.light, bg = Palette.colorYellow.pale, b = Palette.colorYellow.dark }
 
         ( Unavailable, Green ) ->
-            { fg = Twt.green_200, bg = Twt.green_50, b = Twt.green_700 }
+            { fg = Palette.colorGreen.light, bg = Palette.colorGreen.pale, b = Palette.colorGreen.dark }
 
         ( Unavailable, Blue ) ->
-            { fg = Twt.blue_200, bg = Twt.blue_50, b = Twt.blue_700 }
+            { fg = Palette.colorBlue.light, bg = Palette.colorBlue.pale, b = Palette.colorBlue.dark }
 
 
 getFaultColors : Bool -> Bool -> { fg : Twt.Color, bg : Twt.Color }
 getFaultColors active xed =
     case ( xed, active ) of
         ( False, True ) ->
-            { fg = Twt.purple_500, bg = Twt.purple_50 }
+            { fg = Palette.colorPurple.medium, bg = Palette.colorPurple.pale }
 
         ( _, _ ) ->
-            { fg = Twt.gray_400, bg = Twt.gray_50 }
+            { fg = Palette.colorGray.medium, bg = Palette.colorGray.pale }
 
 
 getDieColors : DieColor -> { face : Twt.Color, border : Twt.Color, pip : Twt.Color }
 getDieColors dieColor =
     case dieColor of
         DieWhite ->
-            { face = Twt.white, border = Twt.gray_300, pip = Twt.black }
+            { face = Twt.white, border = Palette.colorGray.medium, pip = Twt.black }
 
         DieRed ->
-            { face = Twt.red_500, border = Twt.red_700, pip = Twt.white }
+            { face = Palette.colorRed.medium, border = Palette.colorRed.dark, pip = Twt.white }
 
         DieYellow ->
-            { face = Twt.yellow_500, border = Twt.yellow_700, pip = Twt.white }
+            { face = Palette.colorYellow.medium, border = Palette.colorYellow.dark, pip = Twt.white }
 
         DieGreen ->
-            { face = Twt.green_500, border = Twt.green_700, pip = Twt.white }
+            { face = Palette.colorGreen.medium, border = Palette.colorGreen.dark, pip = Twt.white }
 
         DieBlue ->
-            { face = Twt.blue_500, border = Twt.blue_700, pip = Twt.white }
+            { face = Palette.colorBlue.medium, border = Palette.colorBlue.dark, pip = Twt.white }
 
 
 getButtonColors : Bool -> { fg : Twt.Color, bg : Twt.Color }
 getButtonColors enabled =
     if enabled then
-        { fg = Twt.purple_800, bg = Twt.purple_100 }
+        { fg = Palette.colorPurple.dark, bg = Palette.colorPurple.light }
 
     else
-        { fg = Twt.gray_300, bg = Twt.gray_100 }
+        { fg = Palette.colorGray.light, bg = Palette.colorGray.pale }
