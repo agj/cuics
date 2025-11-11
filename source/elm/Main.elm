@@ -840,8 +840,8 @@ viewScoreboard language board =
         , between "−"
         , viewScoreboardPoints language (getFaultColors True True).fg (Board.faults board) (Board.faultPoints board)
         , between "="
-        , viewScoreboardSquare Twt.black
-            [ Html.div [ css [ Tw.font_bold, Tw.text_xl, Tw.text_color Twt.black ] ]
+        , viewScoreboardSquare Palette.colorGray.deep
+            [ Html.div [ css [ Tw.font_bold, Tw.text_xl, Tw.text_color Palette.colorGray.deep ] ]
                 [ Html.text (String.fromInt (Board.points board) ++ (Texts.for language).p) ]
             ]
         ]
@@ -929,7 +929,7 @@ viewDialog content =
         ]
         [ Html.div
             [ css [ Tw.w_8over12, Tw.max_h_80, Tw.p_6 ]
-            , css [ Tw.bg_color Twt.white, Tw.drop_shadow_xl ]
+            , css [ Tw.bg_color Palette.colorGray.pale, Tw.drop_shadow_xl ]
             , css [ Tw.rounded_xl ]
             , Events.stopPropagationOn "click" (Decode.succeed ( NoOp, True ))
 
@@ -1459,7 +1459,7 @@ getColors color status =
             { fg = Palette.colorBlue.medium, bg = Palette.colorPurple.pale, b = Palette.colorPurple.medium }
 
         ( Picked, _ ) ->
-            { fg = Twt.white, bg = Palette.colorPurple.dark, b = Palette.colorPurple.medium }
+            { fg = Palette.colorGray.pale, bg = Palette.colorPurple.dark, b = Palette.colorPurple.medium }
 
         ( Xed, Red ) ->
             { fg = Palette.colorRed.medium, bg = Palette.colorRed.pale, b = Palette.colorRed.dark }
@@ -1512,19 +1512,19 @@ getDieColors : DieColor -> { face : Twt.Color, border : Twt.Color, pip : Twt.Col
 getDieColors dieColor =
     case dieColor of
         DieWhite ->
-            { face = Twt.white, border = Palette.colorGray.medium, pip = Twt.black }
+            { face = Palette.colorGray.pale, border = Palette.colorGray.medium, pip = Palette.colorGray.deep }
 
         DieRed ->
-            { face = Palette.colorRed.medium, border = Palette.colorRed.dark, pip = Twt.white }
+            { face = Palette.colorRed.medium, border = Palette.colorRed.dark, pip = Palette.colorGray.pale }
 
         DieYellow ->
-            { face = Palette.colorYellow.medium, border = Palette.colorYellow.dark, pip = Twt.white }
+            { face = Palette.colorYellow.medium, border = Palette.colorYellow.dark, pip = Palette.colorGray.pale }
 
         DieGreen ->
-            { face = Palette.colorGreen.medium, border = Palette.colorGreen.dark, pip = Twt.white }
+            { face = Palette.colorGreen.medium, border = Palette.colorGreen.dark, pip = Palette.colorGray.pale }
 
         DieBlue ->
-            { face = Palette.colorBlue.medium, border = Palette.colorBlue.dark, pip = Twt.white }
+            { face = Palette.colorBlue.medium, border = Palette.colorBlue.dark, pip = Palette.colorGray.pale }
 
 
 getButtonColors : Bool -> { fg : Twt.Color, bg : Twt.Color }

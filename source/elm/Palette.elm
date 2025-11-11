@@ -36,10 +36,11 @@ colorBlue =
 
 
 colorGray =
-    { medium = Twt.gray_400
-    , dark = Twt.gray_700
-    , light = Twt.gray_200
-    , pale = Twt.gray_50
+    { deep = Twt.stone_900
+    , dark = Twt.stone_700
+    , medium = Twt.stone_400
+    , light = Twt.stone_200
+    , pale = Twt.stone_50
     }
 
 
